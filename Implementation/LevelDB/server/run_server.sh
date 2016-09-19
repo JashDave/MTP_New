@@ -2,7 +2,7 @@
 export GOROOT=/home/NFV_LTE_EPC/go
 export PATH=$PATH:$GOROOT/bin
 export GOPATH=/home/NFV_LTE_EPC/go_workspace
-cd /home/NFV_LTE_EPC/go_workspace/src/levelmemdb
+cd /home/NFV_LTE_EPC/go_workspace/src/levelmemdb/
 #go run lmemdb_performance.go
 
 if [ $# -eq 0 ]
