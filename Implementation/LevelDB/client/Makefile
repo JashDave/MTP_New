@@ -23,8 +23,10 @@ endif
 
 all:	$(BINPATH)/KVStoreNonTemplateImplLevelDB.o
 
+$(BINPATH)/kvstore_client.o: 
+#	$(GCC) $(SHOWWARN) $(OPL) -o $(BINPATH)/kvstore_client.o -c ../../../Helper/src/kvstore_client.cpp
 
-$(BINPATH)/KVStoreNonTemplateImplLevelDB.o:	$(IMPLPATH)/kvstore_client.cpp $(IMPLPATH)/KVStoreImplLevelDB.cpp $(IMPLPATH)/KVStoreNonTemplateImplLevelDB.cpp KVStoreHeader.h KVStore.h
+$(BINPATH)/KVStoreNonTemplateImplLevelDB.o:	$(BINPATH)/kvstore_client.o $(IMPLPATH)/KVStoreImplLevelDB.cpp $(IMPLPATH)/KVStoreNonTemplateImplLevelDB.cpp ../../../Interface/KVStoreHeader.h $(IMPLPATH)/KVStore.h
 	$(GCC) $(SHOWWARN) $(OPL) -c $(IMPLPATH)/KVStoreNonTemplateImplLevelDB.cpp -o $(BINPATH)/KVStoreNonTemplateImplLevelDB.o
 
 install:	$(BINPATH)/KVStoreNonTemplateImplLevelDB.o
@@ -35,15 +37,15 @@ install:	$(BINPATH)/KVStoreNonTemplateImplLevelDB.o
 test:	$(TESTBIN)/TestKVStore.o $(TESTBIN)/TestKVStorePerformance.o $(TESTBIN)/TestKVStoreNoReqPerSec.o
 
 
-$(TESTBIN)/TestKVStore.o: $(IMPLPATH)/kvstore_client.cpp $(IMPLPATH)/KVStoreImplLevelDB.cpp KVStoreHeader.h KVStore.h $(TESTSRC)/TestKVStore.cpp
+$(TESTBIN)/TestKVStore.o: $(BINPATH)/kvstore_client.o $(IMPLPATH)/KVStoreImplLevelDB.cpp ../../../Interface/KVStoreHeader.h $(IMPLPATH)/KVStore.h $(TESTSRC)/TestKVStore.cpp
 	$(GCC) $(SHOWWARN) $(OPL) $(TESTSRC)/TestKVStore.cpp  -o $(TESTBIN)/TestKVStore.o $(LIBS)
 
 
-$(TESTBIN)/TestKVStorePerformance.o: $(IMPLPATH)/kvstore_client.cpp $(IMPLPATH)/KVStoreImplLevelDB.cpp KVStoreHeader.h KVStore.h $(TESTSRC)/TestKVStorePerformance.cpp
+$(TESTBIN)/TestKVStorePerformance.o: $(BINPATH)/kvstore_client.o $(IMPLPATH)/KVStoreImplLevelDB.cpp ../../../Interface/KVStoreHeader.h $(IMPLPATH)/KVStore.h $(TESTSRC)/TestKVStorePerformance.cpp
 	$(GCC) $(SHOWWARN) $(OPL) $(TESTSRC)/TestKVStorePerformance.cpp  -o $(TESTBIN)/TestKVStorePerformance.o $(LIBS) -Dthread_count=$(TC)
 
 
-$(TESTBIN)/TestKVStoreNoReqPerSec.o: $(IMPLPATH)/kvstore_client.cpp $(IMPLPATH)/KVStoreImplLevelDB.cpp KVStoreHeader.h KVStore.h $(TESTSRC)/TestKVStoreNoReqPerSec.cpp
+$(TESTBIN)/TestKVStoreNoReqPerSec.o: $(BINPATH)/kvstore_client.o $(IMPLPATH)/KVStoreImplLevelDB.cpp ../../../Interface/KVStoreHeader.h $(IMPLPATH)/KVStore.h $(TESTSRC)/TestKVStoreNoReqPerSec.cpp
 	$(GCC) $(SHOWWARN) $(OPL) $(TESTSRC)/TestKVStoreNoReqPerSec.cpp  -o $(TESTBIN)/TestKVStoreNoReqPerSec.o $(LIBS) -Dthread_count=$(TC)
 
 clean:

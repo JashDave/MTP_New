@@ -1,4 +1,4 @@
-#include "../KVStore.h"
+#include "KVStore.h"
 
 namespace kvstore {
 

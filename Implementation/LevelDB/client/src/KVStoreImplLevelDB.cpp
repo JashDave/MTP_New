@@ -2,12 +2,12 @@
 // Refer : https://isocpp.org/wiki/faq/templates
 //        http://stackoverflow.com/questions/3040480/c-template-function-compiles-in-header-but-not-implementation
 //It only includes templates implementation
-#include "../KVStoreHeader.h"
 
 #ifndef __KVSTORE_DEF__
 #define __KVSTORE_DEF__
 
-#include "kvstore_client.cpp"
+#include "../../../../Interface/KVStoreHeader.h"
+#include "../../../../Helper/src/kvstore_client.cpp"
 
 #define c_kvsclient ((KVStoreClient *)kvsclient)
 
