@@ -114,6 +114,7 @@ namespace kvstore {
       kvd.serr = "";
       kvd.ierr = 0;
       kvd.value = toBoostObject<ValType>(string(buf)); //?
+      delete buf;
     }/*
     catch(RAMCloud::ObjectDoesntExistException& e){
       kvd.serr = e.str();

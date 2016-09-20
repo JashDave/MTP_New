@@ -3,6 +3,7 @@ PATH_TO_RAMCLOUD = /home/$(USER)/RAMCloud
 
 current:
 	#g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o TestKVStore.o TestKVStore.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin #-Wno-deprecated
+	#g++ -std=c++11  -o LevelDBLoadTestMultiThreaded.o LevelDBLoadTestMultiThreaded.cpp -lkvstore -lboost_serialization -lpthread
 	g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o LoadTestMultiThreaded.o LoadTestMultiThreaded.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin #-Wno-deprecated
 
 all:

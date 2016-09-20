@@ -1,5 +1,5 @@
-#ifndef __KVSTORE_CLIENT_H__
-#define __KVSTORE_CLIENT_H__
+#ifndef __MESSAGE_CLIENT_H__
+#define __MESSAGE_CLIENT_H__
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+namespace MessageClientNS{
 
 #define MAX_INPUT_SIZE 1048576 //1MB
 
@@ -307,4 +309,5 @@ cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
 return 0;
 }
 */
+};
 #endif
