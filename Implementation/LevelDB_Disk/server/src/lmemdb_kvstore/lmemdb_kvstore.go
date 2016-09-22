@@ -14,7 +14,7 @@ import (
 
 
   type TableManager struct {
-    var tablemapMutex Mutex; 
+    tablemapMutex sync.Mutex; 
     tablemap map[string]*memdb.DB
   }
 

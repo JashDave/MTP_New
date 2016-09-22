@@ -11,7 +11,7 @@ import (
 )
 
 var wg sync.WaitGroup
-var runs int = 100000
+var runs int = 5000
 var threads int = 100
 var key [][]byte = make([][]byte, runs)
 var data [][]byte = make([][]byte, runs)
@@ -62,11 +62,12 @@ func main() {
 	   The returned DB instance is goroutine-safe.
 	*/
 	db := memdb.New(comparer.DefaultComparer, runs)
-	//Initial write to enture do_get doesnt throws error
+	//Initial write to ensure do_get doesnt throws error
 	wg.Add(1)
 	do_put(0, db)
 	wg.Add(1)
 	do_get(0, db)
+  for j:= 0; j<10; j++{
 	for i := 1; i <= threads; i++ {
 		wg.Add(1)
 		go do_put(i, db)
@@ -74,5 +75,6 @@ func main() {
 		wg.Add(1)
 		go do_get(i, db)
 	}
+  }
 	wg.Wait()
 }
