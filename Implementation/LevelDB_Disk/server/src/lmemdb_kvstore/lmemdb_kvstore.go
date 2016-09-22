@@ -4,7 +4,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/memdb"
 	"github.com/syndtr/goleveldb/leveldb/comparer"
   "sync"
-	//"fmt"
+	"fmt"
 	//"strconv"
 	//"time"
   //kvstore "go_workspace/src/leveldb_test/lmemedb_kvstore"//Import path
