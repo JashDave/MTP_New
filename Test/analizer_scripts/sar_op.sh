@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #dpath="../src/PerformanceData/Client/RAMCloud/2016-09-15/1/2KB/"
-dpath="../src/PerformanceData/Client/RAMCloud/2016-09-15/1/100KB/"
+dpath="../src/PerformanceData/Client/RAMCloud/2016-09-22/5/2KB/"
 #perf_data_ThreadedMixedRW_DataSize2000Bytes_Iter5000_2xTC1
 fnwstat=$dpath"fnwstat.csv"
 fcpustat=$dpath"fcpustat.csv"

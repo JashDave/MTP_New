@@ -35,6 +35,7 @@ import (
     if ok {
       kvs.db = db
     } else {
+				fmt.Println("Created New Table!!!");
       	db = memdb.New(comparer.DefaultComparer,1000000000)
         tm.tablemap[tablename] = db
         kvs.db = db

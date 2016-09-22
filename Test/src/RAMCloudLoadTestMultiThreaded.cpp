@@ -24,7 +24,7 @@ using namespace RAMCloud;
 using namespace kvstore;
 using namespace MessageClientNS;
 
-#define NUM_ENTRIES 1000000   //Key Space
+#define NUM_ENTRIES 50000   //Key Space
 #define MAX_DATA_SIZE 2000 // in Bytes
 #define RUN_TIME 20 //in seconds
 #define MAX_THREAD_COUNT 64
@@ -55,22 +55,22 @@ class ServerCommands{
 	public:
 		MessageClient *mc,*mc2;
 		ServerCommands(string ip, int port){
-			mc = new MessageClient("10.129.28.101",port);
-			mc2 = new MessageClient("10.129.26.229",port);
+			mc = new MessageClient("10.129.26.229",port);
+			//mc2 = new MessageClient("10.129.28.101",port);
 		}
 
 		void startSARatServer(string desc,string folder="./"){
 			static vector<string> cmd_vec(1);
 			cmd_vec[0]="sar -o "+folder+"perf_data_"+desc+" -u 1";
 			mc->send(cmd_vec);
-			mc2->send(cmd_vec);
+			//mc2->send(cmd_vec);
 		}
 
 		void stopSARatServer(){
 			static vector<string> cmd_vec(1);
 			cmd_vec[0]="pkill -SIGINT sar";
 			mc->send(cmd_vec);
-			mc2->send(cmd_vec);
+			//mc2->send(cmd_vec);
 		}
 };
 
@@ -117,14 +117,14 @@ void putAllEntriesOnce(string config,string table_name){
 
 void do_put(int tid, KVStore<string,string> *k){
 	printf("PUT Thread #%d started\n",tid);
-	int i=0;
+	int i=tid%2;
 	while(!go_start); //wait
 	while(run){
 		pm[tid].start();
 		//cluster->write(table, key[i].c_str(), key_len[i], value[i].c_str(), value_len[i]);
 		k->put(key[i],value[i]);
 		pm[tid].end();
-		i++;
+		i+=2;
 		i%=NUM_ENTRIES;
 	}
 	printf("PUT Thread #%d ended\n",tid);
@@ -137,7 +137,7 @@ void do_put(int tid, KVStore<string,string> *k){
 
 void do_get(int tid, KVStore<string,string> *k){
 	printf("GET Thread #%d started\n",tid);
-	int i=0;
+	int i=tid%2;
 	while(!go_start); //wait
 	while(run){
 		gm[tid].start();
@@ -148,7 +148,7 @@ void do_get(int tid, KVStore<string,string> *k){
 		// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
 		//printf("%s:%s\n",key[i].c_str(),str);
 		// }
-		i++;
+		i+=2;
 		i%=NUM_ENTRIES;
 	}
 	printf("GET Thread #%d ended\n",tid);
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 3;
+		int iter_num = 5;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		string st2 = IMPL_NAME+DATE+to_string(iter_num)+sep+to_string(MAX_DATA_SIZE/1000)+"KB"+sep+"TC"+to_string(THREAD_COUNT)+sep;
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
 		vector<string> cmd_vec(1);
 		cmd_vec[0]="mkdir -p "+s_folder;
 		sc.mc->send(cmd_vec);
-		sc.mc2->send(cmd_vec);
+		//sc.mc2->send(cmd_vec);
 
 
 

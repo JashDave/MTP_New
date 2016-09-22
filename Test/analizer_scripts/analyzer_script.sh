@@ -107,7 +107,7 @@ if [ -d "$d" ]; then
 
 
 
-dpath="../src/PerformanceData/Client/RAMCloud/2016-09-13/3/2KB/"
+dpath="../src/PerformanceData/Client/RAMCloud/2016-09-22/5/2KB/"
 
 delAndMakeDirs $dpath
 processFiles "ThreadedRead" $dpath
