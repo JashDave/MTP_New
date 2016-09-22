@@ -26,7 +26,7 @@ using namespace MessageClientNS;
 
 #define NUM_ENTRIES 1000000   //Key Space
 #define MAX_DATA_SIZE 2000 // in Bytes
-#define RUN_TIME 60 //in seconds
+#define RUN_TIME 20 //in seconds
 #define MAX_THREAD_COUNT 64
 //#define THREAD_COUNT 16
 #define IMPL_NAME "RAMCloud"
@@ -96,17 +96,18 @@ void init_data(){
 
 void putAllEntriesOnce(string config,string table_name){
 	 KVStore<string,string> *k=new KVStore<string,string>();
+	 KVData<string> kr;
 	 k->bind(config,table_name);
         for(int i=0;i<NUM_ENTRIES;i+=2){
-                k->put(key[i],value[i]);
-		if(k->ierr<0){
-			cout<<"Error at entry " << i << ":" << k->serr;
+                kr = k->put(key[i],value[i]);
+		if(kr.ierr<0){
+			cout<<"Error at entry " << i << ":" << kr.serr;
 		}
         }
         for(int i=1;i<NUM_ENTRIES;i+=2){
-                k->put(key[i],value[i]);
-                if(k->ierr<0){
-                        cout<<"Error at entry " << i << ":" << k->serr;
+                kr=k->put(key[i],value[i]);
+                if(kr.ierr<0){
+                        cout<<"Error at entry " << i << ":" << kr.serr;
                 }
 
         }
@@ -206,7 +207,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 2;
+		int iter_num = 3;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		string st2 = IMPL_NAME+DATE+to_string(iter_num)+sep+to_string(MAX_DATA_SIZE/1000)+"KB"+sep+"TC"+to_string(THREAD_COUNT)+sep;
