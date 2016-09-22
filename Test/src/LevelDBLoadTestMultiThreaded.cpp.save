@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 201;
+		int iter_num = 1;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -174,9 +174,8 @@ int main(int argc, char *argv[]) {
 		init_data();
 
 
-		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		vector<int> TC={2,6,8,12,16,32};
-		//vector<int> TC={1,2};
+		vector<int> TC={1,2,4,6,8,10,12,14,16,32};
+		// vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {
 
 			cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;
@@ -209,7 +208,7 @@ int main(int argc, char *argv[]) {
 			}
 			run=true;
 			go_start=true;
-			sar_threads[0]=thread(doSystem,"sar -o "+c_folder+"sar_threadedwrite 1");
+			sar_threads[2]=thread(doSystem,"sar -o "+c_folder+"sar_threadedwrite 1");
 			sc.startSARatServer("ThreadedWrite_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
 			sleep(RUN_TIME);
 			system("pkill -SIGINT sar");
@@ -243,7 +242,7 @@ int main(int argc, char *argv[]) {
 			}
 			run=true;
 			go_start=true;
-			sar_threads[1]=thread(doSystem,"sar -o "+c_folder+"sar_threadedread 1");
+			sar_threads[3]=thread(doSystem,"sar -o "+c_folder+"sar_threadedread 1");
 			sc.startSARatServer("ThreadedRead_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
 			sleep(RUN_TIME);
 			system("pkill -SIGINT sar");
@@ -280,7 +279,7 @@ int main(int argc, char *argv[]) {
 			}
 			run=true;
 			go_start=true;
-			sar_threads[2]=thread(doSystem,"sar -o "+c_folder+"sar_mixed 1");
+			sar_threads[4]=thread(doSystem,"sar -o "+c_folder+"sar_mixed 1");
 			sc.startSARatServer("ThreadedMixedRW_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_2xTC"+to_string(THREAD_COUNT)+".sarop",s_folder);
 			sleep(RUN_TIME);
 			system("pkill -SIGINT sar");
