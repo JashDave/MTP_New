@@ -24,9 +24,9 @@ using namespace RAMCloud;
 using namespace kvstore;
 using namespace MessageClientNS;
 
-#define NUM_ENTRIES 400000   //Key Space
+#define NUM_ENTRIES 1000000   //Key Space
 #define MAX_DATA_SIZE 2000 // in Bytes
-#define RUN_TIME 20 //in seconds
+#define RUN_TIME 60 //in seconds
 #define MAX_THREAD_COUNT 64
 //#define THREAD_COUNT 16
 #define IMPL_NAME "RAMCloud"
@@ -56,7 +56,7 @@ class ServerCommands{
 		MessageClient *mc,*mc2;
 		ServerCommands(string ip, int port){
 			mc = new MessageClient("10.129.28.101",port);
-			mc2 = new MessageClient("10.129.28.157",port);
+			mc2 = new MessageClient("10.129.26.229",port);
 		}
 
 		void startSARatServer(string desc,string folder="./"){
@@ -97,9 +97,20 @@ void init_data(){
 void putAllEntriesOnce(string config,string table_name){
 	 KVStore<string,string> *k=new KVStore<string,string>();
 	 k->bind(config,table_name);
-         for(int i=0;i<NUM_ENTRIES;i++){
+        for(int i=0;i<NUM_ENTRIES;i+=2){
                 k->put(key[i],value[i]);
+		if(k->ierr<0){
+			cout<<"Error at entry " << i << ":" << k->serr;
+		}
         }
+        for(int i=1;i<NUM_ENTRIES;i+=2){
+                k->put(key[i],value[i]);
+                if(k->ierr<0){
+                        cout<<"Error at entry " << i << ":" << k->serr;
+                }
+
+        }
+
 	delete k;
 }
 
@@ -183,7 +194,7 @@ int main(int argc, char *argv[]) {
 
 
 	//vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-	vector<int> TC={8,16,32};
+	vector<int> TC={1,2,6,8,12,24};
 	for(int THREAD_COUNT:TC) {
 
 		cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;
@@ -195,7 +206,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 301;
+		int iter_num = 2;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		string st2 = IMPL_NAME+DATE+to_string(iter_num)+sep+to_string(MAX_DATA_SIZE/1000)+"KB"+sep+"TC"+to_string(THREAD_COUNT)+sep;
