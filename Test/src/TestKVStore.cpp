@@ -1,5 +1,6 @@
 // #include "../../Implementation/RAMCloud/src/LevelDB.h"
-#include "../../Implementation/RAMCloud/client/src/KVStore.h"
+//#include "../../Implementation/RAMCloud/client/src/KVStore.h"
+#include "../../Implementation/Redis/client/src/KVStore.h"
 #include<iostream>
 #include<thread>
 
@@ -11,8 +12,9 @@ void doSomthing(){
   //SocketAddress,TableName
   //k.bind("10.129.26.154:8090","ShreeGanesh"); //Exactly once for each KVStore object
   // k.bind("127.1.1.1:8090","ShreeGanesh"); //Exactly once for each KVStore object
+  k.bind("127.0.0.1:7000","ShreeGanesh"); //Exactly once for each KVStore object
   // k.bind("tcp:host=10.129.28.101,port=11100","ShreeGanesh"); //Exactly once for each KVStore object
-  k.bind("tcp:host=127.0.1.1,port=11100","ShreeGanesh"); //Exactly once for each KVStore object
+  // k.bind("tcp:host=127.0.1.1,port=11100","ShreeGanesh"); //Exactly once for each KVStore object
 
   //k.put(11,"Om Nama Shivay");
   cout<<"First get()"<<endl;
@@ -65,7 +67,7 @@ void doSomthing(){
 }
 
 int main(){
-  const int thread_count = 1;
+  const int thread_count = 10;
   int i;
   thread threads[thread_count];
   for (i = 0; i < thread_count; i++) {
