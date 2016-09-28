@@ -14,7 +14,8 @@ void doSomething(int tid){
 
   KVRequest kr;
   //kr.bind("127.1.1.1:8090");//Invoked exactly once
-  kr.bind("127.0.0.1:7000");//Invoked exactly once
+  // kr.bind("127.0.0.1:7000");//Invoked exactly once
+  kr.bind("10.129.28.101:7000");//Invoked exactly once
   //kr.bind("10.129.26.223:8090");//Invoked exactly once
 
   for(int i=0;i<iter;i++) {

@@ -7,7 +7,8 @@
 #define __KVSTORE_DEF__
 
 #include "redis/RedisClient.hpp"
-#include "../../../../Interface/KVStoreHeader.h"
+// #include "../../../../Interface/KVStoreHeader.h"
+#include "kvscommon/KVStoreHeader.h"
 
 
 

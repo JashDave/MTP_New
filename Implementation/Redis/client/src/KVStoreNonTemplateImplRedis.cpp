@@ -25,7 +25,9 @@ namespace kvstore {
     string ip = connection.substr(0,colon);
     string port = connection.substr(colon+1);
     kvsclient = (void *) new KVStoreClient();
-    c_kvsclient->rc.Initialize(ip,stoi(port),10,100);
+    if(c_kvsclient->rc.Initialize(ip,stoi(port),10,100)){
+      cerr<<"connection error"<<endl;
+    }
   }
   KVRequest::~KVRequest(){
     delete(c_kvsclient);
@@ -39,6 +41,7 @@ namespace kvstore {
 // }
 
   KVResultSet KVRequest::execute(){
+    // cout<<"KVReq Execute"<<endl;
     vector<string> res;
     int pr=1,gr=1;
     if(vputk.size()!=0){
@@ -61,7 +64,7 @@ namespace kvstore {
       switch(v[i][0]){
         case 'p' :
         if(pr == RC_SUCCESS){
-          //cout<<"Put success"<<endl;
+          // cout<<"Put success"<<endl;
           res.push_back("0");
           res.push_back("");
           res.push_back("");
@@ -75,7 +78,7 @@ namespace kvstore {
         case 'g' :
         if(gr == RC_SUCCESS){
 
-            //cout<<"Get success :"<<getres[getidx]<<endl;
+            // cout<<"Get success :"<<getres[getidx]<<endl;
           if(getres[getidx].empty()){
             res.push_back("-1");
             res.push_back("Value not found");

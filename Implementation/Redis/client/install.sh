@@ -1,6 +1,7 @@
 #!/bin/bash
 
-
+mkdir -p /usr/local/include/kvscommon
+cp ../../../Interface/KVStoreHeader.h /usr/local/include/kvscommon/
 
 mkdir -p deps
 cd deps
@@ -21,12 +22,16 @@ cd src
 g++ -std=c++11 -c RedisClient.cpp
 #ar -cq libredisclient.a RedisClient.o
 
-cd ../..
+cd ../../
+
+cp -p ../src/* /usr/local/include/redis
+
 rm -r tmp
 mkdir tmp
 cd tmp
 cp ../redis_client/src/RedisClient.o .
 ar x ../hiredis/libhiredis.a
+#pwd
 g++ -std=c++11 -c ../../src/KVStoreNonTemplateImplRedis.cpp -Wno-deprecated
 ar cq libkvs_redis.a *.o
 #ar crsT libkvs_redis.a /usr/lib/libredisclient.a /usr/local/lib/libhiredis.a
