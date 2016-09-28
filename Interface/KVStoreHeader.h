@@ -58,6 +58,10 @@ namespace kvstore {
 		int count=0;
 		void *kvsclient;
 		std::vector<string> v;
+		std::vector<string> vputk;
+		std::vector<string> vputv;
+		std::vector<string> vget;
+		std::vector<string> vdel;
 	public:
 		void bind(string connection);
 		~KVRequest();		//For distroying connection object

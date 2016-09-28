@@ -38,6 +38,8 @@ int main()
     }
 
     vector<string> key_vec={"key_1","key_1_abc","key_2"};
+    vector<string> vvec={"V1","V2",""};
+    redisCli.Mset(key_vec,vvec);
     vector<string> val_vec(3);
     redisCli.Mget(key_vec,&val_vec);
     for(auto v:val_vec){

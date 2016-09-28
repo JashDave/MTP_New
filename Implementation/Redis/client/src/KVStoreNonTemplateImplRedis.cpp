@@ -2,17 +2,17 @@
 
 namespace kvstore {
 
-// class KVStoreClient{
-// public:
-//   CRedisClient rc;
-//   string tbname;
-//   ~KVStoreClient(){
-//     delete rc;
-//   }
-// };
+  // class KVStoreClient{
+  // public:
+  //   CRedisClient rc;
+  //   string tbname;
+  //   ~KVStoreClient(){
+  //     delete rc;
+  //   }
+  // };
 
   KVResultSet::KVResultSet(vector<string> r){
-    count=r.size()/4;
+    count=r.size()/3;
     res=r;
   }
 
@@ -21,28 +21,104 @@ namespace kvstore {
   }
 
   void KVRequest::bind(string connection){
-    // int colon = connection.find(":");
-    // string ip = connection.substr(0,colon);
-    // string port = connection.substr(colon+1);
-    // kvsclient = (void *) new KVStoreClient(ip,stoi(port));
-    // v.push_back("Multiple");
+    int colon = connection.find(":");
+    string ip = connection.substr(0,colon);
+    string port = connection.substr(colon+1);
+    kvsclient = (void *) new KVStoreClient();
+    c_kvsclient->rc.Initialize(ip,stoi(port),10,100);
   }
   KVRequest::~KVRequest(){
+    delete(c_kvsclient);
     //For distroying connection object
   }
 
+// void printvec(vector<string> &v){
+//   for(string s:v){
+//     cout<<s<<endl;
+//   }
+// }
 
   KVResultSet KVRequest::execute(){
-    // c_kvsclient->send(v);
-    // vector<string> rcv=c_kvsclient->receive();
-    //cout<<"Received size"<<rcv.size()<<"  "<<rcv[0]<<endl;
-    vector<string> rcv;
-    return KVResultSet(rcv);
+    vector<string> res;
+    int pr=1,gr=1;
+    if(vputk.size()!=0){
+      pr = c_kvsclient->rc.Mset(vputk,vputv);
+    }
+
+    vector<string> getres;
+    if(vget.size()!=0){
+      gr = c_kvsclient->rc.Mget(vget,&getres);
+    }
+
+    vector<int> delres(vdel.size());
+    for(int i=0;i<vdel.size();i++){
+      delres[i] = c_kvsclient->rc.Del(vdel[i]);
+    }
+
+    int getidx=0;
+    int delidx=0;
+    for(int i=0;i<v.size();i++){
+      switch(v[i][0]){
+        case 'p' :
+        if(pr == RC_SUCCESS){
+          //cout<<"Put success"<<endl;
+          res.push_back("0");
+          res.push_back("");
+          res.push_back("");
+        } else {
+          res.push_back("-1");
+          res.push_back("connection error");
+          res.push_back("");
+        }
+        break;
+
+        case 'g' :
+        if(gr == RC_SUCCESS){
+
+            //cout<<"Get success :"<<getres[getidx]<<endl;
+          if(getres[getidx].empty()){
+            res.push_back("-1");
+            res.push_back("Value not found");
+            res.push_back("");
+          }else {
+            res.push_back("0");
+            res.push_back("");
+            res.push_back(getres[getidx]);
+          }
+        } else {
+          res.push_back("-1");
+          res.push_back("connection error");
+          res.push_back("");
+        }
+        getidx++;
+        break;
+
+        case 'd' :
+        if(delres[delidx] == RC_SUCCESS){
+          //cout<<"Del success"<<endl;
+          res.push_back("0");
+          res.push_back("");
+          res.push_back("");
+        } else {
+          //cout<<"Del unsuccess"<<endl;
+          res.push_back("-1");
+          res.push_back("connection error");
+          res.push_back("");
+        }
+        delidx++;
+        break;
+      }
+    }
+
+    return KVResultSet(res);
   }
 
   void KVRequest::reset(){
     v.clear();
-    // v.push_back("Multiple");
+    vputk.clear();
+    vputv.clear();
+    vget.clear();
+    vdel.clear();
   }
 
 }

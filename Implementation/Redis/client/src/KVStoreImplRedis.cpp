@@ -10,9 +10,9 @@
 #include "../../../../Interface/KVStoreHeader.h"
 
 
-class KVStoreClient;
 
 //? move to NonTemplateImpl
+class KVStoreClient;
 class KVStoreClient{
 public:
   CRedisClient rc;
@@ -26,53 +26,40 @@ namespace kvstore {
     	template<typename ValType>
     	KVData<ValType> KVResultSet::get(int idx){
         KVData<ValType> ret;
-        // if(idx>=0 && idx<count){
-        //   ret.serr = res[idx*4+2];
-        //   ret.ierr = stoi(res[idx*4+3]);
-        //   if(ret.ierr==0){
-        //     ret.value = toBoostObject<ValType>(res[idx*4+1]);
-        //   }
-        // } else {
-        //   ret.ierr=-1;
-        //   if(count==0)
-        //   ret.serr="Empty KVResultSet due to empty request queue, please ensure that your request queue is not empty.";
-        //   else
-        //   ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
-        // }
+        if(idx>=0 && idx<count){
+          ret.serr = res[idx*3+1];
+          ret.ierr = stoi(res[idx*3]);
+          if(ret.ierr==0){
+            ret.value = toBoostObject<ValType>(res[idx*3+2]);
+          }
+        } else {
+          ret.ierr=-1;
+          if(count==0)
+          ret.serr="Empty KVResultSet due to empty request queue, please ensure that your request queue is not empty.";
+          else
+          ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
+        }
         return ret;
       }
 
 
     template<typename KeyType, typename ValType>
     void KVRequest::get(KeyType const& key,string tablename){
-      // v.push_back("CreateTable");
-      // v.push_back(tablename);
-      // string skey=toBoostString(key);
-      // v.push_back("Get");
-      // v.push_back(skey);
-      //rep.push_back(new KVData<ValType>);
+      v.push_back("g");
+      vget.push_back(tablename+toBoostString(key));
     }
 
     template<typename KeyType, typename ValType>
     void KVRequest::put(KeyType const& key,ValType const& val,string tablename){
-      // v.push_back("CreateTable");
-      // v.push_back(tablename);
-      // string skey=toBoostString(key);
-      // string sval=toBoostString(val);
-      // v.push_back("Put");
-      // v.push_back(skey);
-      // v.push_back(sval);
-      //rep.push_back(new KVData<ValType>);
+      v.push_back("p");
+      vputk.push_back(tablename+toBoostString(key));
+      vputv.push_back(toBoostString(val));
     }
 
     template<typename KeyType, typename ValType>
     void KVRequest::del(KeyType const& key,string tablename){
-      // v.push_back("CreateTable");
-      // v.push_back(tablename);
-      // string skey=toBoostString(key);
-      // v.push_back("Del");
-      // v.push_back(skey);
-      //rep.push_back(new KVData<ValType>);
+      v.push_back("d");
+      vdel.push_back(tablename+toBoostString(key));
     }
 
   template<typename KeyType, typename ValType>
@@ -145,7 +132,7 @@ namespace kvstore {
 
   template<typename KeyType, typename ValType>
   bool KVStore<KeyType,ValType>::clear() {
-    //Not yet implemented
+    // Not yet implemented
     // FLUSHDB can be used
     // Current problem can do FLUSHALL but all tables will be deleted (tablename+key)
     return false;

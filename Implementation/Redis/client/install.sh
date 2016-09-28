@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+
 mkdir -p deps
 cd deps
 
@@ -25,6 +27,7 @@ mkdir tmp
 cd tmp
 cp ../redis_client/src/RedisClient.o .
 ar x ../hiredis/libhiredis.a
+g++ -std=c++11 -c ../../src/KVStoreNonTemplateImplRedis.cpp -Wno-deprecated
 ar cq libkvs_redis.a *.o
 #ar crsT libkvs_redis.a /usr/lib/libredisclient.a /usr/local/lib/libhiredis.a
 #ar crsT libkvs_redis.a redis_client/src/libredisclient.a hiredis/libhiredis.a
