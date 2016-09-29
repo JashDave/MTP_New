@@ -74,7 +74,7 @@ namespace kvstore {
     string port = connection.substr(colon+1);
     kvsclient = (void *) new KVStoreClient();
     c_kvsclient->tbname = tablename;
-    return c_kvsclient->rc.Initialize(ip,stoi(port),1,100);
+    return c_kvsclient->rc.Initialize(ip,stoi(port),10,100);
   }
 
   template<typename KeyType, typename ValType>

@@ -70,7 +70,7 @@ func (cl *Client) performTask(strarr []string) ([]string,int){
     used++;
     return []string{"",serr,strconv.Itoa(ierr)},used
   case "Clear":
-    cl.kvs.Clear()
+    cl.kvs.Clear(&tm)
     return []string{"true"},used
   }
   return []string{""},used

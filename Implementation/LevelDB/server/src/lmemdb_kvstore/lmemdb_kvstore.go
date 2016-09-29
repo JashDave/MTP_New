@@ -3,6 +3,7 @@ package lmemedb_kvstore
 import (
 	"github.com/syndtr/goleveldb/leveldb/memdb"
 	"github.com/syndtr/goleveldb/leveldb/comparer"
+	"sync"
 	//"fmt"
 	//"strconv"
 	//"time"
@@ -12,6 +13,7 @@ import (
 
 
   type TableManager struct {
+    tablemapMutex sync.Mutex;
     tablemap map[string]*memdb.DB
   }
 
@@ -26,6 +28,8 @@ import (
 	}
 
     func (kvs *KVS_LMemDB) CreateTable(tablename string, tm *TableManager) bool{
+    tm.tablemapMutex.Lock();
+		defer tm.tablemapMutex.Unlock();
     db,ok := tm.tablemap[tablename]
     if ok {
       kvs.db = db

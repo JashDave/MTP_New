@@ -42,7 +42,8 @@ void doSomthing(){
   // cout<<endl<<"get() after clear"<<endl;
   //k.clear();
   cout<<endl<<"get() after del"<<endl;
-  k.del(10);
+  // k.del(10);
+  k.clear();
   kvd = k.get(10);
   if(kvd.ierr<0){
     cout<<"Error in getting data"<<endl<<kvd.serr<<endl;
