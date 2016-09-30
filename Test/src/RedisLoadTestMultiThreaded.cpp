@@ -3,7 +3,7 @@
  */
 
 
-#include "../../Implementation/Redis/client/src/KVStore.h"
+#include "redis/KVStore.h"
 #include <iostream>
 #include <thread>
 
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 1;
+		int iter_num = 1000;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -176,6 +176,7 @@ int main(int argc, char *argv[]) {
 
 		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
 		vector<int> TC={2,6,8,12,16,32};
+		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {
 
