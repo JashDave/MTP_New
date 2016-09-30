@@ -94,14 +94,18 @@ void init_data(){
 void do_put(int tid, KVStore<string,string> *k){
 		printf("PUT Thread #%d started\n",tid);
 		int i=0;
+		KVData kvd;
 		while(!go_start); //wait
 		while(run){
 			pm[tid].start();
 			//cluster->write(table, key[i].c_str(), key_len[i], value[i].c_str(), value_len[i]);
-			k->put(key[i],value[i]);
+			kvd = k->put(key[i],value[i]);
 			pm[tid].end();
 			i++;
 			i%=NUM_ENTRIES;
+			if(kvd.ierr!=0){
+				cout<<"PUT Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+			}
 		}
 		printf("PUT Thread #%d ended\n",tid);
 		pm[tid].print("PUT Thread "+to_string(tid)+" ended\n");
@@ -114,16 +118,21 @@ void do_put(int tid, KVStore<string,string> *k){
 void do_get(int tid, KVStore<string,string> *k){
 		printf("GET Thread #%d started\n",tid);
 		int i=0;
+		KVData<string> kvd;
 		while(!go_start); //wait
 		while(run){
 			gm[tid].start();
-			k->get(key[i]);
+			kvd = k->get(key[i]);
 			gm[tid].end();
-			// string ret_val=k->value;
+			if(kvd.ierr==0){
+			// string ret_val=kvd->value;
 			// if(ret_val.compare(value[i])!=0){
 			// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
 			//printf("%s:%s\n",key[i].c_str(),str);
 			// }
+			} else {
+			  cout<<"GET Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+			}
 			i++;
 			i%=NUM_ENTRIES;
 		}
@@ -157,7 +166,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 1000;
+		int iter_num = 12;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -166,7 +175,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":7000";
+		string config=SERVER_IP+":8000";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
@@ -203,7 +212,7 @@ int main(int argc, char *argv[]) {
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
-				k->bind(config,table_name);
+				cout<< k->bind(config,table_name)<<endl;
 				put_threads[i] = thread(do_put, i, k);
 
 				pinThreadToCPU(&put_threads[i],i);
