@@ -94,7 +94,7 @@ void init_data(){
 void do_put(int tid, KVStore<string,string> *k){
 		printf("PUT Thread #%d started\n",tid);
 		int i=0;
-		KVData kvd;
+		KVData<string> kvd;
 		while(!go_start); //wait
 		while(run){
 			pm[tid].start();
