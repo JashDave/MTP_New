@@ -40,7 +40,7 @@ namespace kvstore {
     string ip = connection.substr(0,colon);
     string port = connection.substr(colon+1);
     kvsclient = (void *) new KVStoreClient();
-    if(c_kvsclient->init(ip,port)){
+    if(!c_kvsclient->init(ip,port)){
       cerr<<"connection error"<<endl;
     }
   }

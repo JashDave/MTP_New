@@ -57,10 +57,14 @@ namespace kvstore {
 	private:
 		int count=0;
 		void *kvsclient;
+		//TODO : All vectors must be moved to KVSClientData
 		std::vector<string> v;
+		std::vector<uint64_t> vputt;
 		std::vector<string> vputk;
 		std::vector<string> vputv;
+		std::vector<uint64_t> vgett;
 		std::vector<string> vget;
+		std::vector<uint64_t> vdelt;
 		std::vector<string> vdel;
 	public:
 		void bind(string connection);

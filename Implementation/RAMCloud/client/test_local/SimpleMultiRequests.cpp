@@ -1,6 +1,6 @@
 /*
-   g++ --std=c++0x -g -I../install/include -I. RMCLoadTestMultiThreaded.cpp  -o RMCLoadTestMultiThreaded.out -L../install/bin -lramcloud -Wl,-rpath=../install/bin -pthread
- */
+g++ --std=c++0x -g -I/home/jashdave/RAMCloud/install/include -I. SimpleMultiRequests.cpp  -o SimpleMultiRequests.o -L/home/jashdave/RAMCloud/install/bin -lramcloud -pthread -Wl,-rpath=/home/jashdave/RAMCloud/install/bin
+*/
 
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
@@ -37,6 +37,8 @@ int main(){
 	}
 	cluster.multiWrite(mwo, sz);
 
+
+keys[0]="testkey";
 	MultiReadObject *mro[sz];
 	Tub<ObjectBuffer> retval[sz];
   // for(int i=0;i<sz;i++) {
