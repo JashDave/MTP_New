@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
 
 
 		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		vector<int> TC={2,6,8,12,16,32};
+		vector<int> TC={1,2,6,8,12,24,36,48};
 		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {
