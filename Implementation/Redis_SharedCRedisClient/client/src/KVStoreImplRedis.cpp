@@ -124,7 +124,7 @@ namespace kvstore {
       kvd.ierr=0;
     } else {
       kvd.serr = "Connection error";
-      kvd.ierr = r;
+      kvd.ierr = -1;
     }
     return kvd;
   }
@@ -138,7 +138,7 @@ namespace kvstore {
       kvd.ierr=0;
     } else {
       kvd.serr = "Connection error";
-      kvd.ierr = r;
+      kvd.ierr = -1;
     }
     return kvd;
   }

@@ -33,12 +33,12 @@ int main(){
 
 	MultiWriteObject *mwo[sz];
   for(int i=0;i<sz;i++) {
-		mwo[i] = new MultiWriteObject(tableId, keys[i].c_str(), keys[i].size(), vals[i].c_str(), vals[i].size());
+		mwo[i] = new MultiWriteObject(tableId, keys[i].c_str(), keys[i].size(), vals[i].c_str(), vals[i].size()+1);
 	}
 	cluster.multiWrite(mwo, sz);
 
 
-keys[0]="testkey";
+// keys[0]="testkey";
 	MultiReadObject *mro[sz];
 	Tub<ObjectBuffer> retval[sz];
   // for(int i=0;i<sz;i++) {
