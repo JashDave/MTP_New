@@ -105,6 +105,9 @@ void do_put(int tid, KVStore<string,string> *k){
 			i%=NUM_ENTRIES;
 			if(kvd.ierr!=0){
 				cout<<"PUT Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+//return;
+			} else {
+				//cout<<"PUT success"<<endl;
 			}
 		}
 		printf("PUT Thread #%d ended\n",tid);
@@ -125,6 +128,7 @@ void do_get(int tid, KVStore<string,string> *k){
 			kvd = k->get(key[i]);
 			gm[tid].end();
 			if(kvd.ierr==0){
+//cout<<"GET success"<<endl;
 			// string ret_val=kvd->value;
 			// if(ret_val.compare(value[i])!=0){
 			// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
@@ -132,6 +136,7 @@ void do_get(int tid, KVStore<string,string> *k){
 			// }
 			} else {
 			  cout<<"GET Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+//return;
 			}
 			i++;
 			i%=NUM_ENTRIES;
@@ -166,7 +171,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 12;
+		int iter_num = 7;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -175,7 +180,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":8000";
+		string config=SERVER_IP+":7000";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
