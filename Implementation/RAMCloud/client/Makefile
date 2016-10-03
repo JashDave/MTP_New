@@ -31,6 +31,7 @@ $(BINPATH)/KVStoreNonTemplateImplRamCloud.o:	$(IMPLPATH)/KVStoreImplRamCloud.cpp
 install:	$(BINPATH)/KVStoreNonTemplateImplRamCloud.o
 	ar -cq $(BINPATH)/libkvstore.a $(BINPATH)/KVStoreNonTemplateImplRamCloud.o
 	cp -p $(BINPATH)/libkvstore.a /usr/lib
+	#cp -rp $(PATH_TO_RAMCLOUD)/install/include /usr/include
 
 uninstall:
 	echo "Uninstall!!! Yet to be implemented."
