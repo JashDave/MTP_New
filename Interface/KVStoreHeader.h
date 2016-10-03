@@ -113,7 +113,7 @@ namespace kvstore {
 	string toBoostString(T const &obj);
 
 	template<typename T>
-	T const & toBoostObject(string sobj);
+	T toBoostObject(string sobj);
 
 	//------------Common implementation--------------------
 	template<typename T>
