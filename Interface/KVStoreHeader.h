@@ -125,14 +125,24 @@ namespace kvstore {
 	}
 
 
+	// template<typename T>
+	// T const & toBoostObject(string sobj){
+	// 	T *obj = new(T);
+	// 	stringstream ifs;
+	// 	ifs<<sobj;
+	// 	boost::archive::text_iarchive ia(ifs);
+	// 	ia >> (*obj);
+	// 	return *obj;
+	// }
+
 	template<typename T>
 	T const & toBoostObject(string sobj){
-		T *obj = new(T);
+		T obj;
 		stringstream ifs;
 		ifs<<sobj;
 		boost::archive::text_iarchive ia(ifs);
-		ia >> (*obj);
-		return *obj;
+		ia >> obj;
+		return obj;
 	}
 }
 #endif
