@@ -136,7 +136,7 @@ namespace kvstore {
 	// }
 
 	template<typename T>
-	T const & toBoostObject(string sobj){
+	T toBoostObject(string sobj){
 		T obj;
 		stringstream ifs;
 		ifs<<sobj;
