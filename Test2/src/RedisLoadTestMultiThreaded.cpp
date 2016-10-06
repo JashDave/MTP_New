@@ -24,9 +24,10 @@ using namespace kvstore;
 using namespace MessageClientNS;
 
 #define NUM_ENTRIES 5000   //Key Space
-#define MAX_DATA_SIZE 2000 // in Bytes
+// #define MAX_DATA_SIZE 2000 // in Bytes
+long MAX_DATA_SIZE=2000; // in Bytes
 #define RUN_TIME 20 //in seconds
-#define MAX_THREAD_COUNT 64
+#define MAX_THREAD_COUNT 1000
 //#define THREAD_COUNT 16
 #define IMPL_NAME "Redis"
 
@@ -159,14 +160,16 @@ void pinThreadToCPU(thread *th,int i){
 }
 
 int main(int argc, char *argv[]) {
-		if (argc != 2) {
-			printf("Usage: %s Server_IPAddress\n", argv[0]);
+		if (argc != 4) {
+			printf("Usage: %s Server_IPAddress   ITER_NUM   MAX_DATA_SIZE\n", argv[0]);
 			exit(0);
 		}
 
+
+ 	  MAX_DATA_SIZE = stoi(argv[3]);
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 12;
+		int iter_num = stoi(argv[2]);
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -184,7 +187,7 @@ int main(int argc, char *argv[]) {
 
 
 		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		vector<int> TC={1,2,6,8,12,24,36,48};
+		vector<int> TC={2,6,12,24,36,48,60,72,120};
 		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {
