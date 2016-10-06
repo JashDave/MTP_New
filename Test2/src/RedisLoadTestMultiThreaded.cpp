@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":8000";
+		string config=SERVER_IP+":7000";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
