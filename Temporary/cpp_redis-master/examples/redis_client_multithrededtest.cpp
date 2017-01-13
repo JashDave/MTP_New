@@ -4,13 +4,14 @@
 using namespace std;
 using namespace std::chrono;
 
-#define THREAD_COUNT 50
+//#define THREAD_COUNT 1
 
-string IP = "127.0.0.1";
+string IP = "10.129.28.101";
 int PORT = 6379;
 
 double loopcount  = 1e5;
 cpp_redis::redis_client client;
+string data="ABCDEFGHIJ";
 
 double doPut(){
   static int counter=0;
@@ -23,7 +24,7 @@ double doPut(){
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   for(double i=0;i<loopcount;i++){
-    client.set("hello"+to_string(counter)+"_"+to_string(i), to_string(i));
+    client.set("hello"+to_string(counter)+"_"+to_string(i), data+to_string(i));
     // client.set("hello"+to_string(i), to_string(i), [](cpp_redis::reply& reply) {
       // std::cout << "set hello 42: " << reply << std::endl;
       // if (reply.is_string())
@@ -145,13 +146,17 @@ void doFunc(double (*func)(),string desc){
 }
 
 int main(void) {
+  for(int i=0;i<1e2;i++){
+   data+="1234567890";
+  }
+
   client.connect(IP, PORT, [](cpp_redis::redis_client&) {
     std::cout << "client disconnected (disconnection handler)" << std::endl;
   });
 
   //! Enable logging
   // cpp_redis::active_logger = std::unique_ptr<cpp_redis::logger>(new cpp_redis::logger);
-  // doFunc(doPut,"Put function");
+  doFunc(doPut,"Put function");
   doFunc(doGet,"Get function");
 
   return 0;

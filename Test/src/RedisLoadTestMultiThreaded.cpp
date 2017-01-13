@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 7;
+		int iter_num = 200;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);

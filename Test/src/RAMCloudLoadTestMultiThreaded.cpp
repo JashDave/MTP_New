@@ -24,7 +24,7 @@ using namespace RAMCloud;
 using namespace kvstore;
 using namespace MessageClientNS;
 
-#define NUM_ENTRIES 50000   //Key Space
+#define NUM_ENTRIES 5000   //Key Space
 #define MAX_DATA_SIZE 2000 // in Bytes
 #define RUN_TIME 20 //in seconds
 #define MAX_THREAD_COUNT 64
@@ -55,7 +55,7 @@ class ServerCommands{
 	public:
 		MessageClient *mc,*mc2;
 		ServerCommands(string ip, int port){
-			mc = new MessageClient("10.129.26.229",port);
+			mc = new MessageClient("10.129.28.101",port);
 			//mc2 = new MessageClient("10.129.28.101",port);
 		}
 
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 
 
 	//vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-	vector<int> TC={1,2,6,8,12,24};
+	vector<int> TC={1,2,6,8,12,24,36,48};
 	for(int THREAD_COUNT:TC) {
 
 		cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 5;
+		int iter_num = 1;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		string st2 = IMPL_NAME+DATE+to_string(iter_num)+sep+to_string(MAX_DATA_SIZE/1000)+"KB"+sep+"TC"+to_string(THREAD_COUNT)+sep;

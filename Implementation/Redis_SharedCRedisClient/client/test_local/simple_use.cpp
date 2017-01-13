@@ -46,7 +46,7 @@ void doSomthing(){
 
 int main()
 {
-    if (!redisCli.Initialize("10.129.28.101", 7000, 10, 20))
+    if (!redisCli.Initialize("10.129.28.101", 8000, 10, 20))
     {
         cout << "connect to redis failed" << endl;
         return -1;

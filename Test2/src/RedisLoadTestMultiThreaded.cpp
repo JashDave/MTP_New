@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":7000";
+		string config=SERVER_IP+":7001";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
@@ -186,9 +186,9 @@ int main(int argc, char *argv[]) {
 		init_data();
 
 
-		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		//vector<int> TC={2,6,12,24,36,48,60,72,120};
-		vector<int> TC={96,120,144,192};
+		//vector<int> TC={2,4,6,8,12,24,36,48,60,72};
+		vector<int> TC={2,6,8,12,24,36,60,96,144,192};
+		//vector<int> TC={228,252,276,300};
 		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {
