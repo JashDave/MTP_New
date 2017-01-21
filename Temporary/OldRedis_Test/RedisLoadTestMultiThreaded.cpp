@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		SERVER_IP = string(argv[1]);
 
 		int i=0;
-		string config=SERVER_IP+":7001";
+		string config=SERVER_IP+":7002";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
