@@ -26,8 +26,8 @@ using namespace kvstore;
 #define NUM_ENTRIES 5000   //Key Space
 // #define MAX_DATA_SIZE 2000 // in Bytes
 long MAX_DATA_SIZE=2000; // in Bytes
-#define RUN_COUNT (int)1e5
-#define RUN_TIME 20 //in seconds
+#define RUN_COUNT (int)1e6
+#define RUN_TIME 1 //in seconds
 #define MAX_THREAD_COUNT 1000
 //#define THREAD_COUNT 16
 #define IMPL_NAME "Redis"
