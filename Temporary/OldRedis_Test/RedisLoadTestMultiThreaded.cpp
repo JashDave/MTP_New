@@ -70,7 +70,7 @@ void do_put(int tid, KVStore<string,string> *k){
 		KVData<string> kvd;
 		// while(!go_start); //wait
 		// while(run){
-		for(int ii=0;i<RUN_COUNT;i++){
+		for(int ii=0;ii<RUN_COUNT;ii++){
 			pm[tid].start();
 			//cluster->write(table, key[i].c_str(), key_len[i], value[i].c_str(), value_len[i]);
 			kvd = k->put(key[i],value[i]);
@@ -82,7 +82,7 @@ void do_put(int tid, KVStore<string,string> *k){
 			}
 		}
 		printf("PUT Thread #%d ended\n",tid);
-		pm[tid].print("PUT Thread "+to_string(tid)+" ended\n");
+		//pm[tid].print("PUT Thread "+to_string(tid)+" ended\n");
 		delete k;
 }
 
@@ -95,7 +95,7 @@ void do_get(int tid, KVStore<string,string> *k){
 		KVData<string> kvd;
 		// while(!go_start); //wait
 		// while(run){
-	  for(int ii=0;i<RUN_COUNT;i++){
+	  for(int ii=0;ii<RUN_COUNT;ii++){
 			gm[tid].start();
 			kvd = k->get(key[i]);
 			gm[tid].end();
@@ -112,7 +112,7 @@ void do_get(int tid, KVStore<string,string> *k){
 			i%=NUM_ENTRIES;
 		}
 		printf("GET Thread #%d ended\n",tid);
-		gm[tid].print("GET Thread "+to_string(tid)+" ended\n");
+		//gm[tid].print("GET Thread "+to_string(tid)+" ended\n");
 		delete k;
 }
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		SERVER_IP = string(argv[1]);
 
 		int i=0;
-		string config=SERVER_IP+":7002";
+		string config=SERVER_IP+":7001";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
@@ -161,23 +161,29 @@ int main(int argc, char *argv[]) {
 				gm[i].reset();
 			}
 
+
+			Measure tmp;
 			//----Multithreaded Write------
+			tmp.start();
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
 				cout<< k->bind(config,table_name)<<endl;
 				put_threads[i] = thread(do_put, i, k);
 				pinThreadToCPU(&put_threads[i],i);
 			}
-			sleep(RUN_TIME);
+			//sleep(RUN_TIME);
 			for (i = 0; i < THREAD_COUNT; i++) {
 				if (put_threads[i].joinable()) {
 					put_threads[i].join();
 				}
 			}
+			tmp.end();
 			for (i = 0; i < THREAD_COUNT; i++) {
-				pm[i].print("Redis writes with TC"+to_string(i));
+				//pm[i].print("Redis writes with TC"+to_string(i));
 				pm[i].reset();
 			}
+			tmp.print("Write Time:");
+			tmp.reset();
 			sleep(1);
 
 
@@ -185,6 +191,7 @@ int main(int argc, char *argv[]) {
 
 
 			//-----Multithreaded Read-------
+			tmp.start();
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
 				k->bind(config,table_name);
@@ -192,22 +199,26 @@ int main(int argc, char *argv[]) {
 
 				pinThreadToCPU(&get_threads[i],i);
 			}
-			sleep(RUN_TIME);
+			// sleep(RUN_TIME);
 			for (i = 0; i < THREAD_COUNT; i++) {
 				if (get_threads[i].joinable()) {
 					get_threads[i].join();
 				}
 			}
+			tmp.end();
 			for (i = 0; i < THREAD_COUNT; i++) {
-				gm[i].print("Redis reads with TC"+to_string(i));
+				//gm[i].print("Redis reads with TC"+to_string(i));
 				gm[i].reset();
 			}
+			tmp.print("Read Time:");
+			tmp.reset();
 			sleep(1);
 
 
 
 
 			//----Multithreaded Mixed (Read+Write)---------
+			tmp.start();
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
 				k->bind(config,table_name);
@@ -219,7 +230,7 @@ int main(int argc, char *argv[]) {
 				pinThreadToCPU(&put_threads[i],i);
 				pinThreadToCPU(&get_threads[i],i);
 			}
-			sleep(RUN_TIME);
+			// sleep(RUN_TIME);
 
 			for (i = 0; i < THREAD_COUNT; i++) {
 				if (put_threads[i].joinable()) {
@@ -229,11 +240,13 @@ int main(int argc, char *argv[]) {
 					get_threads[i].join();
 				}
 			}
+			tmp.end();
 			for (i = 0; i < THREAD_COUNT; i++) {
-				pm[i].print("Redis M_write with TC"+to_string(i));
-				gm[i].print("Redis M_reads with TC"+to_string(i));
+				//pm[i].print("Redis M_write with TC"+to_string(i));
+				//gm[i].print("Redis M_reads with TC"+to_string(i));
 			}
-
+			tmp.print("Mixed :");
+			tmp.reset();
 		}//End of THREAD_COUNT loop
 
 		return 0;
