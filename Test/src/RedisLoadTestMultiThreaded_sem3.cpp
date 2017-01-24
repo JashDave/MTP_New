@@ -24,10 +24,9 @@ using namespace kvstore;
 using namespace MessageClientNS;
 
 #define NUM_ENTRIES 5000   //Key Space
-// #define MAX_DATA_SIZE 2000 // in Bytes
-long MAX_DATA_SIZE=2000; // in Bytes
+#define MAX_DATA_SIZE 2000 // in Bytes
 #define RUN_TIME 20 //in seconds
-#define MAX_THREAD_COUNT 1000
+#define MAX_THREAD_COUNT 64
 //#define THREAD_COUNT 16
 #define IMPL_NAME "Redis"
 
@@ -53,27 +52,27 @@ bool go_start = false;//Read olny for threads  - Race condition
 
 class ServerCommands{
 	public:
-		//MessageClient *mc;
+		MessageClient *mc;
 		ServerCommands(string ip, int port){
-		//	mc = new MessageClient(ip,port);
+			mc = new MessageClient(ip,port);
 		}
 
 		void startSARatServer(string desc,string folder="./"){
-		//	static vector<string> cmd_vec(1);
-		//	cmd_vec[0]="sar -o "+folder+"perf_data_"+desc+" -u 1";
-		//	mc->send(cmd_vec);
+			static vector<string> cmd_vec(1);
+			cmd_vec[0]="sar -o "+folder+"perf_data_"+desc+" -u 1";
+			mc->send(cmd_vec);
 		}
 
 		void stopSARatServer(){
-		//	static vector<string> cmd_vec(1);
-		//	cmd_vec[0]="pkill -SIGINT sar";
-		//	mc->send(cmd_vec);
+			static vector<string> cmd_vec(1);
+			cmd_vec[0]="pkill -SIGINT sar";
+			mc->send(cmd_vec);
 		}
 };
 
 
 void doSystem(string cmd){
-	//system(cmd.c_str());
+	system(cmd.c_str());
 }
 
 
@@ -106,6 +105,9 @@ void do_put(int tid, KVStore<string,string> *k){
 			i%=NUM_ENTRIES;
 			if(kvd.ierr!=0){
 				cout<<"PUT Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+//return;
+			} else {
+				//cout<<"PUT success"<<endl;
 			}
 		}
 		printf("PUT Thread #%d ended\n",tid);
@@ -126,6 +128,7 @@ void do_get(int tid, KVStore<string,string> *k){
 			kvd = k->get(key[i]);
 			gm[tid].end();
 			if(kvd.ierr==0){
+//cout<<"GET success"<<endl;
 			// string ret_val=kvd->value;
 			// if(ret_val.compare(value[i])!=0){
 			// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
@@ -133,6 +136,7 @@ void do_get(int tid, KVStore<string,string> *k){
 			// }
 			} else {
 			  cout<<"GET Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+//return;
 			}
 			i++;
 			i%=NUM_ENTRIES;
@@ -160,16 +164,14 @@ void pinThreadToCPU(thread *th,int i){
 }
 
 int main(int argc, char *argv[]) {
-		if (argc != 4) {
-			printf("Usage: %s Server_IPAddress   ITER_NUM   MAX_DATA_SIZE\n", argv[0]);
+		if (argc != 2) {
+			printf("Usage: %s Server_IPAddress\n", argv[0]);
 			exit(0);
 		}
 
-
- 	  MAX_DATA_SIZE = stoi(argv[3]);
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = stoi(argv[2]);
+		int iter_num = 200;
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -178,7 +180,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":7001";
+		string config=SERVER_IP+":7000";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
@@ -187,11 +189,9 @@ int main(int argc, char *argv[]) {
 
 
 		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		//vector<int> TC={2,6,8,12,24,36,48,60};
-		//vector<int> TC={96,120,144,192};
+		vector<int> TC={1,2,6,8,12,24,36,48};
 		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
-		vector<int> TC={50};
 		for(int THREAD_COUNT:TC) {
 
 			cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 			string s_folder=st1+"Server"+sep+st2;
 			vector<string> cmd_vec(1);
 			cmd_vec[0]="mkdir -p "+s_folder;
-			//sc.mc->send(cmd_vec);
+			sc.mc->send(cmd_vec);
 
 
 
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
-				cout<< k->bind(config,table_name+to_string(i%20))<<endl;
+				cout<< k->bind(config,table_name)<<endl;
 				put_threads[i] = thread(do_put, i, k);
 
 				pinThreadToCPU(&put_threads[i],i);
@@ -225,10 +225,10 @@ int main(int argc, char *argv[]) {
 			run=true;
 			go_start=true;
 			sar_threads[0]=thread(doSystem,"sar -o "+c_folder+"sar_threadedwrite 1");
-			//sc.startSARatServer("ThreadedWrite_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
+			sc.startSARatServer("ThreadedWrite_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
 			sleep(RUN_TIME);
-			//system("pkill -SIGINT sar");
-			//sc.stopSARatServer();
+			system("pkill -SIGINT sar");
+			sc.stopSARatServer();
 			run=false;
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
-				k->bind(config,table_name+to_string(i%20));
+				k->bind(config,table_name);
 				get_threads[i] = thread(do_get, i, k);
 
 				pinThreadToCPU(&get_threads[i],i);
@@ -259,10 +259,10 @@ int main(int argc, char *argv[]) {
 			run=true;
 			go_start=true;
 			sar_threads[1]=thread(doSystem,"sar -o "+c_folder+"sar_threadedread 1");
-			//sc.startSARatServer("ThreadedRead_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
+			sc.startSARatServer("ThreadedRead_DataSize"+to_string(MAX_DATA_SIZE)+"Bytes_Iter"+to_string(NUM_ENTRIES)+"_TC"+to_string(THREAD_COUNT)+".sarop",s_folder);
 			sleep(RUN_TIME);
-			//system("pkill -SIGINT sar");
-			//sc.stopSARatServer();
+			system("pkill -SIGINT sar");
+			sc.stopSARatServer();
 			run=false;
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
@@ -284,10 +284,10 @@ int main(int argc, char *argv[]) {
 			go_start=false;
 			for (i = 0; i < THREAD_COUNT; i++) {
 			  KVStore<string,string> *k=new KVStore<string,string>();
-				k->bind(config,table_name+to_string(i%20));
+				k->bind(config,table_name);
 				put_threads[i] = thread(do_put, i, k);
 				k=new KVStore<string,string>();
-				k->bind(config,table_name+to_string(i%20));
+				k->bind(config,table_name);
 				get_threads[i] = thread(do_get, i, k);
 
 				pinThreadToCPU(&put_threads[i],i);

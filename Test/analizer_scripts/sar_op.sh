@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #dpath="../src/PerformanceData/Client/RAMCloud/2016-09-15/1/2KB/"
-dpath="../src/PerformanceData/Client/RAMCloud/2016-10-01/5/2KB/"
+#dpath="../src/PerformanceData/Client/RAMCloud/2016-10-01/5/2KB/"
 #dpath="../src/PerformanceData/Client/LevelDB/2016-09-30/3/2KB/"
-#dpath="../src/PerformanceData/Client/Redis/2016-10-01/7/2KB/"
+dpath="../src/PerformanceData/Client/Redis/2017-01-24/1/1KB/"
 
 #perf_data_ThreadedMixedRW_DataSize2000Bytes_Iter5000_2xTC1
 fnwstat=$dpath"fnwstat.csv"
