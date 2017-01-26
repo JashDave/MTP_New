@@ -6,7 +6,8 @@ using namespace std::chrono;
 
 //#define THREAD_COUNT 1
 
-string IP = "10.129.28.101";
+string IP = "127.0.0.1";
+//string IP = "10.129.28.101";
 int PORT = 6379;
 
 double loopcount  = 1e5;
