@@ -1,0 +1,17 @@
+jash2@client-166:~/MTP_New/Implementation/LevelDB_Disk/server$ ./run_server.sh 10.129.28.141:8090
+Starting server at 10.129.28.141:8090
+Server started at  10.129.28.141:8090
+
+panic: runtime error: index out of range
+
+goroutine 23050 [running]:
+panic(0x60b5c0, 0xc82000c080)
+	/home/NFV_LTE_EPC/go/src/runtime/panic.go:481 +0x3e6
+main.(*Client).doTask(0xc823a5bf80, 0x7a2aa0, 0x0, 0x0, 0x7fd36c357418, 0xc82203a470)
+	/home/NFV_LTE_EPC/go_workspace/src/levelmemdb/server.go:95 +0x1cf
+main.handleClient(0x7fd36c357418, 0xc82203a470)
+	/home/NFV_LTE_EPC/go_workspace/src/levelmemdb/server.go:181 +0xba
+created by main.main
+	/home/NFV_LTE_EPC/go_workspace/src/levelmemdb/server.go:199 +0x33b
+exit status 2
+
