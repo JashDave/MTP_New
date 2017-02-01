@@ -6,6 +6,7 @@
 using namespace std;
 
 class KVImplementation {
+  void *kvsclient;
 public:
   bool bind(string ip, string port);
   bool put(string key, string value);

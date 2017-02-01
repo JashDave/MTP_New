@@ -2,9 +2,10 @@ PATH_TO_RAMCLOUD = /home/$(USER)/RAMCloud
 
 redis:
 	g++ CommonNoReqPerSecTest.cpp RedisKVImplementation.cpp -std=c++11 -pthread -lhiredis -lkvs_redis
-	g++ -std=c++11  -o RedisLoadTestMultiThreaded.o RedisLoadTestMultiThreaded.cpp -lkvs_redis -lboost_serialization -lpthread
+	#g++ -std=c++11  -o RedisLoadTestMultiThreaded.o RedisLoadTestMultiThreaded.cpp -lkvs_redis -lboost_serialization -lpthread
 ramcloud:
-	g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o RAMCloudLoadTestMultiThreaded.o RAMCloudLoadTestMultiThreaded.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin -Wno-deprecated
+	g++ CommonNoReqPerSecTest.cpp RamCloudKVImplementation.cpp -std=c++11 -o RamCloudKVImplementation.out -g -I $(PATH_TO_RAMCLOUD)/install/include -L$(PATH_TO_RAMCLOUD)/install/bin -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin -pthread
+	#g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o RAMCloudLoadTestMultiThreaded.o RAMCloudLoadTestMultiThreaded.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin -Wno-deprecated
 	#g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o TestKVStore.o TestKVStore.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin #-Wno-deprecated
 	
 leveldb:	

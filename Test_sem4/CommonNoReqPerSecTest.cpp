@@ -5,9 +5,10 @@
 
 #define RUN_TIME 10
 #define THREAD_COUNT 20
-#define IP "10.129.28.44"
-#define PORT "7001"
-
+#define IP "10.129.26.81"
+#define PORT "11100"
+// #define IP "10.129.28.44"
+// #define PORT "7001"
 
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
@@ -146,6 +147,7 @@ void pinThreadToCPU(thread *th,int i){
   }
 }
 
+//----------------------------------------------
 #define doTest(info,...) \
   reset();\
   for(int i=0;i<THREAD_COUNT;i++){\
@@ -163,30 +165,10 @@ void pinThreadToCPU(thread *th,int i){
   }\
   sumUp();\
   printinfo(info);
-
+//---------------------------------------------
 
 int main(int argc, char *argv[]){
-
   {doTest("___PUT Operations____",doPut,i,k)}
   {doTest("___GET Operations____",doGet,i,k)}
-
-  // reset();
-  // for(int i=0;i<THREAD_COUNT;i++){
-  //   KVImplementation k;
-  //   k.bind(IP,PORT);
-  //   td[i] = thread(doPut,i,k);
-  // }
-  // run=true;
-  // sleep(RUN_TIME);
-  // run=false;
-  // for (int i = 0; i < THREAD_COUNT; i++) {
-  //   if (td[i].joinable()) {
-  //     td[i].join();
-  //   }
-  // }
-  // sumUp();
-  // printinfo();
-
-
   return 0;
 }
