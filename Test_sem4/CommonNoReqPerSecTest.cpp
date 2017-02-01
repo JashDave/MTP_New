@@ -3,43 +3,49 @@
  */
 
 
+#define RUN_TIME 10
+#define THREAD_COUNT 20
+#define IP "10.129.28.44"
+#define PORT "7001"
+
+
+
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
 #include <thread>
-
 #include <stdio.h>
 #include <cstdlib>
 #include <vector>
 #include <cstring>
 #include <string>
 #include <ctime>
-
-#include "MessageClient.cpp"
-// #include "ramcloud/RamCloud.h"
+#include <unistd.h>
 #include "TestUtils.h"
+#include "KVImplementation.h"
+// #include "MessageClient.cpp"
+// #include "ramcloud/RamCloud.h"
 
+// #ifdef REDIS
+//   #include <redis>
+//   using namespace kvstore;
+// #endif /* REDIS */
 
 using namespace std;
 // using namespace RAMCloud;
 // using namespace kvstore;
-using namespace MessageClientNS;
+// using namespace MessageClientNS;
 
-
-class KVImplementation {
-public:
-  bool bind(string ip, string port){return false;}
-  bool put(string key, string value){return false;}
-  string get(string key){return "Err";}
-};
-
+#ifdef DEFAULTIMPL
+  class KVImplementation {
+  public:
+    bool bind(string ip, string port){return false;}
+    bool put(string key, string value){return false;}
+    string get(string key){return "Err";}
+  };
+#endif
 
 
 //------------------------------------------------------------------------------
-#define RUN_TIME 4
-#define THREAD_COUNT 10
-#define IP "10.129.26.44"
-#define PORT "8090"
-
 bool run;
 long long counter[THREAD_COUNT];
 long long failure[THREAD_COUNT];
@@ -76,13 +82,17 @@ void reset(){
 }
 
 void printinfo(string info=""){
+  cout<<endl;
   cout<<info<<endl;
   cout<<"Run Time : "<<RUN_TIME<<" seconds"<<endl;
   cout<<"THREAD_COUNT : "<<THREAD_COUNT<<""<<endl;
   cout<<"Avg. Latency : "<<avg_latency<<" us"<<endl;
+  cout<<"Failure : "<<fcount/double(RUN_TIME)<<" ops"<<endl;
   cout<<"Throughput : "<<count/double(RUN_TIME)<<" ops"<<endl;
+  cout<<"Good Throughput : "<<(count-fcount)/double(RUN_TIME)<<" ops"<<endl;
 }
 
+//------MOVE TO TestUtils.h-------------------------
 inline high_resolution_clock::time_point start(){
   return high_resolution_clock::now();
 }
@@ -91,6 +101,7 @@ inline double end(high_resolution_clock::time_point& t1){
   high_resolution_clock::time_point t2=high_resolution_clock::now();
   return (double)duration_cast<microseconds>(t2 -t1).count();
 }
+//--------------------------------------------------
 
 void doPut(int tid,KVImplementation k){
   string key = "Key"+to_string(tid);
@@ -157,6 +168,7 @@ void pinThreadToCPU(thread *th,int i){
 int main(int argc, char *argv[]){
 
   {doTest("___PUT Operations____",doPut,i,k)}
+  {doTest("___GET Operations____",doGet,i,k)}
 
   // reset();
   // for(int i=0;i<THREAD_COUNT;i++){
