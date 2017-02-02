@@ -108,6 +108,7 @@ void doPut(int tid,KVImplementation k){
   string key = "Key"+to_string(tid);
   while(!run);
   while(run){
+cout<<"."<<flush;
     auto t1 = start();
     if(!k.put(key,value)){
       failure[tid]++;
@@ -122,6 +123,7 @@ void doGet(int tid,KVImplementation k){
   string key = "Key"+to_string(tid);
   while(!run);
   while(run){
+cout<<"."<<flush;
     auto t1 = start();
     string val = k.get(key);
     total_latency[tid]+=end(t1);
