@@ -1,7 +1,7 @@
 PATH_TO_RAMCLOUD = /home/$(USER)/RAMCloud
 
 redis:
-	g++ CommonNoReqPerSecTest.cpp RedisKVImplementation.cpp -std=c++11 -pthread -lhiredis -lkvs_redis
+	g++ CommonNoReqPerSecTest.cpp RedisKVImplementation.cpp -std=c++11 -pthread -lkvs_redis
 	#g++ -std=c++11  -o RedisLoadTestMultiThreaded.o RedisLoadTestMultiThreaded.cpp -lkvs_redis -lboost_serialization -lpthread
 
 ramcloud:
