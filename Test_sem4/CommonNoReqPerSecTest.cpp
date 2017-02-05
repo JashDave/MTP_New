@@ -5,11 +5,11 @@
 
 #define RUN_TIME 10
 #define THREAD_COUNT 20
-#define IP "10.129.26.81"
-#define PORT "11100"
-// #define IP "10.129.28.44"
-// #define PORT "7001"
-
+//#define IP "10.129.26.81"
+//#define PORT "11100"
+#define IP "10.129.28.44"
+//#define PORT "7001"
+#define PORT "8090"
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
@@ -45,6 +45,12 @@ using namespace std;
   };
 #endif
 
+
+#ifdef MDEBUG
+ #define TRACE(x) {x}
+#else
+ #define TRACE(x) {}
+#endif
 
 //------------------------------------------------------------------------------
 bool run;
@@ -107,7 +113,7 @@ inline double end(high_resolution_clock::time_point& t1){
 void doPut(int tid,KVImplementation k){
   string key = "Key"+to_string(tid);
   while(!run);
-  cout<<"Tid "<<tid<<" started"<<endl;
+  TRACE(cout<<"Tid "<<tid<<" started"<<endl;)
   while(run){
 //cout<<"."<<flush;
     auto t1 = start();
@@ -118,13 +124,13 @@ void doPut(int tid,KVImplementation k){
     total_latency[tid]+=end(t1);
     counter[tid]++;
   }
-  cout<<"Tid "<<tid<<" ended"<<endl;
+  TRACE(cout<<"Tid "<<tid<<" ended"<<endl;)
 }
 
 void doGet(int tid,KVImplementation k){
   string key = "Key"+to_string(tid);
   while(!run);
-  cout<<"Tid "<<tid<<" started"<<endl;
+  TRACE(cout<<"Tid "<<tid<<" started"<<endl;)
   while(run){
 //cout<<"."<<flush;
     auto t1 = start();
@@ -136,7 +142,7 @@ void doGet(int tid,KVImplementation k){
     }
     counter[tid]++;
   }
-  cout<<"Tid "<<tid<<" ended"<<endl;
+  TRACE(cout<<"Tid "<<tid<<" ended"<<endl;)
 }
 
 
