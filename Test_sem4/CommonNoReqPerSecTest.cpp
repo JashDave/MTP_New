@@ -21,7 +21,8 @@
 #include <string>
 #include <ctime>
 #include <unistd.h>
-#include "TestUtils.h"
+#include <chrono>
+//#include "TestUtils.h"
 #include "KVImplementation.h"
 // #include "MessageClient.cpp"
 // #include "ramcloud/RamCloud.h"
@@ -32,6 +33,7 @@
 // #endif /* REDIS */
 
 using namespace std;
+using namespace std::chrono;
 // using namespace RAMCloud;
 // using namespace kvstore;
 // using namespace MessageClientNS;
