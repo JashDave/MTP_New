@@ -22,6 +22,7 @@
 #include <ctime>
 #include <unistd.h>
 #include <chrono>
+#include <sstream>  // stringstream
 //#include "TestUtils.h"
 #include "KVImplementation.h"
 // #include "MessageClient.cpp"
@@ -100,15 +101,21 @@ void reset(){
   }
 }
 
+string getInfo(string info=""){
+  stringstream ss;
+  ss<<info<<endl;
+  ss<<"Run Time : "<<RUN_TIME<<" seconds"<<endl;
+  ss<<"THREAD_COUNT : "<<THREAD_COUNT<<""<<endl;
+  ss<<"Avg. Latency : "<<avg_latency<<" us"<<endl;
+  ss<<"Failure : "<<fcount/double(RUN_TIME)<<" ops"<<endl;
+  ss<<"Throughput : "<<count/double(RUN_TIME)<<" ops"<<endl;
+  ss<<"Good Throughput : "<<(count-fcount)/double(RUN_TIME)<<" ops"<<endl;
+  return ss.str();
+}
+
+
 void printinfo(string info=""){
-  cout<<endl;
-  cout<<info<<endl;
-  cout<<"Run Time : "<<RUN_TIME<<" seconds"<<endl;
-  cout<<"THREAD_COUNT : "<<THREAD_COUNT<<""<<endl;
-  cout<<"Avg. Latency : "<<avg_latency<<" us"<<endl;
-  cout<<"Failure : "<<fcount/double(RUN_TIME)<<" ops"<<endl;
-  cout<<"Throughput : "<<count/double(RUN_TIME)<<" ops"<<endl;
-  cout<<"Good Throughput : "<<(count-fcount)/double(RUN_TIME)<<" ops"<<endl;
+  cout<<getInfo(info)<<endl;
 }
 
 //------MOVE TO TestUtils.h-------------------------
