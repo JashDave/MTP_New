@@ -143,7 +143,7 @@ public:
     min = sorted_diff[0];
     max = *(sorted_diff.end()-1);
     sum = std::accumulate(sorted_diff.begin(), sorted_diff.end(), 0L);
-    avgthreadruntime = sum/thread_count
+    avgthreadruntime = sum/thread_count;
     avg = sum/((double)count);
     tput = (count*1e6/avgthreadruntime);
 
