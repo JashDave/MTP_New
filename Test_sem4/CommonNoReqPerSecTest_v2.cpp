@@ -3,10 +3,10 @@
  */
 
 
-#define RUN_TIME 10
-#define THREAD_COUNT 20
+#define RUN_TIME 60
+#define THREAD_COUNT 50
 #define KEY_SIZE 10
-#define VAlUE_SIZE 100
+#define VALUE_SIZE 1000
 #define DATASET_SIZE 10000
 //#define IP "10.129.26.81"
 //#define PORT "11100"
@@ -14,7 +14,7 @@
 #define PORT "7003"
 // #define PORT "8090"
 
-#define SRAND_ON 0
+#define SRAND_ON 1
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
   }
   vector<string> key = DataSetGenerator::getUniform(DATASET_SIZE,KEY_SIZE);
-  vector<string> value = DataSetGenerator::getUniform(DATASET_SIZE,VAlUE_SIZE);
+  vector<string> value = DataSetGenerator::getUniform(DATASET_SIZE,VALUE_SIZE);
 
   int thread_count = THREAD_COUNT;
   int run_time = RUN_TIME;
