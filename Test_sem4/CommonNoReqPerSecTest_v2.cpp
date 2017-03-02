@@ -222,8 +222,8 @@ int main(int argc, char *argv[]){
   vector<string> key = DataSetGenerator::getUniform(1000,10);
   vector<string> value = DataSetGenerator::getUniform(1000,1000);
 
-  int thread_count = 2;
-  int run_time = 20;
+  int thread_count = THREAD_COUNT;
+  int run_time = RUN_TIME;
   Experiment e = Experiment(key,value,thread_count,run_time);
   e.runExperiment("50-50");
   e.setReadProb(1);

@@ -57,6 +57,9 @@ public:
   int count=0;
   high_resolution_clock::time_point t1,t2;
   vector<long long> diff_entries;
+  long long thread_count=1;
+  long long avgthreadruntime;
+  long long tput;
   // vector<uint64_t> start_entries;//(10000);
   // vector<uint64_t> end_entries;//(10000);
 public:
@@ -69,6 +72,7 @@ public:
     count=0;
     fcount=0;
     diff_entries.clear();
+    thread_count = 1;
     // start_entries.clear();
     // end_entries.clear();
   }
@@ -108,7 +112,7 @@ public:
     cout<<"Avg\t"<<avg<<"us"<<endl;
     cout<<"Count\t"<<count<<endl;
     cout<<"Fail\t"<<fcount<<endl;
-    cout<<"Tput\t"<<(count*1e6/sum)<<" ops"<<endl;
+    cout<<"Tput\t"<<tput<<" ops"<<endl;
   }
 
   inline void incfcount(){
@@ -139,11 +143,13 @@ public:
     min = sorted_diff[0];
     max = *(sorted_diff.end()-1);
     sum = std::accumulate(sorted_diff.begin(), sorted_diff.end(), 0L);
+    avgthreadruntime = sum/thread_count
     avg = sum/((double)count);
+    tput = (count*1e6/avgthreadruntime);
 
     file << desc << "\n";
     file << "Min (in microseconds),Max (us),Avg (us),Count,Sum,Failure Count,Throughput\n";
-    file << min << "," << max << "," << avg << "," << count << "," << sum << "," << fcount << "," << (count*1e6/sum) << "\n";
+    file << min << "," << max << "," << avg << "," << count << "," << sum << "," << fcount << "," << tput << "\n";
     file << "\n";
     // file << "Duration,Start Time,End Time\n";
     // for(ll i=0;i<diff_entries.size();i++){
@@ -159,7 +165,8 @@ public:
 
   void mergeAll(vector<Measure> vm){
     // reset();
-    for(int i=0;i<vm.size();i++){
+    thread_count = vm.size();
+    for(int i=0;i<thread_count;i++){
       fcount+=vm[i].fcount;
       // count+=vm[i].count;
       // sum+=vm[i].sum;
