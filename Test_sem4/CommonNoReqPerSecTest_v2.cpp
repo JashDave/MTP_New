@@ -5,6 +5,9 @@
 
 #define RUN_TIME 10
 #define THREAD_COUNT 20
+#define KEY_SIZE 10
+#define VAlUE_SIZE 100
+#define DATASET_SIZE 10000
 //#define IP "10.129.26.81"
 //#define PORT "11100"
 #define IP "10.129.28.44"
@@ -219,8 +222,8 @@ int main(int argc, char *argv[]){
   if(SRAND_ON){
     srand(time(NULL));
   }
-  vector<string> key = DataSetGenerator::getUniform(1000,10);
-  vector<string> value = DataSetGenerator::getUniform(1000,1000);
+  vector<string> key = DataSetGenerator::getUniform(DATASET_SIZE,KEY_SIZE);
+  vector<string> value = DataSetGenerator::getUniform(DATASET_SIZE,VAlUE_SIZE);
 
   int thread_count = THREAD_COUNT;
   int run_time = RUN_TIME;
