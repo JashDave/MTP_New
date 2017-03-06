@@ -2,18 +2,25 @@
    g++ --std=c++0x -g -I../install/include -I. RMCLoadTestMultiThreaded.cpp  -o RMCLoadTestMultiThreaded.out -L../install/bin -lramcloud -Wl,-rpath=../install/bin -pthread
  */
 
+// -DDS="Redis"
 
-#define RUN_TIME 60
-#define THREAD_COUNT 50
+#define RUN_TIME 30
+#define THREAD_COUNT 100
 #define KEY_SIZE 10
 #define VALUE_SIZE 1000
 #define DATASET_SIZE 10000
+
+#define UNIFORM "Uniform"
+#define ZIPF "Zipf"
+#define DIST UNIFORM
+// #define DIST ZIPF
+
 //#define IP "10.129.26.81"
 //#define PORT "11100"
 #define IP "10.129.28.44"
 #define PORT "7003"
 // #define PORT "8090"
-
+#define SERVER_CTRL_PORT 8091
 #define SRAND_ON 1
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
@@ -30,7 +37,7 @@
 #include <sstream>  // stringstream
 #include "TestUtils.h"
 #include "KVImplementation.h"
-// #include "MessageClient.cpp"
+#include "MessageClient.cpp"
 // #include "ramcloud/RamCloud.h"
 
 // #ifdef REDIS
@@ -42,7 +49,7 @@ using namespace std;
 using namespace std::chrono;
 // using namespace RAMCloud;
 // using namespace kvstore;
-// using namespace MessageClientNS;
+using namespace MessageClientNS;
 
 #ifdef DEFAULTIMPL
   class KVImplementation {
@@ -60,6 +67,83 @@ using namespace std::chrono;
  #define TRACE(x) {}
 #endif
 
+
+
+class ServerCommands{
+	public:
+		MessageClient *mc;
+		ServerCommands(string ip, int port){
+			mc = new MessageClient(ip,port);
+		}
+
+		void startSARatServer(string desc,string folder="./"){
+			static vector<string> cmd_vec(1);
+			cmd_vec[0]="sar -o "+folder+"perf_data_"+desc+" -u 1";
+			mc->send(cmd_vec);
+		}
+
+		void stopSARatServer(){
+			static vector<string> cmd_vec(1);
+			cmd_vec[0]="pkill -SIGINT sar";
+			mc->send(cmd_vec);
+		}
+};
+
+
+void doSystem(string cmd){
+	system(cmd.c_str());
+}
+
+
+
+int zipf(double alpha, int n)
+{
+  //http://www.csee.usf.edu/~kchriste/tools/toolpage.html
+  //http://www.csee.usf.edu/~kchriste/tools/genzipf.c
+  int TRUE = 1;
+  int FALSE = 0;
+  static int first = TRUE;      // Static first time flag
+  static double c = 0;          // Normalization constant
+  double z;                     // Uniform random number (0 < z < 1)
+  double sum_prob;              // Sum of probabilities
+  double zipf_value;            // Computed exponential value to be returned
+  int    i;                     // Loop counter
+
+  static int N=0;
+  if(N!=n){
+    first = TRUE;
+  }
+  // Compute normalization constant on first call only
+  if (first == TRUE)
+  {
+    N=n;
+    c=0;
+    for (i=1; i<=n; i++)
+      c = c + (1.0 / pow((double) i, alpha));
+    c = 1.0 / c;
+    first = FALSE;
+  }
+
+  // Pull a uniform random number (0 < z < 1)
+  do
+  {
+    z = double(rand())/RAND_MAX;
+  }
+  while ((z == 0) || (z == 1));
+
+  // Map z to the value
+  sum_prob = 0;
+  for (i=1; i<=n; i++)
+  {
+    sum_prob = sum_prob + c / pow((double) i, alpha);
+    if (sum_prob >= z)
+    {
+      zipf_value = i;
+      break;
+    }
+  }
+  return(zipf_value);
+}
 
 
 
@@ -110,6 +194,9 @@ public:
   void setReadProb(double rp){
     readp = rp;
   }
+  double getReadProb(){
+    return readp;
+  }
 
   void worker(int id, KVImplementation k){
     double rp = readp * RAND_MAX;
@@ -122,7 +209,13 @@ public:
     TRACE(cout<<"Tid "<<tid<<" started"<<endl;)
     while(run){
       r1 = rand();
-      r2 = rand() % dataSz;
+      if(DIST==UNIFORM){
+        r2 = rand() % dataSz;
+      } else if (DIST==ZIPF){
+        r2 = zipf(1,dataSz-1);
+        // if(r2<0 || r2>=dataSz)
+        //   cerr<<"ERROR: in zipf "<<r2<<endl;
+      }
 
       if(r1<rp){
         //Do read
@@ -145,7 +238,7 @@ public:
     TRACE(cout<<"Tid "<<tid<<" ended"<<endl;)
   }
 
-  void runExperiment(string desc="No description provided."){
+  void runExperiment(string filename){
     vector<thread> td(thread_count);
     run = false;
     for(int i=0;i<thread_count;i++){
@@ -164,10 +257,15 @@ public:
       }
     }
 
+    long num_cpus = std::thread::hardware_concurrency();
+    string desc = string("Data Store,Work Load,Data Size(bytes),Thread Count,Run Time") + string("\n") + string(DS) +","+string(DIST)+" ReadProb:"+to_string(getReadProb())+","+to_string(VALUE_SIZE)+","+to_string(thread_count)+","+to_string(run_time);
+    string detailes = "CPU count, CPU util, NW rx(KBps), NW tx(KBps), NW util, Mem Size, Mem util, Disk util, Page Faults";
+    // string client_detailes = getClientDetailes();
+    // string server_detailes = getServerDetailes();
+
     Measure merged;
     merged.mergeAll(m);
-    string filename = "FileName";
-    merged.saveToFile(desc,filename);
+    merged.saveToFile(desc,filename,true);
     merged.print(desc);
   }
 
@@ -228,10 +326,21 @@ int main(int argc, char *argv[]){
   int thread_count = THREAD_COUNT;
   int run_time = RUN_TIME;
   Experiment e = Experiment(key,value,thread_count,run_time);
-  e.runExperiment("50-50");
+  string details;
+
+  string sep="/";
+  string DATE=currentDateTime("%Y-%m-%d");
+  string folder=string(DS)+sep+DATE+sep+string(argv[1])+sep;
+  cout<<folder<<endl;
+  doSystem("mkdir -p "+folder);
+
+  e.setReadProb(0.5);
+  e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
+
   e.setReadProb(1);
-  e.runExperiment("Only Read");
+  e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
+
   e.setReadProb(0);
-  e.runExperiment("Only write");
+  e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
   return 0;
 }

@@ -1,16 +1,19 @@
-#set term 
+set term png
+set output "leveldb_writeonly.png"
 #set size
 
 
 set datafile separator ","
 
-set xlabel "Latency (in usec)"
+
+datafile = "lwriteonly"
+set xlabel "Latency (in ms)"
 set ylabel "CDF (Request Count)"
+set ytics 0.1
+set xtics 2
+set xrange [0:20]
+skipfile="<awk -F, '(NR>5){print (FNR-5)\",\" $2}' ".datafile
+stats skipfile using 1 name "A" nooutput
 
-datafile = "abc"
-#skipfile=system("awk -F, '(NR>5){print (FNR-5)\",\" $2}' abc")
-skipfile="<awk -F, '(NR>5){print (FNR-5)\",\" $2}' abc"
-
-
-plot skipfile using 2:1 with lines title "CDF"
-pause -1
+plot skipfile using ($2/1000):($1/A_max) with lines title "CDF"
+#pause -1
