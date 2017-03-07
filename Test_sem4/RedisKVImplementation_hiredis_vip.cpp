@@ -39,6 +39,6 @@ string KVImplementation::get(string key){
   return string(reply->str);
 }
 
-KVImplementation::~KVImplementation(){
-  // redisClusterFree(cc);
-}
+// KVImplementation::~KVImplementation(){
+//   // redisClusterFree(cc);
+// }

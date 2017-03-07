@@ -11,7 +11,7 @@ public:
   bool bind(string ip, string port);
   bool put(string key, string value);
   string get(string key);
-  ~KVImplementation();
+  // ~KVImplementation();
 };
 
 #endif

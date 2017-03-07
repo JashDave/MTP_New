@@ -1,5 +1,5 @@
 #!/bin/bash
-git clone https://github.com/vipshop/hiredis-vip.wiki.git
+git clone https://github.com/vipshop/hiredis-vip.git
 cd hiredis-vip
 make
 sudo make install
