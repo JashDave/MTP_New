@@ -23,6 +23,7 @@ bool KVImplementation::put(string key, string value){
     //redisClusterFree(cc); //??
     return false;
   }
+  freeReplyObject(reply); //Double free?
   return true;
 }
 
@@ -36,6 +37,7 @@ string KVImplementation::get(string key){
     return string(cc->errstr);
   }
   // printf("get %s\n",reply->str );
+  freeReplyObject(reply); // Double free?
   return string(reply->str);
 }
 

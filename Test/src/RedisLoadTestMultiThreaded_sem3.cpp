@@ -180,18 +180,19 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":7000";
+		string config=SERVER_IP+":7003";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
+		cout<<"SIP:"<<SERVER_IP<<endl;
 		ServerCommands sc(SERVER_IP,8091);
 		init_data();
 
 
 		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		vector<int> TC={1,2,6,8,12,24,36,48};
+		// vector<int> TC={1,2,6,8,12,24,36,48};
 		//vector<int> TC={12,16,32};
-		//vector<int> TC={1,2};
+		vector<int> TC={48};
 		for(int THREAD_COUNT:TC) {
 
 			cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;

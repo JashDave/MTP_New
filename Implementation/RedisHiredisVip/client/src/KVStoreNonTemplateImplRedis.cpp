@@ -3,18 +3,16 @@
 namespace kvstore {
 
 
-  KVMgmt kvm;
+  // KVMgmt kvm;
 
   bool KVStoreClient::init(string ip, string port){
-    bool b=true;
-    kvm.mtx.lock();
-    if(kvm.rc == NULL){
-      kvm.rc = new CRedisClient();
-      b=kvm.rc->Initialize(ip,stoi(port),10,100);
+    rc = redisClusterConnect(string(ip+":"+port).c_str(), HIRCLUSTER_FLAG_NULL);
+    if(rc == NULL || rc->err)
+    {
+      //printf("connect error : %s\n", rc == NULL ? "NULL" : rc->errstr);
+      return false;
     }
-    rc = kvm.rc;
-    kvm.mtx.unlock();
-    return b;
+    return true;
   }
 
   // class KVStoreClient{
@@ -55,22 +53,66 @@ namespace kvstore {
   //   }
   // }
 
+  string flattenVec(vector<string> in){
+    string ret="";
+    int sz = in.size();
+    for(int i=0;i<sz-1;i++){
+      ret+= (in[i]+" ");
+    }
+    ret+=in[sz-1];
+    return ret;
+  }
+
   KVResultSet KVRequest::execute(){
+    int RC_SUCCESS=1;
     // cout<<"KVReq Execute"<<endl;
     vector<string> res;
     int pr=1,gr=1;
+
     if(vputk.size()!=0){
-      pr = c_kvsclient->rc->Mset(vputk,vputv);
+      int sz=vputk.size();
+      for(int i=0;i<sz;i++){
+        redisReply *reply = redisClusterCommand(c_kvsclient->rc, "mset %s %s", vputk[i].c_str(), vputv[i].c_str());
+        if(reply == NULL)
+        {
+          // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
+          //redisClusterFree(c_kvsclient->rc); //??
+          pr=0;
+        } else {
+          freeReplyObject(reply);
+        }
+      }
     }
 
     vector<string> getres;
     if(vget.size()!=0){
-      gr = c_kvsclient->rc->Mget(vget,&getres);
+        int sz=vget.size();
+        for(int i=0;i<sz;i++){
+          redisReply *reply = redisClusterCommand(c_kvsclient->rc, "get %s", vget[i].c_str());
+          if(reply == NULL)
+          {
+            // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
+            //redisClusterFree(c_kvsclient->rc); //??
+            gr=0;
+          } else {
+            getres.push_back(string(reply->str));
+            freeReplyObject(reply);
+          }
+        }
     }
 
     vector<int> delres(vdel.size());
     for(int i=0;i<vdel.size();i++){
-      delres[i] = c_kvsclient->rc->Del(vdel[i]);
+        redisReply *reply = redisClusterCommand(c_kvsclient->rc, "del %s", vdel[i].c_str());
+        if(reply == NULL)
+        {
+          // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
+          //redisClusterFree(c_kvsclient->rc); //??
+          delres[i]=0;
+        } else {
+          delres[i]=reply->integer;
+          freeReplyObject(reply);
+        }
     }
 
     int getidx=0;
