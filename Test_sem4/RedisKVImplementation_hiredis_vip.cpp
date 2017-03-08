@@ -38,6 +38,9 @@ string KVImplementation::get(string key){
   }
   // printf("get %s\n",reply->str );
   freeReplyObject(reply); // Double free?
+  if(reply->str == NULL){
+    printf("reply->str is NULL\n");
+  }
   return string(reply->str);
 }
 

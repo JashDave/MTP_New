@@ -1,7 +1,7 @@
 PATH_TO_RAMCLOUD = /home/$(USER)/RAMCloud
 
 redis:
-	g++ -std=c++11  -o RedisLoadTestMultiThreaded.o RedisLoadTestMultiThreaded.cpp -lkvs_redis -lboost_serialization -lpthread
+	g++ -std=c++11  -o RedisLoadTestMultiThreaded.o RedisLoadTestMultiThreaded.cpp -lkvs_redis -lboost_serialization -lpthread -fpermissive
 ramcloud:
 	g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o RAMCloudLoadTestMultiThreaded.o RAMCloudLoadTestMultiThreaded.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin -Wno-deprecated
 	#g++ -std=c++11  -I$(PATH_TO_RAMCLOUD)/install/include -o TestKVStore.o TestKVStore.cpp -L$(PATH_TO_RAMCLOUD)/install/bin -lkvstore -lboost_serialization -lpthread -lramcloud -Wl,-rpath=$(PATH_TO_RAMCLOUD)/install/bin #-Wno-deprecated

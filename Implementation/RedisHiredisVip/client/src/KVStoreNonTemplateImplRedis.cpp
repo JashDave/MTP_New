@@ -94,6 +94,9 @@ namespace kvstore {
             // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
             //redisClusterFree(c_kvsclient->rc); //??
             gr=0;
+          }  else if(reply->str == NULL){
+            gr=0;
+            freeReplyObject(reply);
           } else {
             getres.push_back(string(reply->str));
             freeReplyObject(reply);

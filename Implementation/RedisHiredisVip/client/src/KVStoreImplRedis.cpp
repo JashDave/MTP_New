@@ -103,6 +103,10 @@ namespace kvstore {
       //redisClusterFree(c_kvsclient->rc); //??
      kvd.serr = string(c_kvsclient->rc->errstr);
      kvd.ierr = -1;
+   } else if(reply->str == NULL){
+    kvd.serr = string("Data doesn't exists");
+    kvd.ierr = -1;
+    freeReplyObject(reply);
    } else {
       // printf("get %s\n",reply->str );
       kvd.ierr=0;
