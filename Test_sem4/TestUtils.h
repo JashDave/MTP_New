@@ -17,9 +17,9 @@ using namespace std::chrono;
 
 
 /*
- * Gives Date and Time in given format
- * Visit http://en.cppreference.com/w/cpp/chrono/c/strftime for more information about date/time format
- * Ref: http://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
+* Gives Date and Time in given format
+* Visit http://en.cppreference.com/w/cpp/chrono/c/strftime for more information about date/time format
+* Ref: http://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
 */
 const std::string currentDateTime(string fmt="%Y-%m-%d.%X") {
   time_t     now = time(0);
@@ -31,7 +31,7 @@ const std::string currentDateTime(string fmt="%Y-%m-%d.%X") {
 }
 
 /*
- * Gives current time in milliseconds since 1st Jan 1970
+* Gives current time in milliseconds since 1st Jan 1970
 */
 inline unsigned long long currentMilis(){
   milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
@@ -39,11 +39,25 @@ inline unsigned long long currentMilis(){
 }
 
 /*
- * Gives current time in microseconds since 1st Jan 1970
+* Gives current time in microseconds since 1st Jan 1970
 */
 inline unsigned long long currentMicros(){
   microseconds ms = duration_cast< microseconds >(system_clock::now().time_since_epoch());
   return ms.count();
+}
+
+
+void pinThreadToCPU(thread *th,int i){
+  long num_cpus;
+  cpu_set_t cpuset;
+  int rc;
+  num_cpus = std::thread::hardware_concurrency();
+  CPU_ZERO(&cpuset);
+  CPU_SET(i%num_cpus, &cpuset);
+  rc = pthread_setaffinity_np(th->native_handle(), sizeof(cpu_set_t), &cpuset);
+  if (rc != 0) {
+    std::cerr << "Error calling pthread_setaffinity_np: " << rc << "\n";
+  }
 }
 
 
@@ -77,9 +91,9 @@ public:
     // end_entries.clear();
   }
 
-//Though all functions defined within class are by default inline. We have
-// declared inline explicitly here to make a note that these functions must be
-// inline.
+  //Though all functions defined within class are by default inline. We have
+  // declared inline explicitly here to make a note that these functions must be
+  // inline.
   inline void start(){
     t1=high_resolution_clock::now();
   }

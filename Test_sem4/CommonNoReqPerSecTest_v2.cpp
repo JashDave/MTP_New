@@ -214,6 +214,7 @@ public:
       KVImplementation k;
       k.bind(IP,PORT);
       td[i] = thread(&Experiment::worker,this,i,k);
+      pinThreadToCPU(&td[i],i);
     }
     run=true;
     sleep(run_time);
