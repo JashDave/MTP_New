@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 //For returning hetrogeneous array as return of execute()
 //#include <tuple> //Not used
@@ -39,6 +40,9 @@ using namespace boost;
 
 namespace kvstore {
 
+#define OPR_TYPE_GET "get"
+#define OPR_TYPE_PUT "put"
+#define OPR_TYPE_DEL "del"
 
 /* Class declaration */
 	template<typename KeyType, typename ValType>
@@ -54,11 +58,14 @@ namespace kvstore {
 */
 	class KVResultSet {
 	private:
-		int count;
-		vector<string> res;
+		// int count;
+		vector<shared_ptr<KVData<string>>> res;
+		vector<string> operation_type;
 	public:
-		KVResultSet(vector<string> r);
+		KVResultSet(vector<shared_ptr<KVData<string>>> r, vector<string> opr_type);
 		int size();
+		string oprType(int idx);
+
 		template<typename ValType>
 		KVData<ValType> get(int idx);
 	};
@@ -69,20 +76,27 @@ namespace kvstore {
 */
 	class KVRequest {
 	private:
-		int count=0;
-		void *kvsclient;
-		//TODO : All vectors must be moved to KVSClientData
-		std::vector<string> v;
-		std::vector<uint64_t> vputt;
-		std::vector<string> vputk;
-		std::vector<string> vputv;
-		std::vector<uint64_t> vgett;
-		std::vector<string> vget;
-		std::vector<uint64_t> vdelt;
-		std::vector<string> vdel;
+		void *dataholder;
+		KVImplHelper kh;
+
+		// int count=0;
+		std::vector<string> operation_type;
+
+		std::vector<string> put_tablename;
+		std::vector<string> put_key;
+		std::vector<string> put_value;
+
+		std::vector<string> get_tablename;
+		std::vector<string> get_key;
+
+		std::vector<string> del_tablename;
+		std::vector<string> del_key;
 	public:
-		void bind(string connection);
+		KVRequest();
 		~KVRequest();		//For distroying connection object
+
+		bool bind(string connection);
+
 		template<typename KeyType, typename ValType>
 		void get(KeyType const& key,string tablename);
 
@@ -92,9 +106,39 @@ namespace kvstore {
 		template<typename KeyType, typename ValType>
 		void del(KeyType const& key,string tablename);
 
-		KVResultSet execute();
+		shared_ptr<KVResultSet> execute();
 		void reset();
 	};
+
+	/*-------KVRequest::get()----------*/
+	template<typename KeyType, typename ValType>
+	void KVRequest::get(KeyType const& key,string tablename){
+		string skey=toBoostString(key);
+		operation_type.push_back(OPR_TYPE_GET);
+		get_key.push_back(skey);
+		get_tablename.push_back(tablename);
+		// kh.get(skey,tablename);
+	}
+	/*-------KVRequest::put()----------*/
+	template<typename KeyType, typename ValType>
+	void KVRequest::put(KeyType const& key,ValType const& val,string tablename){
+		string skey=toBoostString(key);
+		string sval=toBoostString(val);
+		operation_type.push_back(OPR_TYPE_PUT);
+		put_key.push_back(skey);
+		put_value.push_back(sval);
+		put_tablename.push_back(tablename);
+		// kh.put(skey,sval,tablename);
+	}
+	/*-------KVRequest::del()----------*/
+	template<typename KeyType, typename ValType>
+	void KVRequest::del(KeyType const& key,string tablename){
+		string skey=toBoostString(key);
+		operation_type.push_back(OPR_TYPE_DEL);
+		del_key.push_back(skey);
+		del_tablename.push_back(tablename);
+		// kh.del(skey,tablename);
+	}
 
 
 /*
@@ -128,17 +172,44 @@ namespace kvstore {
 	/*-------KVStore::get()----------*/
   template<typename KeyType, typename ValType>
   shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::get(KeyType const& key){
-	    string skey=toBoostString(key);
-	    string sval;
-	    shared_ptr<KVData<ValType>> kvd = make_shared<KVData<ValType>>;
-			shared_ptr<KVData<string>> res = kh.get(skey);
-			kvd->ierr = res.ierr;
-			kvd->serr = res.serr;
-			if(kvd->ierr==0){
-				kvd->value = toBoostObject<ValType>(res.value);
-			}
-			return kvd;
+    string skey=toBoostString(key);
+    string sval;
+    shared_ptr<KVData<ValType>> kvd = make_shared<KVData<ValType>>;
+		shared_ptr<KVData<string>> res = kh.get(skey);
+		kvd->ierr = res.ierr;
+		kvd->serr = res.serr;
+		if(kvd->ierr==0){
+			kvd->value = toBoostObject<ValType>(res.value);
+		}
+		return kvd;
 	}
+	/*-------KVStore::put()----------*/
+	template<typename KeyType, typename ValType>
+	shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::put(KeyType const& key,ValType const& val){
+		string skey=toBoostString(key);
+		string sval=toBoostString(val);
+		shared_ptr<KVData<ValType>> kvd = make_shared<KVData<ValType>>;
+		shared_ptr<KVData<string>> res = kh.put(skey,sval);
+		kvd->ierr = res.ierr;
+		kvd->serr = res.serr;
+		return kvd;
+	}
+	/*-------KVStore::del()----------*/
+	template<typename KeyType, typename ValType>
+	shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::del(KeyType const& key){
+		string skey=toBoostString(key);
+		shared_ptr<KVData<ValType>> kvd = make_shared<KVData<ValType>>;
+		shared_ptr<KVData<string>> res = kh.del(skey);
+		kvd->ierr = res.ierr;
+		kvd->serr = res.serr;
+		return kvd;
+	}
+	/*-------KVStore::clear()----------*/
+	template<typename KeyType, typename ValType>
+	shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::clear(){
+		return kh.clear();
+	}
+
 
 /*
 	Data object for returning response of any key value operation
