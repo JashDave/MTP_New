@@ -33,10 +33,6 @@ namespace kvstore {
     return count;
   }
 
-	int KVResultSet::ierror(int idx){
-    return stoi(res[idx*3]);
-  }
-
   void KVRequest::bind(string connection){
     int colon = connection.find(":");
     string ip = connection.substr(0,colon);
