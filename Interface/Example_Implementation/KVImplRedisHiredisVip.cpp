@@ -1,4 +1,4 @@
-#include "KVStoreHeader_v2.h"
+#include <kvstore/KVStoreHeader_v2.h>
 #include <hiredis-vip/hircluster.h>
 
 namespace kvstore {
@@ -19,7 +19,7 @@ namespace kvstore {
   }
 
   KVImplHelper::~KVImplHelper(){
-    delete(dataholder);
+    delete(c_kvsclient);
   }
 
   bool KVImplHelper::bind(string conn, string tablename){
@@ -35,7 +35,7 @@ namespace kvstore {
 
   std::shared_ptr<KVData<string>> KVImplHelper::get(string const& key){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    redisReply *reply = redisClusterCommand(c_kvsclient->rc, "get %s", (c_kvsclient->tablename+key).c_str());
+    redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "get %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
       ret->ierr = -1;
@@ -56,7 +56,7 @@ namespace kvstore {
 
   std::shared_ptr<KVData<string>> KVImplHelper::put(string const& key,string const& val){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    redisReply *reply = redisClusterCommand(c_kvsclient->rc, "set %s %s", (c_kvsclient->tablename+key).c_str(), val.c_str());
+    redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "set %s %s", (c_kvsclient->tablename+key).c_str(), val.c_str());
     if(reply == NULL)
     {
       ret->ierr = -1;
@@ -72,7 +72,7 @@ namespace kvstore {
 
   std::shared_ptr<KVData<string>> KVImplHelper::del(string const& key){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    redisReply *reply = redisClusterCommand(c_kvsclient->rc, "del %s", (c_kvsclient->tablename+key).c_str());
+    redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "del %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
       ret->ierr = -1;

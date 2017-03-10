@@ -1,8 +1,9 @@
 /*
+  g++ -std=c++11 TestKVStoreImpl_v2.cpp -lkvstore_v2 -lkvs_redis_v2 -lboost_serialization
   g++ -std=c++11 TestKVStoreImpl_v2.cpp KVStoreHeader_v2.cpp KVImplRedisHiredisVip.cpp -pthread -lboost_serialization -lhiredis_vip -fpermissive -w
 */
 
-#include "KVStoreHeader_v2.h"
+#include <kvstore/KVStoreHeader_v2.h>
 
 #define IP "10.129.28.141"
 #define PORT "7003"
@@ -14,7 +15,9 @@ int main(){
   string tablename = "TestTable123";
 
   KVStore<int,string> ks;
-  ks.bind(conf,tablename);
+  if(!ks.bind(conf,tablename)){
+    cerr<<"Connection Error"<<endl;
+  }
   std::shared_ptr<KVData<string>> r;
   r = ks.put(1,"One");
   r = ks.put(2,"Two");

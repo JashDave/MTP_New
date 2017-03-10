@@ -6,7 +6,7 @@
 #ifndef __KVSTORE_H__
 #define __KVSTORE_H__
 
-#include "KVImpl.h"
+#include "KVImpl.h" 
 
 #include <stdio.h>
 #include <iostream>
@@ -20,18 +20,19 @@
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/hash_map.hpp>
-#include <boost/serialization/hash_set.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/slist.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/bitset.hpp>
-#include <boost/serialization/string.hpp>
+// #include <boost/serialization/vector.hpp>
+// #include <boost/serialization/array.hpp>
+// #include <boost/serialization/vector.hpp>
+// #include <boost/serialization/list.hpp>
+// #include <boost/serialization/slist.hpp>
+// #include <boost/serialization/set.hpp>
+// #include <boost/serialization/bitset.hpp>
+// #include <boost/serialization/string.hpp>
+// #include <boost/serialization/map.hpp>
 // #include <boost/shared_ptr.hpp>
+// --------Depricated Warning-------
+// #include <boost/serialization/hash_set.hpp>
+// #include <boost/serialization/hash_map.hpp>
 
 
 using namespace std;
