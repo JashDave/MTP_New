@@ -24,9 +24,10 @@ using namespace kvstore;
 using namespace MessageClientNS;
 
 #define NUM_ENTRIES 5000   //Key Space
-#define MAX_DATA_SIZE 2000 // in Bytes
+// #define MAX_DATA_SIZE 2000 // in Bytes
+long MAX_DATA_SIZE=2000; // in Bytes
 #define RUN_TIME 20 //in seconds
-#define MAX_THREAD_COUNT 64
+#define MAX_THREAD_COUNT 1000
 //#define THREAD_COUNT 16
 #define IMPL_NAME "Redis"
 
@@ -105,9 +106,6 @@ void do_put(int tid, KVStore<string,string> *k){
 			i%=NUM_ENTRIES;
 			if(kvd.ierr!=0){
 				cout<<"PUT Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
-//return;
-			} else {
-				//cout<<"PUT success"<<endl;
 			}
 		}
 		printf("PUT Thread #%d ended\n",tid);
@@ -128,7 +126,6 @@ void do_get(int tid, KVStore<string,string> *k){
 			kvd = k->get(key[i]);
 			gm[tid].end();
 			if(kvd.ierr==0){
-//cout<<"GET success"<<endl;
 			// string ret_val=kvd->value;
 			// if(ret_val.compare(value[i])!=0){
 			// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
@@ -136,7 +133,6 @@ void do_get(int tid, KVStore<string,string> *k){
 			// }
 			} else {
 			  cout<<"GET Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
-//return;
 			}
 			i++;
 			i%=NUM_ENTRIES;
@@ -164,14 +160,16 @@ void pinThreadToCPU(thread *th,int i){
 }
 
 int main(int argc, char *argv[]) {
-		if (argc != 2) {
-			printf("Usage: %s Server_IPAddress\n", argv[0]);
+		if (argc != 4) {
+			printf("Usage: %s Server_IPAddress   ITER_NUM   MAX_DATA_SIZE\n", argv[0]);
 			exit(0);
 		}
 
+
+ 	  MAX_DATA_SIZE = stoi(argv[3]);
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 200;
+		int iter_num = stoi(argv[2]);
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		SERVER_IP = string(argv[1]);
@@ -180,7 +178,7 @@ int main(int argc, char *argv[]) {
 		int i=0;
 		string desc1="";
 		string desc2="";
-		string config=SERVER_IP+":7000";
+		string config=SERVER_IP+":7001";
 		string table_name="TestTable";
 
 		num_cpus = std::thread::hardware_concurrency();
@@ -188,8 +186,9 @@ int main(int argc, char *argv[]) {
 		init_data();
 
 
-		// vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-		vector<int> TC={1,2,6,8,12,24,36,48};
+		//vector<int> TC={2,4,6,8,12,24,36,48,60,72};
+		vector<int> TC={2,6,8,12,24,36,60,96,144,192};
+		//vector<int> TC={228,252,276,300};
 		//vector<int> TC={12,16,32};
 		//vector<int> TC={1,2};
 		for(int THREAD_COUNT:TC) {

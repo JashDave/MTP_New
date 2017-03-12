@@ -24,10 +24,11 @@ using namespace RAMCloud;
 using namespace kvstore;
 using namespace MessageClientNS;
 
-#define NUM_ENTRIES 5000   //Key Space
-#define MAX_DATA_SIZE 2000 // in Bytes
+#define NUM_ENTRIES 50000   //Key Space
+// #define MAX_DATA_SIZE 2000 // in Bytes
+long MAX_DATA_SIZE=2000; // in Bytes
 #define RUN_TIME 20 //in seconds
-#define MAX_THREAD_COUNT 64
+#define MAX_THREAD_COUNT 1000
 //#define THREAD_COUNT 16
 #define IMPL_NAME "RAMCloud"
 
@@ -138,16 +139,21 @@ void do_put(int tid, KVStore<string,string> *k){
 void do_get(int tid, KVStore<string,string> *k){
 	printf("GET Thread #%d started\n",tid);
 	int i=tid%2;
+	KVData<string> kvd;
 	while(!go_start); //wait
 	while(run){
 		gm[tid].start();
-		k->get(key[i]);
+		kvd = k->get(key[i]);
 		gm[tid].end();
-		// string ret_val=k->value;
+		if(kvd.ierr==0){
+		// string ret_val=kvd->value;
 		// if(ret_val.compare(value[i])!=0){
 		// cerr<<"Error in GET  Tid:"<<tid<<" i:"<<i<<" got data:"<<ret_val<<endl;
 		//printf("%s:%s\n",key[i].c_str(),str);
 		// }
+		} else {
+			cout<<"GET Tid:"<<tid<<" ERR:"<<kvd.serr<<endl;
+		}
 		i+=2;
 		i%=NUM_ENTRIES;
 	}
@@ -174,19 +180,20 @@ void pinThreadToCPU(thread *th,int i){
 }
 
 int main(int argc, char *argv[]) {
-	if (argc != 2) {
-		printf("Usage: %s Server_IPAddress\n", argv[0]);
+	if (argc != 4) {
+		printf("Usage: %s Server_IPAddress   ITER_NUM   MAX_DATA_SIZE\n", argv[0]);
 		exit(0);
 	}
 
 	SERVER_IP = string(argv[1]);
 
+	MAX_DATA_SIZE = stoi(argv[3]);
 	int i=0;
 	string desc1="";
 	string desc2="";
 	string config="tcp:host="+SERVER_IP+",port=11100";
 	string table_name="TestTable2";
-	
+
 	putAllEntriesOnce(config,table_name);
 
 	num_cpus = std::thread::hardware_concurrency();
@@ -195,7 +202,8 @@ int main(int argc, char *argv[]) {
 
 
 	//vector<int> TC={1,2,4,6,8,10,12,14,16,32,48,64};
-	vector<int> TC={1,2,6,8,12,24,36,48};
+	vector<int> TC={2,6,8,12,24,36,48,60};
+	//vector<int> TC={96,120,144,192};
 	for(int THREAD_COUNT:TC) {
 
 		cout<<"THREAD COUNT="<<THREAD_COUNT<<endl;
@@ -207,7 +215,7 @@ int main(int argc, char *argv[]) {
 
 		string sep="/";
 		string DATE=sep+currentDateTime("%Y-%m-%d")+sep;
-		int iter_num = 1;
+		int iter_num = stoi(argv[2]);
 		string prefix="";
 		string st1 = prefix+"PerformanceData"+sep;
 		string st2 = IMPL_NAME+DATE+to_string(iter_num)+sep+to_string(MAX_DATA_SIZE/1000)+"KB"+sep+"TC"+to_string(THREAD_COUNT)+sep;
@@ -229,7 +237,7 @@ int main(int argc, char *argv[]) {
 		for (i = 0; i < THREAD_COUNT; i++) {
 			KVStore<string,string> *k=new KVStore<string,string>();
 			k->bind(config,table_name);
-			put_threads[i] = thread(do_put, i, k);   
+			put_threads[i] = thread(do_put, i, k);
 
 			pinThreadToCPU(&put_threads[i],i);
 		}
