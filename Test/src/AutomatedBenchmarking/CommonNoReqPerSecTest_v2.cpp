@@ -100,7 +100,8 @@ public:
 
   void startMonitoring(){
 			vector<string> cmd_vec;
-			cmd_vec.push_back("sar -o ~/perf_data 1");
+			cmd_vec.push_back("rm -f ~/perf_data")
+      cmd_vec.push_back("sar -o ~/perf_data 1");
 			for(auto msgc: msgc_list){
         msgc->send(cmd_vec);
       }
