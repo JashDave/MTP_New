@@ -8,6 +8,10 @@ namespace kvstore {
   KVImplHelper::~KVImplHelper(){
   }
 
+  KVImplHelper::KVImplHelper(KVImplHelper& kh){
+    /* Copy dataholder if used */
+  }
+
   bool KVImplHelper::bind(string conn, string tablename){
     /* Connection to key value store */
     return false;
@@ -63,7 +67,7 @@ namespace kvstore {
     /* Do multiput and send the response via 'ret' vector */
     return 0;
   }
-  
+
   int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     /* Do multidel and send the response via 'ret' vector */
     return 0;

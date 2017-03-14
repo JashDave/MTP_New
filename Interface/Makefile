@@ -4,7 +4,7 @@
 
 INSTALL_PATH=/usr/local
 LIB_NAME=libkvstore_v2.a
-G++ = g++ -std=c++11
+G++ = g++ -std=c++11 -pthread
 BIN=bin
 
 all:	init install

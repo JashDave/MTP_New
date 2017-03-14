@@ -9,6 +9,7 @@ namespace kvstore {
   public:
     redisClusterContext* rc;
     string tablename;
+    string conn;
     ~KVStoreClient(){
       redisClusterFree(rc);
     }
@@ -18,17 +19,37 @@ namespace kvstore {
     dataholder = (void*) new KVStoreClient();
   }
 
+  KVImplHelper::KVImplHelper(KVImplHelper& kh){
+    dataholder = (void*) new KVStoreClient();
+    bool succ = bind(((KVStoreClient*)kh.dataholder)->conn,((KVStoreClient*)kh.dataholder)->tablename);
+    if(!succ){
+      std::cerr << "Error copying KVImplHelper object" << std::endl;
+    }
+  }
+
   KVImplHelper::~KVImplHelper(){
     delete(c_kvsclient);
   }
 
   bool KVImplHelper::bind(string conn, string tablename){
     c_kvsclient->tablename = tablename;
-    c_kvsclient->rc = redisClusterConnect(conn.c_str(), HIRCLUSTER_FLAG_NULL);
-    if(c_kvsclient->rc == NULL || c_kvsclient->rc->err)
-    {
-      //printf("connect error : %s\n", rc == NULL ? "NULL" : rc->errstr);
-      return false;
+    c_kvsclient->conn = conn;
+
+    bool retry = true;
+    int attempts = 0;
+    int MAX_TRIES = 10;
+    while(retry){
+      c_kvsclient->rc = redisClusterConnect(conn.c_str(), HIRCLUSTER_FLAG_NULL);
+      if(c_kvsclient->rc == NULL || c_kvsclient->rc->err)
+      {
+        attempts++;
+        if(attempts == MAX_TRIES){
+          //printf("connect error : %s\n", rc == NULL ? "NULL" : rc->errstr);
+          return false;
+        }
+      } else {
+        retry = false; /* break; */
+      }
     }
     return true;
   }
