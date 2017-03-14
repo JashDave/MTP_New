@@ -6,7 +6,7 @@
 #ifndef __KVSTORE_H__
 #define __KVSTORE_H__
 
-#include "KVImpl.h" 
+#include "KVImpl.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -78,7 +78,7 @@ namespace kvstore {
 		template<typename ValType>
 		std::shared_ptr<KVData<ValType>> get(int idx);
 	};
-
+	/*----------KVResultSet::get()-----------*/
 	template<typename ValType>
 	std::shared_ptr<KVData<ValType>> KVResultSet::get(int idx){
     std::shared_ptr<KVData<ValType>> ret = std::make_shared<KVData<ValType>>();
@@ -136,6 +136,7 @@ namespace kvstore {
 		void del(KeyType const& key,string tablename);
 
 		std::shared_ptr<KVResultSet> execute();
+		void async_execute(void (*fn)(std::shared_ptr<KVResultSet>, void *), void *data); /* */
 		void reset();
 	};
 
@@ -185,6 +186,9 @@ namespace kvstore {
 		std::shared_ptr<KVData<ValType>> get(KeyType const& key);
 		std::shared_ptr<KVData<ValType>> put(KeyType const& key,ValType const& val);
 		std::shared_ptr<KVData<ValType>> del(KeyType const& key);
+		void async_get(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
+		void async_put(KeyType const& key,ValType const& val, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
+		void async_del(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
 		bool clear();
 	};
 	/*-------KVStore::KVStore()----------*/
@@ -204,7 +208,6 @@ namespace kvstore {
   template<typename KeyType, typename ValType>
   std::shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::get(KeyType const& key){
     string skey=toBoostString(key);
-    string sval;
     std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
 		std::shared_ptr<KVData<string>> res = kh.get(skey);
 		kvd->ierr = res->ierr;
@@ -228,12 +231,52 @@ namespace kvstore {
 	/*-------KVStore::del()----------*/
 	template<typename KeyType, typename ValType>
 	std::shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::del(KeyType const& key){
-		string skey=toBoostString(key);
-		std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-		std::shared_ptr<KVData<string>> res = kh.del(skey);
-		kvd->ierr = res->ierr;
-		kvd->serr = res->serr;
+	string skey=toBoostString(key);
+	std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
+	std::shared_ptr<KVData<string>> res = kh.del(skey);
+	kvd->ierr = res->ierr;
+	kvd->serr = res->serr;
 		return kvd;
+	}
+	/*-------KVRequest::async_get()--------*/
+	template<typename KeyType, typename ValType>
+	void KVStore<KeyType,ValType>::async_get(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+    string skey=toBoostString(key);
+    auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+				std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
+				kvd->ierr = res->ierr;
+				kvd->serr = res->serr;
+				if(kvd->ierr==0){
+					kvd->value = toBoostObject<ValType>(res->value);
+				}
+				fn(kvd,pdata);
+		};
+		kh.async_get(skey,lambda_fn,data);
+	}
+	/*-------KVRequest::async_put()--------*/
+	template<typename KeyType, typename ValType>
+	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+		string skey=toBoostString(key);
+		string sval=toBoostString(val);
+		auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
+			kvd->ierr = res->ierr;
+			kvd->serr = res->serr;
+			fn(kvd,pdata);
+		};
+		kh.async_put(skey,sval,lambda_fn,data);
+	}
+	/*-------KVRequest::async_del()--------*/
+	template<typename KeyType, typename ValType>
+	void KVStore<KeyType,ValType>::async_del(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+		string skey=toBoostString(key);
+		auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
+			kvd->ierr = res->ierr;
+			kvd->serr = res->serr;
+			fn(kvd,pdata);
+		};
+		kh.async_del(skey,lambda_fn,data);
 	}
 	/*-------KVStore::clear()----------*/
 	template<typename KeyType, typename ValType>

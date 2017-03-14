@@ -69,6 +69,11 @@ namespace kvstore {
 		return rs;
 	}
 
+
+	void KVRequest::async_execute(void (*fn)(std::shared_ptr<KVResultSet>, void *), void *data){
+		//?
+	}
+
 	void KVRequest::reset(){
 		operation_type.clear();
 		put_tablename.clear();

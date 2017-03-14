@@ -31,6 +31,24 @@ namespace kvstore {
     return ret;
   }
 
+  void async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async get and update 'ret' */
+    fn(ret,data);
+  }
+
+  void async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async put and update 'ret' */
+    fn(ret,data);
+  }
+
+  void async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async del and update 'ret' */
+    fn(ret,data);
+  }
+
   bool KVImplHelper::clear(){
     /* Delete all from table */
     return false;
@@ -40,10 +58,12 @@ namespace kvstore {
     /* Do multiget and send the response via 'ret' vector */
     return 0;
   }
+
   int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     /* Do multiput and send the response via 'ret' vector */
     return 0;
   }
+  
   int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     /* Do multidel and send the response via 'ret' vector */
     return 0;
