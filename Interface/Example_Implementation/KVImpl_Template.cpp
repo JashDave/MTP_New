@@ -35,19 +35,19 @@ namespace kvstore {
     return ret;
   }
 
-  void async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+  void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     /* Do async get and update 'ret' */
     fn(ret,data);
   }
 
-  void async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+  void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     /* Do async put and update 'ret' */
     fn(ret,data);
   }
 
-  void async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+  void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     /* Do async del and update 'ret' */
     fn(ret,data);

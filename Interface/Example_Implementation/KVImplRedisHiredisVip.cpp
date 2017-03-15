@@ -120,6 +120,7 @@ namespace kvstore {
     }
     return 0;
   }
+  
   int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     int sz = key.size();
     for(int i=0;i<sz;i++){
@@ -128,6 +129,7 @@ namespace kvstore {
     }
     return 0;
   }
+
   int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     int sz = key.size();
     for(int i=0;i<sz;i++){
@@ -135,5 +137,23 @@ namespace kvstore {
       ret.push_back(del(key[i]));
     }
     return 0;
+  }
+
+  void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async get and update 'ret' */
+    fn(ret,data);
+  }
+
+  void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async put and update 'ret' */
+    fn(ret,data);
+  }
+
+  void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
+    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+    /* Do async del and update 'ret' */
+    fn(ret,data);
   }
 }
