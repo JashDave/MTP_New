@@ -33,6 +33,10 @@ namespace kvstore {
     }
     ~KVStoreClient(){
       keeprunning = false;
+      if(td.joinable()){
+        td.join();
+      }
+      // std::terminate(td);
       redisClusterFree(rc);
     }
     void eventLoop(){
@@ -41,7 +45,7 @@ namespace kvstore {
       std::chrono::milliseconds waittime(100);
 
       while(keeprunning){
-        while(count==0){std::this_thread::sleep_for(waittime);}
+        while(count==0){std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
         mtx.lock();
         rep = redisClusterGetReply(rc, (void**)&reply);
         mtx.unlock();
@@ -73,8 +77,8 @@ namespace kvstore {
                 ret->serr = "Value doesn't exists.";
               //value doesnt exists
             } else if (reply->type == REDIS_REPLY_INTEGER){
-                if(reply->integer < 0){
-                  ret->ierr = reply->integer;
+                if(reply->integer <= 0){
+                  ret->ierr = -1; /*reply->integer;*/
                   ret->serr = "Value doesn't exists.";
                 } else {
                   ret->ierr = 0;
@@ -86,7 +90,7 @@ namespace kvstore {
             freeReplyObject(reply);
           }
 				} else {
-          cerr<<"Error in return file:"<<endl;//<<__FILENAME__<<" line:"<<__LINE__<<endl;
+          cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
 					// redisClusterReset(cc);
 				}
       }
@@ -149,6 +153,7 @@ namespace kvstore {
       ret->ierr = -1;
       ret->serr = "Value doesn't exists.";
       freeReplyObject(reply);
+    } else {
       ret->ierr = 0;
       ret->value = string(reply->str);
       freeReplyObject(reply);
@@ -182,8 +187,8 @@ namespace kvstore {
       // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
       //redisClusterFree(c_kvsclient->rc); //??
     } else {
-      if(reply->integer < 0){
-        ret->ierr = reply->integer;
+      if(reply->integer <= 0){
+        ret->ierr = -1;
         ret->serr = "Value doesn't exists.";
       } else {
         ret->ierr = 0;
