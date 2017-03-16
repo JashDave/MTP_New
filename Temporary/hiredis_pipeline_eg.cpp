@@ -4,6 +4,8 @@
 #include<thread>
 #include<atomic>
 #include<unistd.h>
+#include<mutex>
+#include<queue>
  using namespace std;
 int main()
 {
@@ -27,20 +29,25 @@ int main()
 	freeReplyObject(reply);
 
 atomic<long> count(0);
+mutex mtx;
 
 	thread td1([&]{
+    int ret;
 		while(1) {
-			if(redisClusterAppendCommand(cc, "get key1") != REDIS_ERR){
+      mtx.lock();
+      ret = redisClusterAppendCommand(cc, "del key1000") ;
+      mtx.unlock();
+			if(ret!= REDIS_ERR){
 				count++;
-				if(redisClusterGetReply(cc, &reply)==REDIS_OK){
-					cout<<reply->type<<endl;
-					cout<<reply->str<<endl;
-					freeReplyObject(reply);
-					count--;
-				} else {
-					cout<<"Error"<<endl;
-					// redisClusterReset(cc);
-				}
+				// if(redisClusterGetReply(cc, &reply)==REDIS_OK){
+				// 	cout<<reply->type<<endl;
+				// 	cout<<reply->str<<endl;
+				// 	freeReplyObject(reply);
+				// 	count--;
+				// } else {
+				// 	cout<<"Error"<<endl;
+				// 	// redisClusterReset(cc);
+				// }
 			}
 			else{
 				cout<<"\n\n\nAppend error\n\n\n"<<endl;
@@ -48,11 +55,41 @@ atomic<long> count(0);
 			// usleep(100);
 		}
 	});
+
+  	// thread td4([&]{
+    //   int ret;
+  	// 	while(1) {
+    //     mtx.lock();
+    //     ret = redisClusterAppendCommand(cc, "get key2") ;
+    //     mtx.unlock();
+  	// 		if(ret!= REDIS_ERR){
+  	// 			count++;
+  	// 			// if(redisClusterGetReply(cc, &reply)==REDIS_OK){
+  	// 			// 	cout<<reply->type<<endl;
+  	// 			// 	cout<<reply->str<<endl;
+  	// 			// 	freeReplyObject(reply);
+  	// 			// 	count--;
+  	// 			// } else {
+  	// 			// 	cout<<"Error"<<endl;
+  	// 			// 	// redisClusterReset(cc);
+  	// 			// }
+  	// 		}
+  	// 		else{
+  	// 			cout<<"\n\n\nAppend error\n\n\n"<<endl;
+  	// 		}
+  	// 		// usleep(100);
+  	// 	}
+  	// });
 	thread td3([&]{
+    int ret;
 		while(1) {
-			if(redisClusterAppendCommand(cc, "get key2") != REDIS_ERR){
-				count++;
-				if(redisClusterGetReply(cc, &reply)==REDIS_OK){
+			// if(redisClusterAppendCommand(cc, "get key2") != REDIS_ERR){
+			// 	count++;
+        // while(count==0) {usleep(100); cout<<"sleeping"<<endl;}
+        mtx.lock();
+        ret = redisClusterGetReply(cc, &reply);
+        mtx.unlock();
+				if(ret==REDIS_OK){
 					cout<<reply->type<<endl;
 					cout<<reply->str<<endl;
 					freeReplyObject(reply);
@@ -61,10 +98,10 @@ atomic<long> count(0);
 					cout<<"Error"<<endl;
 					// redisClusterReset(cc);
 				}
-			}
-			else{
-				cout<<"\n\n\nAppend error\n\n\n"<<endl;
-			}
+			// }
+			// else{
+			// 	cout<<"\n\n\nAppend error\n\n\n"<<endl;
+			// }
 			// usleep(100);
 		}
 	});

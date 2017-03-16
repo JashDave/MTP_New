@@ -36,9 +36,9 @@ public:
   std::shared_ptr<KVData<string>> get(string const& key);
   std::shared_ptr<KVData<string>> put(string const& key,string const& val);
   std::shared_ptr<KVData<string>> del(string const& key);
-	void async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data);
-	void async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data);
-	void async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data);
+	void async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn);
+	void async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn);
+	void async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn);
   bool clear();
 
   int mget(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret);

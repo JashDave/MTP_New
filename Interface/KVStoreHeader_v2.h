@@ -243,41 +243,44 @@ namespace kvstore {
 	template<typename KeyType, typename ValType>
 	void KVStore<KeyType,ValType>::async_get(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
     string skey=toBoostString(key);
-    auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+    auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
 				std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
 				kvd->ierr = res->ierr;
 				kvd->serr = res->serr;
 				if(kvd->ierr==0){
 					kvd->value = toBoostObject<ValType>(res->value);
 				}
+				void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
 				fn(kvd,pdata);
 		};
-		kh.async_get(skey,lambda_fn,data);
+		kh.async_get(skey,lambda_fn,data,(void *)fn);
 	}
 	/*-------KVRequest::async_put()--------*/
 	template<typename KeyType, typename ValType>
 	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
 		string skey=toBoostString(key);
 		string sval=toBoostString(val);
-		auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+		auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
 			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
 			kvd->ierr = res->ierr;
 			kvd->serr = res->serr;
+			void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
 			fn(kvd,pdata);
 		};
-		kh.async_put(skey,sval,lambda_fn,data);
+		kh.async_put(skey,sval,lambda_fn,data,(void *)fn);
 	}
 	/*-------KVRequest::async_del()--------*/
 	template<typename KeyType, typename ValType>
 	void KVStore<KeyType,ValType>::async_del(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
 		string skey=toBoostString(key);
-		auto lambda_fn = [fn](std::shared_ptr<KVData<string>> res,void *pdata)->void{
+		auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
 			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
 			kvd->ierr = res->ierr;
 			kvd->serr = res->serr;
+			void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
 			fn(kvd,pdata);
 		};
-		kh.async_del(skey,lambda_fn,data);
+		kh.async_del(skey,lambda_fn,data,(void*)fn);
 	}
 	/*-------KVStore::clear()----------*/
 	template<typename KeyType, typename ValType>

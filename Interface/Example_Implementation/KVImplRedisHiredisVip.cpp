@@ -1,17 +1,93 @@
 #include <kvstore/KVStoreHeader_v2.h>
 #include <hiredis-vip/hircluster.h>
-
+#include <mutex>
+#include <atomic>
+#include <queue>
+#include <chrono>
+#include <iostream>
+#include <thread>
+using namespace std;
 namespace kvstore {
 
   #define c_kvsclient ((KVStoreClient*)dataholder)
+
+  struct async_data{
+    void (*fn)(std::shared_ptr<KVData<string>>,void *);
+    void *data;
+    int type;
+  };
 
   class KVStoreClient{
   public:
     redisClusterContext* rc;
     string tablename;
     string conn;
+    std::mutex mtx;
+    std::queue<struct async_data> q;
+    bool keeprunning = true;
+    thread td;
+    std::atomic<long long> count;
+    KVStoreClient(){
+      count=0;
+    }
     ~KVStoreClient(){
+      keeprunning = false;
       redisClusterFree(rc);
+    }
+    void eventLoop(){
+      redisReply *reply;
+      int rep;
+      std::chrono::milliseconds waittime(100);
+
+      while(keeprunning){
+        while(count==0){std::this_thread::sleep_for(waittime);}
+        mtx.lock();
+        rep = redisClusterGetReply(rc, &reply);
+        mtx.unlock();
+
+// #define REDIS_REPLY_STRING 1
+// #define REDIS_REPLY_ARRAY 2
+// #define REDIS_REPLY_INTEGER 3
+// #define REDIS_REPLY_NIL 4
+// #define REDIS_REPLY_STATUS 5
+// #define REDIS_REPLY_ERROR 6
+				if(rep == REDIS_OK){
+          if(reply == NULL){
+            cerr<<"Reply Null"<<endl;
+          } else {
+            std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+            struct async_data ad = q.front(); q.pop();  //? lock required?
+            count--;
+            if(reply->type == REDIS_REPLY_STRING){
+                ret->ierr = 0;
+                ret->value = string(reply->str);
+            } else if (reply->type == REDIS_REPLY_STATUS){
+                ret->ierr = 0;
+              //str == OK
+            } else if (reply->type == REDIS_REPLY_NIL){
+                ret->ierr = -1;
+                ret->serr = "Value doesn't exists.";
+              //value doesnt exists
+            } else if (reply->type == REDIS_REPLY_INTEGER){
+                ret->ierr = reply->integer;
+                if(ret->ierr != 0){
+                  ret->serr = "Value doesn't exists.";
+                }
+              //del reply in reply->integer ; 0==OK -1==Doesnt exists
+            } else {
+              cerr<<"Reply type:"<<reply->type<<endl;
+            }
+            ad.fn(ret,ad.data);
+            freeReplyObject(reply);
+          }
+				} else {
+          cerr<<"Error in return file:"<<endl;//<<__FILENAME__<<" line:"<<__LINE__<<endl;
+					// redisClusterReset(cc);
+				}
+      }
+    }
+    void startEventLoop(){
+      td = thread([&]{eventLoop();});
     }
   };
 
@@ -51,6 +127,7 @@ namespace kvstore {
         retry = false; /* break; */
       }
     }
+    c_kvsclient->startEventLoop();
     return true;
   }
 
@@ -67,7 +144,6 @@ namespace kvstore {
       ret->ierr = -1;
       ret->serr = "Value doesn't exists.";
       freeReplyObject(reply);
-    } else {
       ret->ierr = 0;
       ret->value = string(reply->str);
       freeReplyObject(reply);
@@ -102,6 +178,9 @@ namespace kvstore {
       //redisClusterFree(c_kvsclient->rc); //??
     } else {
       ret->ierr = reply->integer; // 0;
+      if(ret->ierr != 0){
+        ret->serr = "Value doesn't exists.";
+      }
       freeReplyObject(reply);
     }
     return ret;
@@ -120,7 +199,7 @@ namespace kvstore {
     }
     return 0;
   }
-  
+
   int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
     int sz = key.size();
     for(int i=0;i<sz;i++){
@@ -140,20 +219,41 @@ namespace kvstore {
   }
 
   void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    /* Do async get and update 'ret' */
-    fn(ret,data);
+      c_kvsclient->mtx.lock();
+      int ret = redisClusterAppendCommand(c_kvsclient->rc, "get %d",key.c_str()) ;
+      c_kvsclient->mtx.unlock();
+			if(ret!= REDIS_ERR){
+				c_kvsclient->count++;
+        struct async_data ad{fn,data,1};
+        c_kvsclient->q.push(ad);
+			}	else {
+				cerr<<"\n\n\nget Append error\n\n\n"<<endl;
+			}
   }
 
   void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    /* Do async put and update 'ret' */
-    fn(ret,data);
+    c_kvsclient->mtx.lock();
+    int ret = redisClusterAppendCommand(c_kvsclient->rc, "put %d %d",key.c_str(),val.c_str()) ;
+    c_kvsclient->mtx.unlock();
+		if(ret!= REDIS_ERR){
+			c_kvsclient->count++;
+      struct async_data ad{fn,data,1};
+      c_kvsclient->q.push(ad);
+		}	else {
+			cerr<<"\n\n\nput Append error\n\n\n"<<endl;
+		}
   }
 
   void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *),void *data){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-    /* Do async del and update 'ret' */
-    fn(ret,data);
+    c_kvsclient->mtx.lock();
+    int ret = redisClusterAppendCommand(c_kvsclient->rc, "del %d",key.c_str()) ;
+    c_kvsclient->mtx.unlock();
+		if(ret!= REDIS_ERR){
+      c_kvsclient->count++;
+      struct async_data ad{fn,data,1};
+      c_kvsclient->q.push(ad);
+		}	else {
+			cerr<<"\n\n\nget Append error\n\n\n"<<endl;
+		}
   }
 }
