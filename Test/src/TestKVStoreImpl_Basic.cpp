@@ -2,6 +2,7 @@
   g++ -std=c++11 TestKVStoreImpl_Basic.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
 */
 
+// #define CONF string("10.129.28.44:8090")
 #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
@@ -38,7 +39,7 @@ int main(){
   /* Check successfull del */
   IS_REACHABLE
   r = ks.del(1);
-  jAssert(r->ierr!=0, cout<<"Serr:"<<r->serr<<endl;)
+  jAssert(r->ierr!=0, cout<<"Error in del serr:"<<r->serr<<endl;)
 
   /* Check unsuccessfull get */
   IS_REACHABLE
