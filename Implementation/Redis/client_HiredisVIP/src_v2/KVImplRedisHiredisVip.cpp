@@ -27,9 +27,9 @@ namespace kvstore {
     std::queue<struct async_data> q;
     bool keeprunning = true;
     thread td;
-    std::atomic<long long> count;
+    // std::atomic<long long> count;
     KVStoreClient(){
-      count=0;
+      // count=0;
     }
     ~KVStoreClient(){
       keeprunning = false;
@@ -45,7 +45,7 @@ namespace kvstore {
       std::chrono::milliseconds waittime(10);
 
       while(keeprunning){
-        while(count==0){std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
+        while(true){mtx.lock();if(!q.empty()){mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
         mtx.lock();
         rep = redisClusterGetReply(rc, (void**)&reply);
         mtx.unlock();
@@ -62,17 +62,17 @@ namespace kvstore {
           } else {
             std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
             mtx.lock();
+            // if(q.empty()){
+            //   cout<<"Queue empty :"<<__FILE__<<endl;
+            // }
             struct async_data ad = q.front(); q.pop();  //? lock required?
-            if(q.empty()){
-              cout<<"Queue empty :"<<__FILE__<<endl;
-            }
             mtx.unlock();
-            count--;
+            // count--;
             if(reply->type == REDIS_REPLY_STRING){
                 ret->ierr = 0;
-                if(reply->str == NULL){
-                  cout<<"NULL in str :"<<__FILE__<<endl;
-                }
+                // if(reply->str == NULL){
+                //   cout<<"NULL in str :"<<__FILE__<<endl;
+                // }
                 ret->value = string(reply->str);
                 // cout<<"Got:"<<ret->value<<endl;
             } else if (reply->type == REDIS_REPLY_STATUS){
@@ -244,7 +244,7 @@ namespace kvstore {
       int ret = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(c_kvsclient->tablename+key).c_str()) ;
       c_kvsclient->mtx.unlock();
 			if(ret!= REDIS_ERR){
-				c_kvsclient->count++;
+				// c_kvsclient->count++;
         struct async_data ad{fn,data,vfn,1};
         c_kvsclient->mtx.lock();
         c_kvsclient->q.push(ad);
@@ -261,7 +261,7 @@ namespace kvstore {
     int ret = redisClusterAppendCommand(c_kvsclient->rc, "set %s %s",(c_kvsclient->tablename+key).c_str(),val.c_str()) ;
     c_kvsclient->mtx.unlock();
 		if(ret!= REDIS_ERR){
-			c_kvsclient->count++;
+			// c_kvsclient->count++;
       struct async_data ad{fn,data,vfn,2};
       c_kvsclient->mtx.lock();
       c_kvsclient->q.push(ad);
@@ -276,7 +276,7 @@ namespace kvstore {
     int ret = redisClusterAppendCommand(c_kvsclient->rc, "del %s",(c_kvsclient->tablename+key).c_str()) ;
     c_kvsclient->mtx.unlock();
 		if(ret!= REDIS_ERR){
-      c_kvsclient->count++;
+      // c_kvsclient->count++;
       struct async_data ad{fn,data,vfn,3};
       c_kvsclient->mtx.lock();
       c_kvsclient->q.push(ad);
