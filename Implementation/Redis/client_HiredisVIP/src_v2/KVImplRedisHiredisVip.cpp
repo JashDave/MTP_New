@@ -63,10 +63,16 @@ namespace kvstore {
             std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
             mtx.lock();
             struct async_data ad = q.front(); q.pop();  //? lock required?
+            if(q.empty()){
+              cout<<"Queue empty :"<<__FILE__<<endl;
+            }
             mtx.unlock();
             count--;
             if(reply->type == REDIS_REPLY_STRING){
                 ret->ierr = 0;
+                if(reply->str == NULL){
+                  cout<<"NULL in str :"<<__FILE__<<endl;
+                }
                 ret->value = string(reply->str);
                 // cout<<"Got:"<<ret->value<<endl;
             } else if (reply->type == REDIS_REPLY_STATUS){
@@ -97,6 +103,7 @@ namespace kvstore {
     }
     void startEventLoop(){
       td = thread([&]{eventLoop();});
+      // td = thread(KVStoreClient::eventLoop,this);
     }
   };
 
