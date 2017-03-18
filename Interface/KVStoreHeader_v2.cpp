@@ -69,10 +69,12 @@ namespace kvstore {
 		return rs;
 	}
 
-
+//
 	void KVRequest::async_execute(void (*fn)(std::shared_ptr<KVResultSet>, void *), void *data){
-		auto lambda_fn = [=]()->void{
-			std::shared_ptr<KVResultSet> rs = execute();
+		KVRequest *krjd = new KVRequest(*this);
+		auto lambda_fn = [krjd,fn,data]()->void{
+			std::shared_ptr<KVResultSet> rs = krjd->execute();
+			delete(krjd);
 			fn(rs,data);
 		};
 		thread td(lambda_fn);

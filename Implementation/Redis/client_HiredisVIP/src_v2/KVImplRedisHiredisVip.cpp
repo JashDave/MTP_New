@@ -42,7 +42,7 @@ namespace kvstore {
     void eventLoop(){
       redisReply *reply;
       int rep;
-      std::chrono::milliseconds waittime(100);
+      std::chrono::milliseconds waittime(10);
 
       while(keeprunning){
         while(count==0){std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
@@ -103,6 +103,7 @@ namespace kvstore {
   KVImplHelper::KVImplHelper(){
     dataholder = (void*) new KVStoreClient();
   }
+
 
   KVImplHelper::KVImplHelper(KVImplHelper& kh){
     dataholder = (void*) new KVStoreClient();

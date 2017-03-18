@@ -1,6 +1,6 @@
 # Make for version 2
 
-# Dependencies 
+# Dependencies
 
 INSTALL_PATH=/usr/local
 LIB_NAME=libkvstore_v2.a
@@ -29,4 +29,3 @@ clean:
 uninstall:
 	rm -r $(INSTALL_PATH)/include/kvstore/
 	rm $(INSTALL_PATH)/lib/$(LIB_NAME)
-
