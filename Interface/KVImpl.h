@@ -27,7 +27,7 @@ namespace kvstore {
 */
 class KVImplHelper{
 private:
-  void *dataholder;
+  void *dataholder=NULL;
 public:
   KVImplHelper();
   ~KVImplHelper();
