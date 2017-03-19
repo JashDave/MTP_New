@@ -31,7 +31,7 @@ private:
 public:
   KVImplHelper();
   ~KVImplHelper();
-	KVImplHelper(KVImplHelper&); /* copy constructor */
+	KVImplHelper(const KVImplHelper&); /* copy constructor */
   bool bind(string connection,string tablename);
   std::shared_ptr<KVData<string>> get(string const& key);
   std::shared_ptr<KVData<string>> put(string const& key,string const& val);

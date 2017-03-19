@@ -24,6 +24,10 @@ int main(){
   vector<string> vals = {"One","Two","Three"};
   // int sz = keys.size();
 
+
+  std::vector<KVRequest> vxx;
+  vxx.resize(10);
+
   /* Create connection */
   KVRequest kr;
   IS_REACHABLE

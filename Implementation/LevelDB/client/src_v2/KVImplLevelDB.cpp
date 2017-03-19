@@ -29,7 +29,7 @@ namespace kvstore {
     }
   }
 
-  KVImplHelper::KVImplHelper(KVImplHelper& kh){
+  KVImplHelper::KVImplHelper(const KVImplHelper& kh){
     if(dataholder != NULL){
       string conn = ((KVManager *)(kh.dataholder))->conn;
       string tablename = ((KVManager *)(kh.dataholder))->tablename;

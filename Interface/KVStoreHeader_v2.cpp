@@ -33,6 +33,18 @@ namespace kvstore {
 	KVRequest non template implementation
 */
 	KVRequest::KVRequest(){}
+	// KVRequest::KVRequest(KVRequest& kr){
+	// 	dataholder=kr.dataholder;
+	// 	kh=kr.kh;
+	// 	operation_type=kr.operation_type;
+	// 	put_tablename=kr.put_tablename;
+	// 	put_key=kr.put_key;
+	// 	put_value=kr.put_value;
+	// 	get_tablename=kr.get_tablename;
+	// 	get_key=kr.get_key;
+	// 	del_tablename=kr.del_tablename;
+	// 	del_key=kr.del_key;
+	// }
 	KVRequest::~KVRequest(){}		//For distroying connection object
 
 	bool KVRequest::bind(string connection){
