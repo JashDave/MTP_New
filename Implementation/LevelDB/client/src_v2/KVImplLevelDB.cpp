@@ -45,7 +45,7 @@ namespace kvstore {
     int colon = connection.find(":");
     string ip = connection.substr(0,colon);
     string port = connection.substr(colon+1);
-    dataholder = (void *) new KVStoreClient(ip,stoi(port));
+    c_kvsclient = new KVStoreClient(ip,stoi(port));
 
     std::vector<string> v;
     v.push_back("CreateTable");
@@ -135,8 +135,8 @@ namespace kvstore {
   std::vector<std::shared_ptr<KVData<string>>> parseResults(vector<string> &res){
     int count = res.size()/4;
     std::vector<std::shared_ptr<KVData<string>>> fret(count);
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     for(int idx=0;idx<count;idx++){
+      std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
       ret->serr = res[idx*4+2];
       ret->ierr = stoi(res[idx*4+3]);
       if(ret->ierr==0){
@@ -151,6 +151,7 @@ namespace kvstore {
     /* Do multiget and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
+    v.push_back("Multiple");
     for(int i=0;i<sz;i++){
       v.push_back("CreateTable");
       v.push_back(tablename[i]);
@@ -160,8 +161,8 @@ namespace kvstore {
     c_kvsclient->send(v);
     std::vector<string> rcv=c_kvsclient->receive();
     std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
-    for(std::shared_ptr<KVData<string>>& kd: res){
-      ret.push_back(kd);
+    for(int i=0;i<sz;i++){
+      ret.push_back(res[i]);
     }
     return 0;
   }
@@ -170,6 +171,7 @@ namespace kvstore {
     /* Do multiput and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
+    v.push_back("Multiple");
     for(int i=0;i<sz;i++){
       v.push_back("CreateTable");
       v.push_back(tablename[i]);
@@ -180,7 +182,7 @@ namespace kvstore {
     c_kvsclient->send(v);
     std::vector<string> rcv=c_kvsclient->receive();
     std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
-    for(std::shared_ptr<KVData<string>>& kd: res){
+    for(std::shared_ptr<KVData<string>> kd: res){
       ret.push_back(kd);
     }
     return 0;
@@ -190,6 +192,7 @@ namespace kvstore {
     /* Do multidel and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
+    v.push_back("Multiple");
     for(int i=0;i<sz;i++){
       v.push_back("CreateTable");
       v.push_back(tablename[i]);
@@ -199,7 +202,7 @@ namespace kvstore {
     c_kvsclient->send(v);
     std::vector<string> rcv=c_kvsclient->receive();
     std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
-    for(std::shared_ptr<KVData<string>>& kd: res){
+    for(std::shared_ptr<KVData<string>> kd: res){
       ret.push_back(kd);
     }
     return 0;

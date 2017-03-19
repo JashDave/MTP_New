@@ -2,11 +2,11 @@
   g++ -std=c++11 TestKVRequestImpl_Basic.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
 */
 
-// #define CONF string("10.129.28.44:8090")
-#define CONF string("10.129.28.141:7003")
+#define CONF string("10.129.28.44:8091")
+// #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
-// #define JDEBUG
+#define JDEBUG
 
 #include "jutils.h"
 #include <iostream>
@@ -44,6 +44,20 @@ int main(){
   }
   kr.reset();
 
+  {
+  /* Check successfull get */
+    KVStore<int,string> ks;
+    IS_REACHABLE
+    bool succ = ks.bind(CONF,TABLE);
+    jAssert(!succ,cout<<"Connection error"<<endl;);
+    IS_REACHABLE
+    shared_ptr<KVData<string>> kd;
+    for(int i=0;i<keys.size();i++){
+      kd = ks.get(keys[i]);
+      jAssert(kd->ierr!=0, cout<<" Error in get serr:"<<kd->serr<<" for index="<<i<<endl;)
+      jAssert(kd->value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd->value<<endl;)
+    }
+  }
 
   /* Check successfull get */
   IS_REACHABLE
