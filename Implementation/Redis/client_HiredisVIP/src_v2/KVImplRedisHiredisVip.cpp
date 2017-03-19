@@ -211,29 +211,108 @@ namespace kvstore {
     return false;
   };
 
-  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
     int sz = key.size();
+    int rep;
+    redisReply *reply;
+
     for(int i=0;i<sz;i++){
-      c_kvsclient->tablename = tablename[i];
-      ret.push_back(get(key[i]));
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(tablename[i]+key[i]).c_str()) ;
+      if(rep == REDIS_ERR){
+        cerr<<"Get Append error"<<endl;
+      }
+    }
+    for(int i=0;i<sz;i++){
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_OK){
+        if(reply == NULL){
+          cerr<<"Reply Null"<<endl;
+        } else {
+          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          if(reply->type == REDIS_REPLY_STRING){
+              ret->ierr = 0;
+              ret->value = string(reply->str);
+          } else if (reply->type == REDIS_REPLY_NIL){
+              ret->ierr = -1;
+              ret->serr = "Value doesn't exists.";
+          } else {
+            cerr<<"Reply type:"<<reply->type<<endl;
+          }
+          freeReplyObject(reply);
+          vret.push_back(ret);
+        }
+      } else {
+        cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
+        // redisClusterReset(cc);
+      }
     }
     return 0;
   }
 
-  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
     int sz = key.size();
+    int rep;
+    redisReply *reply;
+
     for(int i=0;i<sz;i++){
-      c_kvsclient->tablename = tablename[i];
-      ret.push_back(put(key[i],val[i]));
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "set %s %s",(tablename[i]+key[i]).c_str(), val[i].c_str()) ;
+      if(rep == REDIS_ERR){
+        cerr<<"Set Append error"<<endl;
+      }
+    }
+    for(int i=0;i<sz;i++){
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_OK){
+        if(reply == NULL){
+          cerr<<"Reply Null"<<endl;
+        } else {
+          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          if (reply->type == REDIS_REPLY_STATUS){
+              ret->ierr = 0;
+              // cout<<reply->str<<endl;
+          } else {
+            cerr<<"Reply type:"<<reply->type<<endl;
+          }
+          freeReplyObject(reply);
+          vret.push_back(ret);
+        }
+      }
     }
     return 0;
   }
 
-  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
     int sz = key.size();
+    int rep;
+    redisReply *reply;
+
     for(int i=0;i<sz;i++){
-      c_kvsclient->tablename = tablename[i];
-      ret.push_back(del(key[i]));
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "del %s",(tablename[i]+key[i]).c_str());
+      if(rep == REDIS_ERR){
+        cerr<<"Del Append error"<<endl;
+      }
+    }
+    for(int i=0;i<sz;i++){
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_OK){
+        if(reply == NULL){
+          cerr<<"Reply Null"<<endl;
+        } else {
+          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          if (reply->type == REDIS_REPLY_INTEGER){
+              if(reply->integer <= 0){
+                ret->ierr = -1; /*reply->integer;*/
+                ret->serr = "Value doesn't exists.";
+              } else {
+                ret->ierr = 0;
+              }
+          } else {
+            cerr<<"Reply type:"<<reply->type<<endl;
+          }
+          freeReplyObject(reply);
+          vret.push_back(ret);
+        }
+      }
     }
     return 0;
   }

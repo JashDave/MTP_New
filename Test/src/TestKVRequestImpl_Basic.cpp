@@ -2,8 +2,8 @@
   g++ -std=c++11 TestKVRequestImpl_Basic.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
 */
 
-#define CONF string("10.129.28.44:8091")
-// #define CONF string("10.129.28.141:7003")
+// #define CONF string("10.129.28.44:8091")
+#define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
 #define JDEBUG
@@ -23,10 +23,6 @@ int main(){
   vector<int> keys = {1,2,3};
   vector<string> vals = {"One","Two","Three"};
   // int sz = keys.size();
-
-
-  std::vector<KVRequest> vxx;
-  vxx.resize(10);
 
   /* Create connection */
   KVRequest kr;
