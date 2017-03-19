@@ -112,7 +112,7 @@ namespace kvstore {
   }
 
 
-  KVImplHelper::KVImplHelper(KVImplHelper& kh){
+  KVImplHelper::KVImplHelper(const KVImplHelper& kh){
     dataholder = (void*) new KVStoreClient();
     bool succ = bind(((KVStoreClient*)kh.dataholder)->conn,((KVStoreClient*)kh.dataholder)->tablename);
     if(!succ){
