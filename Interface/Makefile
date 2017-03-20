@@ -4,7 +4,7 @@
 
 INSTALL_PATH=/usr/local
 LIB_NAME=libkvstore_v2.a
-G++ = g++ -std=c++11 -pthread
+G++ = g++ -O3 -std=c++11 -pthread
 BIN=bin
 
 all:	init install
@@ -18,7 +18,7 @@ install:	$(BIN)/KVStoreHeader_v2.o $(BIN)/$(LIB_NAME)
 	cp -f *.h $(INSTALL_PATH)/include/kvstore/
 
 $(BIN)/KVStoreHeader_v2.o:	KVStoreHeader_v2.h KVStoreHeader_v2.cpp KVImpl.h
-	$(G++) -c KVStoreHeader_v2.cpp -o $(BIN)/KVStoreHeader_v2.o 
+	$(G++) -c KVStoreHeader_v2.cpp -o $(BIN)/KVStoreHeader_v2.o
 
 $(BIN)/$(LIB_NAME):	$(BIN)/KVStoreHeader_v2.o
 	ar -cvq $(BIN)/$(LIB_NAME) $(BIN)/*.o

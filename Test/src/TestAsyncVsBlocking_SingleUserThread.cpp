@@ -9,7 +9,7 @@
 // #define CONF string("10.129.28.44:8091")
 #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
-#define OPERATION_COUNT 1e4
+#define OPERATION_COUNT 2e4
 #define READ_PROBABILITY 0.5
 #define DATA_SET_SIZE 5000
 #define KEY_SIZE 30

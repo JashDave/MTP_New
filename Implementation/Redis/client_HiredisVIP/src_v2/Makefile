@@ -4,7 +4,7 @@
 
 INSTALL_PATH=/usr/local
 LIB_NAME=libkvs_redis_v2.a
-G++ = g++ -std=c++11
+G++ = g++ -O3 -std=c++11
 
 
 
