@@ -6,16 +6,16 @@
 */
 
 
-#define CONF string("10.129.28.44:8091")
-// #define CONF string("10.129.28.141:7003")
+// #define CONF string("10.129.28.44:8091")
+#define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
-#define OPERATION_COUNT 2e4
+#define OPERATION_COUNT 1e5
 #define READ_PROBABILITY 0.5
-#define DATA_SET_SIZE 1000
+#define DATA_SET_SIZE 100000
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 
-#define JDEBUG
+// #define JDEBUG
 
 #include "jutils.h"
 #include "TestUtils.h"
@@ -48,6 +48,7 @@ int main(){
   shared_ptr<KVData<string>> kd;
   vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
   vector<string> vals = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,VALUE_SIZE);
+  // cout<<vals[0].size()<<endl;
   TRACE(cout<<"Initialized"<<endl);
 
 
@@ -65,39 +66,40 @@ int main(){
     }
   }
   TRACE(cout<<"Loading successfull"<<endl);
+  cout<<"Loading successfull"<<endl;
 
   /* Test Blocking call */
-  // {
-  //   long long opr_count = OPERATION_COUNT;
-  //   int r1;
-  //   int r2;
-  //   long long failure_count = 0;
-  //   double read_prob = READ_PROBABILITY * RAND_MAX;
-  //   long long start_time = currentMicros();
-  //   while(opr_count){
-  //     r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
-  //     r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
-  //     if(r1<read_prob){
-  //       kd = ks.get(keys[r2]);
-  //     } else {
-  //       kd = ks.put(keys[r2],vals[r2]);
-  //     }
-  //     if(kd->ierr != 0){
-  //       failure_count++;
-  //     }
-  //     opr_count--;
-  //     TRACE(if(opr_count%500 == 0){
-  //       cout<<opr_count<<endl;
-  //     })
-  //   }
-  //   long long end_time = currentMicros();
-  //   long long total_time = end_time - start_time;
-  //   cout<<"Blocking Call Stats:"<<endl;
-  //   cout<<"Total time taken :"<<total_time/(1e6)<<" seconds"<<endl;
-  //   cout<<"Throughput :"<< OPERATION_COUNT / (total_time/(1e6)) << " ops"<<endl;
-  //   cout<<"Operation count:"<<(long long) (OPERATION_COUNT)<<endl;
-  //   cout<<"Failures :"<<failure_count<<endl;
-  // }
+  {
+    long long opr_count = OPERATION_COUNT;
+    int r1;
+    int r2;
+    long long failure_count = 0;
+    double read_prob = READ_PROBABILITY * RAND_MAX;
+    long long start_time = currentMicros();
+    while(opr_count){
+      r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
+      r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
+      if(r1<read_prob){
+        kd = ks.get(keys[r2]);
+      } else {
+        kd = ks.put(keys[r2],vals[r2]);
+      }
+      if(kd->ierr != 0){
+        failure_count++;
+      }
+      opr_count--;
+      TRACE(if(opr_count%500 == 0){
+        cout<<opr_count<<endl;
+      })
+    }
+    long long end_time = currentMicros();
+    long long total_time = end_time - start_time;
+    cout<<"Blocking Call Stats:"<<endl;
+    cout<<"Total time taken :"<<total_time/(1e6)<<" seconds"<<endl;
+    cout<<"Throughput :"<< OPERATION_COUNT / (total_time/(1e6)) << " ops"<<endl;
+    cout<<"Operation count:"<<(long long) (OPERATION_COUNT)<<endl;
+    cout<<"Failures :"<<failure_count<<endl;
+  }
 
 
   /* Test Async call */
