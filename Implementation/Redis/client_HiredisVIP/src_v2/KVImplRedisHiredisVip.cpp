@@ -20,7 +20,7 @@ namespace kvstore {
 
   class KVStoreClient{
   public:
-    redisClusterContext* rc;
+    redisClusterContext* rc=NULL;
     string tablename;
     string conn;
     std::mutex mtx;
@@ -37,6 +37,7 @@ namespace kvstore {
         td.join();
       }
       // std::terminate(td);
+      if(rc!=NULL)
       redisClusterFree(rc);
     }
     void eventLoop(){

@@ -2,10 +2,11 @@
   g++ -std=c++11 TestKVStoreImpl_Basic_Async.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
 */
 
-#define CONF string("10.129.28.141:7003")
+#define CONF string("10.129.28.44:8091")
+// #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
-// #define JDEBUG
+#define JDEBUG
 
 #include "jutils.h"
 #include <iostream>
@@ -18,18 +19,22 @@ using namespace kvstore;
 void successfullGetCallBack(std::shared_ptr<KVData<string>> r,void *data){
   jAssert(r->ierr!=0, cout<<" Error in get(1):"<<r->serr<<" called from line "<<*((int*)data)<<endl;)
   jAssert(r->value!="One", cout<<"Incorrect value from get(1) got:"<<r->value<<" called from line "<<*((int*)data)<<endl;)
+  TRACE(cout<<"successfull get :"<<r->value<<endl;)
 }
 
 void unsuccessfullGetCallBack(std::shared_ptr<KVData<string>> r,void *data){
   jAssert(r->ierr==0, cout<<" Error in unsuccessfull get(1) got:"<<r->value<<" called from line "<<*((int*)data)<<endl;)
+  TRACE(cout<<"unsuccessfull get."<<endl;)
 }
 
 void successfullCallBack(std::shared_ptr<KVData<string>> r,void *data){
   jAssert(r->ierr!=0, cout<<"Serr:"<<r->serr<<" called from line "<<*((int*)data)<<endl;)
+  TRACE(cout<<"successfull callback."<<endl;)
 }
 
 void unsuccessfullCallBack(std::shared_ptr<KVData<string>> r,void *data){
   jAssert(r->ierr==0, cout<<"Error in unsuccessfull del called from line "<<*((int*)data)<<endl;)
+  TRACE(cout<<"unsuccessfull callback."<<endl;)
 }
 
 
