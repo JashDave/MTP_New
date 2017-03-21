@@ -47,7 +47,7 @@ namespace kvstore {
       struct async_data ad;
       std::vector<string> v;
       while(keeprunning){
-        while(true){mtx.lock();if(!q.empty()){ad=q.front();q.pop();mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
+        while(true){mtx.lock();if(!q.empty()){ad=q.front();q.pop();mtx.unlock(); break;}; mtx.unlock();/*cout<<"waiting"<<endl;*/std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
         std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
 
         v=kc->receive();

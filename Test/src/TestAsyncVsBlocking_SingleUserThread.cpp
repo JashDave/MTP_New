@@ -6,12 +6,13 @@
 */
 
 
-// #define CONF string("10.129.28.44:8091")
-#define CONF string("10.129.28.141:7003")
+// #define CONF string("127.0.0.1:8091")
+#define CONF string("10.129.28.44:8091")
+// #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
-#define OPERATION_COUNT 1e5
+#define OPERATION_COUNT 1e4
 #define READ_PROBABILITY 0.5
-#define DATA_SET_SIZE 100000
+#define DATA_SET_SIZE 10000
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 
@@ -39,12 +40,15 @@ void callback_handler(shared_ptr<KVData<string>> kd, void *data){
   dh->opr_count++;
   if(kd->ierr != 0){
     dh->failure_count++;
+  } else {
+    // cout<<"Val:"<<kd->value<<endl;
   }
   TRACE(if(dh->opr_count%1000==0){cout<<"Done:"<<dh->opr_count<<endl;})
 }
 
 
 int main(){
+  cout<<"DATA_SET_SIZE:"<<DATA_SET_SIZE<<endl;
   shared_ptr<KVData<string>> kd;
   vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
   vector<string> vals = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,VALUE_SIZE);
@@ -68,7 +72,22 @@ int main(){
   TRACE(cout<<"Loading successfull"<<endl);
   cout<<"Loading successfull"<<endl;
 
+
+//     /* Load Data */
+// {
+//     vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
+//     vector<string> vals = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,VALUE_SIZE);
+//     for(long long i = 0; i<DATA_SET_SIZE; i++){
+//       kd = ks.put(keys[i],vals[i]);
+//       if(kd->ierr != 0){
+//         cerr<<"Error2 loading data"<<endl;
+//       }
+//     }
+//     cout<<"Loading2 successfull"<<endl;
+// }
+
   /* Test Blocking call */
+  // if(1==0) //------------------------------
   {
     long long opr_count = OPERATION_COUNT;
     int r1;
@@ -119,11 +138,15 @@ int main(){
         ks.async_put(keys[r2],vals[r2],callback_handler,&dh);
       }
       opr_count--;
+      // cout<<opr_count<<endl;
+
       TRACE(if(opr_count%500 == 0){
         cout<<opr_count<<endl;
       })
     }
     /*wait while all callbacks are completed*/
+    TRACE(cout<<"Waiting for callbacks"<<endl;)
+    cout<<"Waiting for callbacks"<<endl;
     while(dh.opr_count!=OPERATION_COUNT){usleep(1000);}
     long long end_time = currentMicros();
     long long total_time = end_time - start_time;

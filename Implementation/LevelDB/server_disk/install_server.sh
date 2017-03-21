@@ -3,7 +3,7 @@ sudo mkdir /home/NFV_LTE_EPC
 sudo chmod u+rwx /home/NFV_LTE_EPC
 mkdir deps
 cd deps
-wget "https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz"
+#wget "https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz"
 cd ..
 tar -C /home/NFV_LTE_EPC -xzf deps/go1.6.2.linux-amd64.tar.gz
 

@@ -6,6 +6,7 @@ import (
   "net"
   "strconv"
   "time"
+  // "io"
   // "strings"
   kvstore "levelmemdb/lmemdb_kvstore"
 )
@@ -134,48 +135,62 @@ func writeStrings(strarr []string,conn net.Conn){
 
   }
   n,err := conn.Write(bytearr) //? err
-  if n<sum {
+  if n<sum || err!=nil {
     fmt.Println("Write error",err);
   }
 }
 
-func readString(conn net.Conn) string{
+func readString(conn net.Conn) (string,error){
   lenbuf := make([]byte,4)
-  /*n,err := */conn.Read(lenbuf) //? err
+  n,err := conn.Read(lenbuf) //? err
+  if(n!=4 || err!=nil){
+    fmt.Println("Error(1): n=",n," Err:",err)
+  }
   var slen int
   slen = int(lenbuf[0])<<24 + int(lenbuf[1])<<16 + int(lenbuf[2])<<8 + int(lenbuf[3])
-  //fmt.Println("Slen:",slen)
+  // fmt.Println("Slen:",slen)
   strbuf := make([]byte,slen)
   dsum:=0;
   for dsum!=slen{
-    n,_ := conn.Read(strbuf[dsum:]) //? err
+    n,err := conn.Read(strbuf[dsum:]) //? err
+    if(err!=nil){
+      fmt.Println("Error(2): n=",n," Err:",err)
+      return "",err
+    }
     dsum+=n
   }
-  return string(strbuf)
+  return string(strbuf),nil
 }
 
 func readStrings(conn net.Conn) ([]string, error) {
   no_of_string := make([]byte,1)
-  _,err := conn.Read(no_of_string) //? err
-  if(err!=nil){
+  n,err := conn.Read(no_of_string) //? err
+  if((n!=1 || err!=nil)){
+    // fmt.Println("Error(3): n=",n," Err:",err)
     return nil,err
   }
+  // fmt.Println("# strings:",no_of_string[0])
   strarr := make([]string,no_of_string[0])
   for i:=byte(0);i<no_of_string[0];i++ {
-    strarr[i] = readString(conn)
+    strarr[i],err = readString(conn)
+    if(err!=nil){
+      fmt.Println("Error(4) due to error 2: n=",n," Err:",err)
+      return nil,err
+    }
   }
+  // fmt.Println("Strarr:",strarr)
   return strarr,nil
 }
 
 func handleClient(conn net.Conn) {
   var cl Client
-  //i := 0
+  // i := 0
   for {
     strarr,err := readStrings(conn)
-      //i++
-      //fmt.Println("Iter:",i,"Strings",strarr)
+      // i++
+      // fmt.Println("Iter:",i)//,"Strings",strarr)
     if err!=nil {
-      //fmt.Println("returned")
+      // fmt.Println("returned")
       return
     }
     cl.doTask(strarr,conn)
