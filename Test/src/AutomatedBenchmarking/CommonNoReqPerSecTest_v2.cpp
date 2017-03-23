@@ -1,6 +1,6 @@
 /*
-   g++ --std=c++0x -g -I../install/include -I. RMCLoadTestMultiThreaded.cpp  -o RMCLoadTestMultiThreaded.out -L../install/bin -lramcloud -Wl,-rpath=../install/bin -pthread
- */
+  g++ -std=c++11 CommonNoReqPerSecTest_v2.cpp -pthread -lboost_serialization -lkvstore_v2 -lkvs_redis_v2 -DDS=\"REDIS\"
+*/
 
 // -DDS="Redis"
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
   }
 
-  vector<string> server_list = {"10.129.28.101:8091","10.129.28.141:8091","10.129.26.81:8091"};
+  vector<string> server_list = {"10.129.28.101:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
   vector<string> key = DataSetGenerator::getRandomStrings(DATASET_SIZE,KEY_SIZE);
   vector<string> value = DataSetGenerator::getRandomStrings(DATASET_SIZE,VALUE_SIZE);
 
