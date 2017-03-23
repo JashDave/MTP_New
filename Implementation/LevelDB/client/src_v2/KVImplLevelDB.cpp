@@ -43,7 +43,7 @@ namespace kvstore {
     }
 
     void eventLoop(){
-      std::chrono::milliseconds waittime(10);
+      std::chrono::milliseconds waittime(5);
       struct async_data ad;
       std::vector<string> v;
       while(keeprunning){
@@ -51,11 +51,11 @@ namespace kvstore {
         std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
 
         v=kc->receive();
-        ret->serr = v[1];
-        ret->ierr = stoi(v[2]);
+        ret->serr = v[2];
+        ret->ierr = stoi(v[3]);
         //Get
         if(ret->ierr==0 && ad.type == 1){
-          ret->value = v[0];
+          ret->value = v[1];
         }
         ad.fn(ret,ad.data,ad.vfn);
       }
@@ -111,15 +111,18 @@ namespace kvstore {
   std::shared_ptr<KVData<string>> KVImplHelper::get(string const& key){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Get");
     v.push_back(key);
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[1];
-    ret->ierr = stoi(v[2]);
+    ret->serr = v[2];
+    ret->ierr = stoi(v[3]);
     if(ret->ierr==0){
-      ret->value = v[0];
+      ret->value = v[1];
     }
     return ret;
   }
@@ -127,32 +130,41 @@ namespace kvstore {
   std::shared_ptr<KVData<string>> KVImplHelper::put(string const& key,string const& val){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Put");
     v.push_back(key);
     v.push_back(val);
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[1];
-    ret->ierr = stoi(v[2]);
+    ret->serr = v[2];
+    ret->ierr = stoi(v[3]);
     return ret;
   }
 
   std::shared_ptr<KVData<string>> KVImplHelper::del(string const& key){
     std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Del");
     v.push_back(key);
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[1];
-    ret->ierr = stoi(v[2]);
+    ret->serr = v[2];
+    ret->ierr = stoi(v[3]);
     return ret;
   }
 
   void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Get");
     v.push_back(key);
     c_kvsclient->kc->send(v);
@@ -164,6 +176,9 @@ namespace kvstore {
 
   void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Put");
     v.push_back(key);
     v.push_back(val);
@@ -176,6 +191,9 @@ namespace kvstore {
 
   void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
+    v.push_back("Multiple");
+    v.push_back("CreateTable");
+    v.push_back(c_kvsclient->tablename);
     v.push_back("Del");
     v.push_back(key);
     c_kvsclient->kc->send(v);
@@ -272,4 +290,49 @@ namespace kvstore {
     }
     return 0;
   }
+
+
+    void KVImplHelper::async_get(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+      std::vector<string> v;
+      v.push_back("Multiple");
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      v.push_back("Get");
+      v.push_back(key);
+      c_kvsclient->kc->send(v);
+      struct async_data ad{fn,data,vfn,1};
+      c_kvsclient->mtx.lock();
+      c_kvsclient->q.push(ad);
+      c_kvsclient->mtx.unlock();
+    }
+
+    void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+      std::vector<string> v;
+      v.push_back("Multiple");
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      v.push_back("Put");
+      v.push_back(key);
+      v.push_back(val);
+      c_kvsclient->kc->send(v);
+      struct async_data ad{fn,data,vfn,2};
+      c_kvsclient->mtx.lock();
+      c_kvsclient->q.push(ad);
+      c_kvsclient->mtx.unlock();
+    }
+
+    void KVImplHelper::async_del(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+      std::vector<string> v;
+      v.push_back("Multiple");
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      v.push_back("Del");
+      v.push_back(key);
+      c_kvsclient->kc->send(v);
+      struct async_data ad{fn,data,vfn,3};
+      c_kvsclient->mtx.lock();
+      c_kvsclient->q.push(ad);
+      c_kvsclient->mtx.unlock();
+    }
+
 }

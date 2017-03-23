@@ -123,7 +123,6 @@ namespace kvstore {
 		std::vector<string> del_key;
 	public:
 		KVRequest();
-		// KVRequest(KVRequest&);
 		~KVRequest();		//For distroying connection object
 
 		bool bind(string connection);

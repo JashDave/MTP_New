@@ -10,10 +10,10 @@
 #define CONF string("10.129.28.44:8091")
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
-#define OPERATION_COUNT 1e4
+#define OPERATION_COUNT 1e3
 #define LOCAL_OPERATION_COUNT 3
 #define READ_PROBABILITY 0.5
-#define DATA_SET_SIZE 10000
+#define DATA_SET_SIZE 1000
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 
@@ -39,6 +39,7 @@ struct data_holder {
 void callback_handler(shared_ptr<KVData<string>> kd, void *data){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
+  // cout<<dh->opr_count<<endl;
   if(kd->ierr != 0){
     dh->failure_count++;
   } else {
@@ -75,6 +76,7 @@ int main(){
   struct data_holder dh = {0,0};
   for(long long i = 0; i<DATA_SET_SIZE; i++){
     ks.async_put(keys[i],vals[i],callback_handler,&dh);
+    // cout<<"In"<<i<<endl;
   }
   while(dh.opr_count!=OPERATION_COUNT){usleep(10000);}
   jAssert(dh.failure_count!=0, cout<<"Failure loading data"<<endl;)
@@ -116,6 +118,7 @@ int main(){
         }
       }
       opr_count--;
+      cout<<"Opr :"<<opr_count<<" FC:"<<failure_count<<endl;
       TRACE(if(opr_count%500 == 0){
         cout<<opr_count<<endl;
       })
@@ -132,6 +135,7 @@ int main(){
 
 
   /* Test Async call */
+  if(1==0)
   {
     struct data_holder dh = {0,0};
 

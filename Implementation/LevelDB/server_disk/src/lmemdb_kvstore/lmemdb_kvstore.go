@@ -43,7 +43,7 @@ func (kvs *KVS_LMemDB) CreateTable(tablename string, tm *TableManager) bool{
 			//fmt.Println("Created New Table!!!");
 			db,err := leveldb.OpenFile(tablename,nil); //? err
 			if err!= nil {
-				fmt.Println(err)
+				fmt.Println("CN:",err)
 				return false
 			}
 			tm.tablemap[tablename] = db
@@ -99,12 +99,12 @@ func (kvs *KVS_LMemDB) CreateTable(tablename string, tm *TableManager) bool{
 					kvs.db.Close();
 					err := os.RemoveAll(kvs.tablename)
 					if err!= nil {
-						fmt.Println(err)
+						fmt.Println("Clear:",err)
 						return false
 					}
 					db,err := leveldb.OpenFile(kvs.tablename,nil); //? err
 					if err!= nil {
-						fmt.Println(err)
+						fmt.Println("Clear2:",err)
 						return false
 					}
 					tm.tablemap[kvs.tablename] = db
