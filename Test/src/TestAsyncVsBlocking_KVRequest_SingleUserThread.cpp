@@ -10,10 +10,10 @@
 #define CONF string("10.129.28.44:8091")
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
-#define OPERATION_COUNT 1e3
+#define OPERATION_COUNT 10000
 #define LOCAL_OPERATION_COUNT 3
 #define READ_PROBABILITY 0.5
-#define DATA_SET_SIZE 1000
+#define DATA_SET_SIZE 10000
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 
@@ -55,6 +55,7 @@ void async_execute_handler(shared_ptr<KVResultSet> rs, void *data){
       dh->failure_count++;
     }
   }
+  // cout<<"Done:"<<dh->opr_count<<endl;
   TRACE(if(dh->opr_count%1000==0){cout<<"Done:"<<dh->opr_count<<endl;})
 }
 
@@ -78,12 +79,12 @@ int main(){
     ks.async_put(keys[i],vals[i],callback_handler,&dh);
     // cout<<"In"<<i<<endl;
   }
-  while(dh.opr_count!=OPERATION_COUNT){usleep(10000);}
+  while(dh.opr_count!=DATA_SET_SIZE){usleep(10000);}
   jAssert(dh.failure_count!=0, cout<<"Failure loading data"<<endl;)
   TRACE(cout<<"Loading successfull"<<endl);
   cout<<"Loading successfull"<<endl;
 
-
+  // sleep(2);
   /* Create connection */
   KVRequest kr;
   shared_ptr<KVResultSet> rs;
@@ -112,13 +113,14 @@ int main(){
         }
       }
       rs = kr.execute();
+      kr.reset();
       for(int i=0;i<local_opr_count;i++){
         if(rs->get<string>(i)->ierr != 0){
           failure_count++;
         }
       }
       opr_count--;
-      cout<<"Opr :"<<opr_count<<" FC:"<<failure_count<<endl;
+      // cout<<"Opr :"<<opr_count<<" FC:"<<failure_count<<endl;
       TRACE(if(opr_count%500 == 0){
         cout<<opr_count<<endl;
       })
@@ -131,11 +133,10 @@ int main(){
     cout<<"Operation count:"<<(long long) (OPERATION_COUNT)<<endl;
     cout<<"Failures :"<<failure_count<<endl;
   }
-  kr.reset();
 
 
   /* Test Async call */
-  if(1==0)
+  // if(1==0)
   {
     struct data_holder dh = {0,0};
 
@@ -157,6 +158,7 @@ int main(){
         }
       }
       kr.async_execute(async_execute_handler,&dh);
+      kr.reset();
       opr_count--;
       TRACE(if(opr_count%500 == 0){
         cout<<opr_count<<endl;
