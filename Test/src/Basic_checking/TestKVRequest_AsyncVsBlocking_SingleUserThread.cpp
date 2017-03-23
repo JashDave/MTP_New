@@ -1,5 +1,5 @@
 /*
-  g++ -std=c++11 TestAsyncVsBlocking_KVRequest_SingleUserThread.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
+  g++ -std=c++11 TestKVRequest_AsyncVsBlocking_SingleUserThread.cpp -lkvstore_v2 -lboost_serialization -pthread -lkvs_redis_v2
   NOTE :
   Note that here we are using single user thread, but async implementation may
   (may not) use multiple threads inside.
@@ -7,7 +7,7 @@
 
 
 // #define CONF string("127.0.0.1:8091")
-#define CONF string("10.129.28.44:8091")
+// #define CONF string("10.129.28.44:8091")
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 #define OPERATION_COUNT 10000
@@ -19,10 +19,10 @@
 
 // #define JDEBUG
 
-#include "jutils.h"
-#include "TestUtils.h"
-#include "./AutomatedBenchmarking/DataSetGenerator.cpp"
-#include "./AutomatedBenchmarking/RandomNumberGenerator.cpp"
+#include "../jutils.h"
+#include "../TestUtils.h"
+#include "../AutomatedBenchmarking/DataSetGenerator.cpp"
+#include "../AutomatedBenchmarking/RandomNumberGenerator.cpp"
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -95,7 +95,7 @@ int main(){
   /* Test Blocking call */
   // if(1==0) //------------------------------
   {
-    int local_opr_count = 3;
+    int local_opr_count = LOCAL_OPERATION_COUNT;
     long long opr_count = OPERATION_COUNT;
     int r1;
     int r2;

@@ -365,4 +365,53 @@ namespace kvstore {
 			cerr<<"\n\n\ndel Append error\n\n\n"<<endl;
 		}
   }
+
+
+  void KVImplHelper::async_get(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+    // cout<<"Get key:"<<key<<endl;
+      c_kvsclient->mtx.lock();
+      int ret = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(tablename+key).c_str()) ;
+      c_kvsclient->mtx.unlock();
+			if(ret!= REDIS_ERR){
+				// c_kvsclient->count++;
+        struct async_data ad{fn,data,vfn,1};
+        c_kvsclient->mtx.lock();
+        c_kvsclient->q.push(ad);
+        c_kvsclient->mtx.unlock();
+			}	else {
+				cerr<<"\n\n\nget Append error\n\n\n"<<endl;
+			}
+  }
+
+  void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  // cout<<"Put key:"<<key<<endl;
+  // cout<<"Put val:"<<val<<endl;
+    c_kvsclient->mtx.lock();
+    int ret = redisClusterAppendCommand(c_kvsclient->rc, "set %s %s",(tablename+key).c_str(),val.c_str()) ;
+    c_kvsclient->mtx.unlock();
+		if(ret!= REDIS_ERR){
+			// c_kvsclient->count++;
+      struct async_data ad{fn,data,vfn,2};
+      c_kvsclient->mtx.lock();
+      c_kvsclient->q.push(ad);
+      c_kvsclient->mtx.unlock();
+		}	else {
+			cerr<<"\n\n\nput Append error\n\n\n"<<endl;
+		}
+  }
+  void KVImplHelper::async_del(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+    // cout<<"del key:"<<key<<endl;
+    c_kvsclient->mtx.lock();
+    int ret = redisClusterAppendCommand(c_kvsclient->rc, "del %s",(tablename+key).c_str()) ;
+    c_kvsclient->mtx.unlock();
+		if(ret!= REDIS_ERR){
+      // c_kvsclient->count++;
+      struct async_data ad{fn,data,vfn,3};
+      c_kvsclient->mtx.lock();
+      c_kvsclient->q.push(ad);
+      c_kvsclient->mtx.unlock();
+		}	else {
+			cerr<<"\n\n\ndel Append error\n\n\n"<<endl;
+		}
+  }
 }

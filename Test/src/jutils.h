@@ -7,4 +7,6 @@
 #endif
 
 #define IS_REACHABLE TRACE(std::cout<<"Reached:"<<__LINE__<<std::endl;)
-#define jAssert(x,y) if(x){std::cout<<"At line "<<__LINE__<<":";y;exit(-1);}
+
+/*exit(-1) is not used intentionaly*/
+#define jAssert(x,y) if(x){std::cout<<"At line "<<__LINE__<<":";y;exit(0);}
