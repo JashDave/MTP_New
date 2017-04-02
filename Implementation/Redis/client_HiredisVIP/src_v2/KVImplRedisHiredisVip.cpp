@@ -12,7 +12,7 @@ namespace kvstore {
   #define c_kvsclient ((KVStoreClient*)dataholder)
 
   struct async_data{
-    void (*fn)(std::shared_ptr<KVData<string>>,void *,void *);
+    void (*fn)(KVData<string>,void *,void *);
     void *data;
     void *vfn;
     int type;
@@ -61,7 +61,7 @@ namespace kvstore {
           if(reply == NULL){
             cerr<<"Reply Null"<<endl;
           } else {
-            std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+            KVData<string> ret = KVData<string>();
             mtx.lock();
             // if(q.empty()){
             //   cout<<"Queue empty :"<<__FILE__<<endl;
@@ -149,8 +149,8 @@ namespace kvstore {
     return true;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::get(string const& key){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::get(string const& key){
+    KVData<string> ret = KVData<string>();
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "get %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
@@ -170,8 +170,8 @@ namespace kvstore {
     return ret;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::put(string const& key,string const& val){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::put(string const& key,string const& val){
+    KVData<string> ret = KVData<string>();
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "set %s %s", (c_kvsclient->tablename+key).c_str(), val.c_str());
     if(reply == NULL)
     {
@@ -186,8 +186,8 @@ namespace kvstore {
     return ret;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::del(string const& key){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::del(string const& key){
+    KVData<string> ret = KVData<string>();
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "del %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
@@ -212,7 +212,7 @@ namespace kvstore {
     return false;
   };
 
-  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
+  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& vret){
     int sz = key.size();
     int rep;
     redisReply *reply;
@@ -229,7 +229,7 @@ namespace kvstore {
         if(reply == NULL){
           cerr<<"Reply Null"<<endl;
         } else {
-          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          KVData<string> ret = KVData<string>();
           if(reply->type == REDIS_REPLY_STRING){
               ret.ierr = 0;
               ret.value = string(reply->str);
@@ -250,7 +250,7 @@ namespace kvstore {
     return 0;
   }
 
-  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
+  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<KVData<string>>& vret){
     int sz = key.size();
     int rep;
     redisReply *reply;
@@ -267,7 +267,7 @@ namespace kvstore {
         if(reply == NULL){
           cerr<<"Reply Null"<<endl;
         } else {
-          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          KVData<string> ret = KVData<string>();
           if (reply->type == REDIS_REPLY_STATUS){
               ret.ierr = 0;
               // cout<<reply->str<<endl;
@@ -282,7 +282,7 @@ namespace kvstore {
     return 0;
   }
 
-  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& vret){
+  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& vret){
     int sz = key.size();
     int rep;
     redisReply *reply;
@@ -299,7 +299,7 @@ namespace kvstore {
         if(reply == NULL){
           cerr<<"Reply Null"<<endl;
         } else {
-          std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+          KVData<string> ret = KVData<string>();
           if (reply->type == REDIS_REPLY_INTEGER){
               if(reply->integer <= 0){
                 ret.ierr = -1; /*reply->integer;*/
@@ -318,7 +318,7 @@ namespace kvstore {
     return 0;
   }
 
-  void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     // cout<<"Get key:"<<key<<endl;
       c_kvsclient->mtx.lock();
       int ret = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(c_kvsclient->tablename+key).c_str()) ;
@@ -334,7 +334,7 @@ namespace kvstore {
 			}
   }
 
-  void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
   // cout<<"Put key:"<<key<<endl;
   // cout<<"Put val:"<<val<<endl;
     c_kvsclient->mtx.lock();
@@ -350,7 +350,7 @@ namespace kvstore {
 			cerr<<"\n\n\nput Append error\n\n\n"<<endl;
 		}
   }
-  void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     // cout<<"del key:"<<key<<endl;
     c_kvsclient->mtx.lock();
     int ret = redisClusterAppendCommand(c_kvsclient->rc, "del %s",(c_kvsclient->tablename+key).c_str()) ;
@@ -367,7 +367,7 @@ namespace kvstore {
   }
 
 
-  void KVImplHelper::async_get(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     // cout<<"Get key:"<<key<<endl;
       c_kvsclient->mtx.lock();
       int ret = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(tablename+key).c_str()) ;
@@ -383,7 +383,7 @@ namespace kvstore {
 			}
   }
 
-  void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
   // cout<<"Put key:"<<key<<endl;
   // cout<<"Put val:"<<val<<endl;
     c_kvsclient->mtx.lock();
@@ -399,7 +399,7 @@ namespace kvstore {
 			cerr<<"\n\n\nput Append error\n\n\n"<<endl;
 		}
   }
-  void KVImplHelper::async_del(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     // cout<<"del key:"<<key<<endl;
     c_kvsclient->mtx.lock();
     int ret = redisClusterAppendCommand(c_kvsclient->rc, "del %s",(tablename+key).c_str()) ;
