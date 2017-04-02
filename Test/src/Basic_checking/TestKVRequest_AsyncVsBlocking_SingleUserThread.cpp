@@ -36,22 +36,22 @@ struct data_holder {
   long long failure_count;
 };
 
-void callback_handler(shared_ptr<KVData<string>> kd, void *data){
+void callback_handler(KVData<string> kd, void *data){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
   // cout<<dh->opr_count<<endl;
-  if(kd->ierr != 0){
+  if(kd.ierr != 0){
     dh->failure_count++;
   } else {
-    // cout<<"Val:"<<kd->value<<endl;
+    // cout<<"Val:"<<kd.value<<endl;
   }
 }
 
-void async_execute_handler(shared_ptr<KVResultSet> rs, void *data){
+void async_execute_handler(KVResultSet rs, void *data){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
   for(int i=0;i<LOCAL_OPERATION_COUNT;i++){
-    if(rs->get<string>(i)->ierr != 0){
+    if(rs.get<string>(i).ierr != 0){
       dh->failure_count++;
     }
   }
@@ -87,7 +87,6 @@ int main(){
   // sleep(2);
   /* Create connection */
   KVRequest kr;
-  shared_ptr<KVResultSet> rs;
   succ = kr.bind(CONF);
   jAssert(!succ,cout<<"Connection error"<<endl;);
   TRACE(cout<<"Connection successfull"<<endl);
@@ -112,10 +111,10 @@ int main(){
           kr.put<string,string>(keys[r2],vals[r2],TABLE);
         }
       }
-      rs = kr.execute();
+      KVResultSet rs = kr.execute();
       kr.reset();
       for(int i=0;i<local_opr_count;i++){
-        if(rs->get<string>(i)->ierr != 0){
+        if(rs.get<string>(i).ierr != 0){
           failure_count++;
         }
       }

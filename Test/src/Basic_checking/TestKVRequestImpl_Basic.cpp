@@ -18,8 +18,7 @@ using namespace std;
 using namespace kvstore;
 
 int main(){
-  shared_ptr<KVResultSet> rs;
-  shared_ptr<KVData<string>> kd;
+  KVData<string> kd;
   vector<int> keys = {1,2,3};
   vector<string> vals = {"One","Two","Three"};
   // int sz = keys.size();
@@ -35,12 +34,12 @@ int main(){
   for(int i=0;i<keys.size();i++){
     kr.put<int,string>(keys[i],vals[i],TABLE);
   }
-  rs = kr.execute();
-  jAssert(rs->size()!=keys.size(),cout<<"Put size mismatch expected:"<<keys.size()<<" got:"<<rs->size()<<endl;)
-  for(int i=0;i<rs->size();i++){
-    kd = rs->get<string>(i);
-    jAssert(rs->oprType(i)!=OPR_TYPE_PUT, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs->oprType(i)<<endl;)
-    jAssert(kd->ierr!=0, cout<<"Error in put serr:"<<kd->serr<<" for index="<<i<<endl;)
+  KVResultSet rs = kr.execute();
+  jAssert(rs.size()!=keys.size(),cout<<"Put size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
+  for(int i=0;i<rs.size();i++){
+    kd = rs.get<string>(i);
+    jAssert(rs.oprType(i)!=OPR_TYPE_PUT, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs.oprType(i)<<endl;)
+    jAssert(kd.ierr!=0, cout<<"Error in put serr:"<<kd.serr<<" for index="<<i<<endl;)
   }
   kr.reset();
 
@@ -51,11 +50,11 @@ int main(){
     bool succ = ks.bind(CONF,TABLE);
     jAssert(!succ,cout<<"Connection error"<<endl;);
     IS_REACHABLE
-    shared_ptr<KVData<string>> kd;
+    KVData<string> kd;
     for(int i=0;i<keys.size();i++){
       kd = ks.get(keys[i]);
-      jAssert(kd->ierr!=0, cout<<" Error in get serr:"<<kd->serr<<" for index="<<i<<endl;)
-      jAssert(kd->value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd->value<<endl;)
+      jAssert(kd.ierr!=0, cout<<" Error in get serr:"<<kd.serr<<" for index="<<i<<endl;)
+      jAssert(kd.value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd.value<<endl;)
     }
   }
 
@@ -65,12 +64,12 @@ int main(){
     kr.get<int,string>(keys[i],TABLE);
   }
   rs = kr.execute();
-  jAssert(rs->size()!=keys.size(),cout<<"Get size mismatch expected:"<<keys.size()<<" got:"<<rs->size()<<endl;)
-  for(int i=0;i<rs->size();i++){
-    kd = rs->get<string>(i);
-    jAssert(rs->oprType(i)!=OPR_TYPE_GET, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs->oprType(i)<<endl;)
-    jAssert(kd->ierr!=0, cout<<" Error in get serr:"<<kd->serr<<" for index="<<i<<endl;)
-    jAssert(kd->value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd->value<<endl;)
+  jAssert(rs.size()!=keys.size(),cout<<"Get size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
+  for(int i=0;i<rs.size();i++){
+    kd = rs.get<string>(i);
+    jAssert(rs.oprType(i)!=OPR_TYPE_GET, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs.oprType(i)<<endl;)
+    jAssert(kd.ierr!=0, cout<<" Error in get serr:"<<kd.serr<<" for index="<<i<<endl;)
+    jAssert(kd.value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd.value<<endl;)
   }
   kr.reset();
 
@@ -80,11 +79,11 @@ int main(){
     kr.del<int,string>(keys[i],TABLE);
   }
   rs = kr.execute();
-  jAssert(rs->size()!=keys.size(),cout<<"Del size mismatch expected:"<<keys.size()<<" got:"<<rs->size()<<endl;)
-  for(int i=0;i<rs->size();i++){
-    kd = rs->get<string>(i);
-    jAssert(rs->oprType(i)!=OPR_TYPE_DEL, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_DEL<<" got:"<<rs->oprType(i)<<endl;)
-    jAssert(kd->ierr!=0, cout<<"Error in del serr:"<<kd->serr<<" for index="<<i<<endl;)
+  jAssert(rs.size()!=keys.size(),cout<<"Del size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
+  for(int i=0;i<rs.size();i++){
+    kd = rs.get<string>(i);
+    jAssert(rs.oprType(i)!=OPR_TYPE_DEL, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_DEL<<" got:"<<rs.oprType(i)<<endl;)
+    jAssert(kd.ierr!=0, cout<<"Error in del serr:"<<kd.serr<<" for index="<<i<<endl;)
   }
   kr.reset();
 
@@ -94,11 +93,11 @@ int main(){
     kr.get<int,string>(keys[i],TABLE);
   }
   rs = kr.execute();
-  jAssert(rs->size()!=keys.size(),cout<<"Unsuccessfull get size mismatch expected:"<<keys.size()<<" got:"<<rs->size()<<endl;)
-  for(int i=0;i<rs->size();i++){
-    kd = rs->get<string>(i);
-    jAssert(rs->oprType(i)!=OPR_TYPE_GET, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs->oprType(i)<<endl;)
-    jAssert(kd->ierr==0, cout<<"Error in unsuccessfull get got:"<<kd->value<<" for index="<<i<<endl;)
+  jAssert(rs.size()!=keys.size(),cout<<"Unsuccessfull get size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
+  for(int i=0;i<rs.size();i++){
+    kd = rs.get<string>(i);
+    jAssert(rs.oprType(i)!=OPR_TYPE_GET, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_GET<<" got:"<<rs.oprType(i)<<endl;)
+    jAssert(kd.ierr==0, cout<<"Error in unsuccessfull get got:"<<kd.value<<" for index="<<i<<endl;)
   }
   kr.reset();
 
@@ -108,11 +107,11 @@ int main(){
     kr.del<int,string>(keys[i],TABLE);
   }
   rs = kr.execute();
-  jAssert(rs->size()!=keys.size(),cout<<"Unsuccessfull del size mismatch expected:"<<keys.size()<<" got:"<<rs->size()<<endl;)
-  for(int i=0;i<rs->size();i++){
-    kd = rs->get<string>(i);
-    jAssert(rs->oprType(i)!=OPR_TYPE_DEL, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_DEL<<" got:"<<rs->oprType(i)<<endl;)
-    jAssert(kd->ierr==0, cout<<"Error in unsuccessfull del for index="<<i<<endl;)
+  jAssert(rs.size()!=keys.size(),cout<<"Unsuccessfull del size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
+  for(int i=0;i<rs.size();i++){
+    kd = rs.get<string>(i);
+    jAssert(rs.oprType(i)!=OPR_TYPE_DEL, cout<<"Incorrect operation type for index="<<i<<" expected:"<<OPR_TYPE_DEL<<" got:"<<rs.oprType(i)<<endl;)
+    jAssert(kd.ierr==0, cout<<"Error in unsuccessfull del for index="<<i<<endl;)
   }
   kr.reset();
 

@@ -16,30 +16,30 @@
 using namespace std;
 using namespace kvstore;
 
-void successfullGetCallBack(std::shared_ptr<KVData<string>> r,void *data){
-  jAssert(r->ierr!=0, cout<<" Error in get(1):"<<r->serr<<" called from line "<<*((int*)data)<<endl;)
-  jAssert(r->value!="One", cout<<"Incorrect value from get(1) got:"<<r->value<<" called from line "<<*((int*)data)<<endl;)
-  TRACE(cout<<"successfull get :"<<r->value<<endl;)
+void successfullGetCallBack(KVData<string> r,void *data){
+  jAssert(r.ierr!=0, cout<<" Error in get(1):"<<r.serr<<" called from line "<<*((int*)data)<<endl;)
+  jAssert(r.value!="One", cout<<"Incorrect value from get(1) got:"<<r.value<<" called from line "<<*((int*)data)<<endl;)
+  TRACE(cout<<"successfull get :"<<r.value<<endl;)
 }
 
-void unsuccessfullGetCallBack(std::shared_ptr<KVData<string>> r,void *data){
-  jAssert(r->ierr==0, cout<<" Error in unsuccessfull get(1) got:"<<r->value<<" called from line "<<*((int*)data)<<endl;)
+void unsuccessfullGetCallBack(KVData<string> r,void *data){
+  jAssert(r.ierr==0, cout<<" Error in unsuccessfull get(1) got:"<<r.value<<" called from line "<<*((int*)data)<<endl;)
   TRACE(cout<<"unsuccessfull get."<<endl;)
 }
 
-void successfullCallBack(std::shared_ptr<KVData<string>> r,void *data){
-  jAssert(r->ierr!=0, cout<<"Serr:"<<r->serr<<" called from line "<<*((int*)data)<<endl;)
+void successfullCallBack(KVData<string> r,void *data){
+  jAssert(r.ierr!=0, cout<<"Serr:"<<r.serr<<" called from line "<<*((int*)data)<<endl;)
   TRACE(cout<<"successfull callback."<<endl;)
 }
 
-void unsuccessfullCallBack(std::shared_ptr<KVData<string>> r,void *data){
-  jAssert(r->ierr==0, cout<<"Error in unsuccessfull del called from line "<<*((int*)data)<<endl;)
+void unsuccessfullCallBack(KVData<string> r,void *data){
+  jAssert(r.ierr==0, cout<<"Error in unsuccessfull del called from line "<<*((int*)data)<<endl;)
   TRACE(cout<<"unsuccessfull callback."<<endl;)
 }
 
 
 int main(){
-  shared_ptr<KVData<string>> r;
+  KVData<string> r;
 
   /* Create connection */
   KVStore<int,string> ks;
