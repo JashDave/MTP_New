@@ -9,6 +9,8 @@
 // #define CONF string("127.0.0.1:8091")
 // #define CONF string("10.129.28.44:8091")
 // #define CONF string("10.129.28.141:7003")
+#define CONF string("127.1.1.1:8090")
+
 #define TABLE string("TestTable123")
 #define OPERATION_COUNT 1e4
 #define READ_PROBABILITY 0.5
@@ -35,13 +37,13 @@ struct data_holder {
   long long failure_count;
 };
 
-void callback_handler(shared_ptr<KVData<string>> kd, void *data){
+void callback_handler(KVData<string> kd, void *data){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
-  if(kd->ierr != 0){
+  if(kd.ierr != 0){
     dh->failure_count++;
   } else {
-    // cout<<"Val:"<<kd->value<<endl;
+    // cout<<"Val:"<<kd.value<<endl;
   }
   TRACE(if(dh->opr_count%1000==0){cout<<"Done:"<<dh->opr_count<<endl;})
 }
@@ -49,7 +51,7 @@ void callback_handler(shared_ptr<KVData<string>> kd, void *data){
 
 int main(){
   cout<<"DATA_SET_SIZE:"<<DATA_SET_SIZE<<endl;
-  shared_ptr<KVData<string>> kd;
+  KVData<string> kd;
   vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
   vector<string> vals = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,VALUE_SIZE);
   // cout<<vals[0].size()<<endl;
@@ -65,7 +67,7 @@ int main(){
   /* Load Data */
   for(long long i = 0; i<DATA_SET_SIZE; i++){
     kd = ks.put(keys[i],vals[i]);
-    if(kd->ierr != 0){
+    if(kd.ierr != 0){
       cerr<<"Error loading data"<<endl;
     }
   }
@@ -79,7 +81,7 @@ int main(){
 //     vector<string> vals = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,VALUE_SIZE);
 //     for(long long i = 0; i<DATA_SET_SIZE; i++){
 //       kd = ks.put(keys[i],vals[i]);
-//       if(kd->ierr != 0){
+//       if(kd.ierr != 0){
 //         cerr<<"Error2 loading data"<<endl;
 //       }
 //     }
@@ -103,7 +105,7 @@ int main(){
       } else {
         kd = ks.put(keys[r2],vals[r2]);
       }
-      if(kd->ierr != 0){
+      if(kd.ierr != 0){
         failure_count++;
       }
       opr_count--;

@@ -68,34 +68,34 @@ namespace kvstore {
 	class KVResultSet {
 	private:
 		// int count;
-		std::shared_ptr< KVData<string> > extra;
-		vector< std::shared_ptr< KVData<string> > > res;
+		KVData<string> extra;
+		vector<KVData<string>> res;
 		vector<string> operation_type;
 	public:
-		KVResultSet(vector<std::shared_ptr<KVData<string> > > r, vector<string> opr_type);
+		KVResultSet(vector<KVData<string>> r, vector<string> opr_type);
 		int size();
 		string oprType(int idx);
 
 		template<typename ValType>
-		std::shared_ptr<KVData<ValType>> get(int idx);
+		KVData<ValType> get(int idx);
 	};
 	/*----------KVResultSet::get()-----------*/
 	template<typename ValType>
-	std::shared_ptr<KVData<ValType>> KVResultSet::get(int idx){
-		std::shared_ptr<KVData<ValType>> ret = std::make_shared<KVData<ValType>>();
+	KVData<ValType> KVResultSet::get(int idx){
+		KVData<ValType> ret = KVData<ValType>();
 		int count = size();
 		if(idx>=0 && idx<count){
-			ret->ierr = res[idx]->ierr;
-			ret->serr = res[idx]->serr;
-			if(ret->ierr==0 && operation_type[idx]==OPR_TYPE_GET){
-				ret->value = toBoostObject<ValType>(res[idx]->value);
+			ret.ierr = res[idx].ierr;
+			ret.serr = res[idx].serr;
+			if(ret.ierr==0 && operation_type[idx]==OPR_TYPE_GET){
+				ret.value = toBoostObject<ValType>(res[idx].value);
 			}
 		} else {
-			ret->ierr=-1;
+			ret.ierr=-1;
 			if(count==0)
-			ret->serr="Empty KVResultSet due to empty request queue, please ensure that your request queue is not empty.";
+			ret.serr="Empty KVResultSet due to empty request queue, please ensure that your request queue is not empty.";
 			else
-			ret->serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
+			ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
 		}
 		return ret;
 	}
@@ -136,8 +136,8 @@ namespace kvstore {
 		template<typename KeyType, typename ValType>
 		void del(KeyType const& key,string tablename);
 
-		std::shared_ptr<KVResultSet> execute();
-		void async_execute(void (*fn)(std::shared_ptr<KVResultSet>, void *), void *data); /* */
+		KVResultSet execute();
+		void async_execute(void (*fn)(KVResultSet, void *), void *data); /* */
 		void reset();
 	};
 
@@ -184,12 +184,12 @@ namespace kvstore {
 		KVStore();
 		~KVStore();
 		bool bind(string connection,string tablename);
-		std::shared_ptr<KVData<ValType>> get(KeyType const& key);
-		std::shared_ptr<KVData<ValType>> put(KeyType const& key,ValType const& val);
-		std::shared_ptr<KVData<ValType>> del(KeyType const& key);
-		void async_get(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
-		void async_put(KeyType const& key,ValType const& val, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
-		void async_del(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data);
+		KVData<ValType> get(KeyType const& key);
+		KVData<ValType> put(KeyType const& key,ValType const& val);
+		KVData<ValType> del(KeyType const& key);
+		void async_get(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data);
+		void async_put(KeyType const& key,ValType const& val, void (*fn)(KVData<ValType>,void *),void *data);
+		void async_del(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data);
 		bool clear();
 	};
 	/*-------KVStore::KVStore()----------*/
@@ -207,77 +207,77 @@ namespace kvstore {
 	}
 	/*-------KVStore::get()----------*/
 	template<typename KeyType, typename ValType>
-	std::shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::get(KeyType const& key){
+	KVData<ValType>  KVStore<KeyType,ValType>::get(KeyType const& key){
 		string skey=toBoostString(key);
-		std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-		std::shared_ptr<KVData<string>> res = kh.get(skey);
-		kvd->ierr = res->ierr;
-		kvd->serr = res->serr;
-		if(kvd->ierr==0){
-			kvd->value = toBoostObject<ValType>(res->value);
+		KVData<ValType> kvd = KVData<ValType>();
+		KVData<string> res = kh.get(skey);
+		kvd.ierr = res.ierr;
+		kvd.serr = res.serr;
+		if(kvd.ierr==0){
+			kvd.value = toBoostObject<ValType>(res.value);
 		}
 		return kvd;
 	}
 	/*-------KVStore::put()----------*/
 	template<typename KeyType, typename ValType>
-	std::shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::put(KeyType const& key,ValType const& val){
+	KVData<ValType>  KVStore<KeyType,ValType>::put(KeyType const& key,ValType const& val){
 		string skey=toBoostString(key);
 		string sval=toBoostString(val);
-		std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-		std::shared_ptr<KVData<string>> res = kh.put(skey,sval);
-		kvd->ierr = res->ierr;
-		kvd->serr = res->serr;
+		KVData<ValType> kvd = KVData<ValType>();
+		KVData<string> res = kh.put(skey,sval);
+		kvd.ierr = res.ierr;
+		kvd.serr = res.serr;
 		return kvd;
 	}
 	/*-------KVStore::del()----------*/
 	template<typename KeyType, typename ValType>
-	std::shared_ptr<KVData<ValType>>  KVStore<KeyType,ValType>::del(KeyType const& key){
+	KVData<ValType>  KVStore<KeyType,ValType>::del(KeyType const& key){
 		string skey=toBoostString(key);
-		std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-		std::shared_ptr<KVData<string>> res = kh.del(skey);
-		kvd->ierr = res->ierr;
-		kvd->serr = res->serr;
+		KVData<ValType> kvd = KVData<ValType>();
+		KVData<string> res = kh.del(skey);
+		kvd.ierr = res.ierr;
+		kvd.serr = res.serr;
 		return kvd;
 	}
 	/*-------KVRequest::async_get()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_get(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+	void KVStore<KeyType,ValType>::async_get(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data){
 		string skey=toBoostString(key);
-		auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
-			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-			kvd->ierr = res->ierr;
-			kvd->serr = res->serr;
-			if(kvd->ierr==0){
-				kvd->value = toBoostObject<ValType>(res->value);
+		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+			KVData<ValType> kvd = KVData<ValType>();
+			kvd.ierr = res.ierr;
+			kvd.serr = res.serr;
+			if(kvd.ierr==0){
+				kvd.value = toBoostObject<ValType>(res.value);
 			}
-			void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
+			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
 			fn(kvd,pdata);
 		};
 		kh.async_get(skey,lambda_fn,data,(void *)fn);
 	}
 	/*-------KVRequest::async_put()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, void (*fn)(KVData<ValType>,void *),void *data){
 		string skey=toBoostString(key);
 		string sval=toBoostString(val);
-		auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
-			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-			kvd->ierr = res->ierr;
-			kvd->serr = res->serr;
-			void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
+		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+			KVData<ValType> kvd = KVData<ValType>();
+			kvd.ierr = res.ierr;
+			kvd.serr = res.serr;
+			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
 			fn(kvd,pdata);
 		};
 		kh.async_put(skey,sval,lambda_fn,data,(void *)fn);
 	}
 	/*-------KVRequest::async_del()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_del(KeyType const& key, void (*fn)(std::shared_ptr<KVData<ValType>>,void *),void *data){
+	void KVStore<KeyType,ValType>::async_del(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data){
 		string skey=toBoostString(key);
-		auto lambda_fn = [](std::shared_ptr<KVData<string>> res,void *pdata, void *vfn)->void{
-			std::shared_ptr<KVData<ValType>> kvd = std::make_shared<KVData<ValType>>();
-			kvd->ierr = res->ierr;
-			kvd->serr = res->serr;
-			void (*fn)(std::shared_ptr<KVData<ValType>>,void*) = (void (*)(std::shared_ptr<KVData<ValType>>,void*))vfn;
+		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+			KVData<ValType> kvd = KVData<ValType>();
+			kvd.ierr = res.ierr;
+			kvd.serr = res.serr;
+			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
 			fn(kvd,pdata);
 		};
 		kh.async_del(skey,lambda_fn,data,(void*)fn);

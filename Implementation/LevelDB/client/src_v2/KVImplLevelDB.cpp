@@ -16,7 +16,7 @@ using namespace std;
 namespace kvstore {
 
   struct async_data{
-    void (*fn)(std::shared_ptr<KVData<string>>,void *,void *);
+    void (*fn)(KVData<string>,void *,void *);
     void *data;
     void *vfn;
     int type;
@@ -48,14 +48,14 @@ namespace kvstore {
       std::vector<string> v;
       while(keeprunning){
         while(true){mtx.lock();if(!q.empty()){ad=q.front();q.pop();mtx.unlock(); break;}; mtx.unlock();/*cout<<"waiting"<<endl;*/std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
-        std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+        KVData<string> ret = KVData<string>();
 
         v=kc->receive();
-        ret->serr = v[2];
-        ret->ierr = stoi(v[3]);
+        ret.serr = v[2];
+        ret.ierr = stoi(v[3]);
         //Get
-        if(ret->ierr==0 && ad.type == 1){
-          ret->value = v[1];
+        if(ret.ierr==0 && ad.type == 1){
+          ret.value = v[1];
         }
         ad.fn(ret,ad.data,ad.vfn);
       }
@@ -108,8 +108,8 @@ namespace kvstore {
     return false;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::get(string const& key){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::get(string const& key){
+    KVData<string> ret = KVData<string>();
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -119,16 +119,16 @@ namespace kvstore {
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[2];
-    ret->ierr = stoi(v[3]);
-    if(ret->ierr==0){
-      ret->value = v[1];
+    ret.serr = v[2];
+    ret.ierr = stoi(v[3]);
+    if(ret.ierr==0){
+      ret.value = v[1];
     }
     return ret;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::put(string const& key,string const& val){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::put(string const& key,string const& val){
+    KVData<string> ret = KVData<string>();
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -139,13 +139,13 @@ namespace kvstore {
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[2];
-    ret->ierr = stoi(v[3]);
+    ret.serr = v[2];
+    ret.ierr = stoi(v[3]);
     return ret;
   }
 
-  std::shared_ptr<KVData<string>> KVImplHelper::del(string const& key){
-    std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
+  KVData<string> KVImplHelper::del(string const& key){
+    KVData<string> ret = KVData<string>();
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -155,12 +155,12 @@ namespace kvstore {
     c_kvsclient->kc->send(v);
 
     v=c_kvsclient->kc->receive();
-    ret->serr = v[2];
-    ret->ierr = stoi(v[3]);
+    ret.serr = v[2];
+    ret.ierr = stoi(v[3]);
     return ret;
   }
 
-  void KVImplHelper::async_get(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -174,7 +174,7 @@ namespace kvstore {
     c_kvsclient->mtx.unlock();
   }
 
-  void KVImplHelper::async_put(string key,string val, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -189,7 +189,7 @@ namespace kvstore {
     c_kvsclient->mtx.unlock();
   }
 
-  void KVImplHelper::async_del(string key, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -215,22 +215,22 @@ namespace kvstore {
     return false;
   }
 
-  std::vector<std::shared_ptr<KVData<string>>> parseResults(vector<string> &res){
+  std::vector<KVData<string>> parseResults(vector<string> &res){
     int count = res.size()/4;
-    std::vector<std::shared_ptr<KVData<string>>> fret(count);
+    std::vector<KVData<string>> fret(count);
     for(int idx=0;idx<count;idx++){
-      std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
-      ret->serr = res[idx*4+2];
-      ret->ierr = stoi(res[idx*4+3]);
-      if(ret->ierr==0){
-        ret->value = res[idx*4+1];
+      KVData<string> ret = KVData<string>();
+      ret.serr = res[idx*4+2];
+      ret.ierr = stoi(res[idx*4+3]);
+      if(ret.ierr==0){
+        ret.value = res[idx*4+1];
       }
       fret[idx]=ret;
     }
     return fret;
   }
 
-  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& ret){
     /* Do multiget and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
@@ -243,14 +243,14 @@ namespace kvstore {
     }
     c_kvsclient->kc->send(v);
     std::vector<string> rcv=c_kvsclient->kc->receive();
-    std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
+    std::vector<KVData<string>> res = parseResults(rcv);
     for(int i=0;i<sz;i++){
       ret.push_back(res[i]);
     }
     return 0;
   }
 
-  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<KVData<string>>& ret){
     /* Do multiput and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
@@ -264,14 +264,14 @@ namespace kvstore {
     }
     c_kvsclient->kc->send(v);
     std::vector<string> rcv=c_kvsclient->kc->receive();
-    std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
-    for(std::shared_ptr<KVData<string>> kd: res){
+    std::vector<KVData<string>> res = parseResults(rcv);
+    for(KVData<string> kd: res){
       ret.push_back(kd);
     }
     return 0;
   }
 
-  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<std::shared_ptr<KVData<string>>>& ret){
+  int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& ret){
     /* Do multidel and send the response via 'ret' vector */
     int sz = key.size();
     std::vector<string> v;
@@ -284,15 +284,15 @@ namespace kvstore {
     }
     c_kvsclient->kc->send(v);
     std::vector<string> rcv=c_kvsclient->kc->receive();
-    std::vector<std::shared_ptr<KVData<string>>> res = parseResults(rcv);
-    for(std::shared_ptr<KVData<string>> kd: res){
+    std::vector<KVData<string>> res = parseResults(rcv);
+    for(KVData<string> kd: res){
       ret.push_back(kd);
     }
     return 0;
   }
 
 
-    void KVImplHelper::async_get(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");
@@ -306,7 +306,7 @@ namespace kvstore {
       c_kvsclient->mtx.unlock();
     }
 
-    void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");
@@ -321,7 +321,7 @@ namespace kvstore {
       c_kvsclient->mtx.unlock();
     }
 
-    void KVImplHelper::async_del(string key, string tablename, void (*fn)(std::shared_ptr<KVData<string>>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");

@@ -9,7 +9,7 @@ namespace kvstore {
 /*
 	KVResultSet non template implementation
 */
-		KVResultSet::KVResultSet(vector<std::shared_ptr<KVData<string>>> r, vector<string> opr_type){
+		KVResultSet::KVResultSet(vector<KVData<string>> r, vector<string> opr_type){
 			res=r;
 			operation_type=opr_type;
 		}
@@ -51,16 +51,16 @@ namespace kvstore {
 		return kh.bind(connection,"randomtable_123321011422");
 	}
 
-	std::shared_ptr<KVResultSet> KVRequest::execute(){
-		vector<std::shared_ptr<KVData<string>>> mput_res;
-		vector<std::shared_ptr<KVData<string>>> mget_res;
-		vector<std::shared_ptr<KVData<string>>> mdel_res;
+	KVResultSet KVRequest::execute(){
+		vector<KVData<string>> mput_res;
+		vector<KVData<string>> mget_res;
+		vector<KVData<string>> mdel_res;
 		int mp = kh.mput(put_key, put_value, put_tablename, mput_res);
 		int mg = kh.mget(get_key, get_tablename, mget_res);
 		int md = kh.mdel(del_key, del_tablename, mdel_res);
 
 		/* Combine the results in given order. */
-		vector<std::shared_ptr<KVData<string>>> combined_res;
+		vector<KVData<string>> combined_res;
 		int sz=operation_type.size();
 		int pi=0,gi=0,di=0;
 		for(int i=0;i<sz;i++){
@@ -77,7 +77,7 @@ namespace kvstore {
 				cerr<<"Invalid operation type in "<<__FILE__<<", "<<__FUNCTION__<<endl;
 			}
 		}
-		std::shared_ptr<KVResultSet> rs = std::make_shared<KVResultSet>(combined_res,operation_type);
+		KVResultSet rs = KVResultSet(combined_res,operation_type);
 		return rs;
 	}
 
@@ -92,14 +92,14 @@ namespace kvstore {
 		}
 	};
 
-  void fun(std::shared_ptr<KVData<string>> kd, void *data, void *vfn){
-		static vector<std::shared_ptr<KVData<string>>> combined_res;
+  void fun(KVData<string> kd, void *data, void *vfn){
+		static vector<KVData<string>> combined_res;
 		combined_res.push_back(kd);
 		if(data != NULL){
 			async_execute_data *ad = (async_execute_data*)data;
-			std::shared_ptr<KVResultSet> rs = std::make_shared<KVResultSet>(combined_res,ad->operation_type);
+			KVResultSet rs = KVResultSet(combined_res,ad->operation_type);
 			if(vfn!=NULL){
-				void (*fn)(std::shared_ptr<KVResultSet>, void *) = (void (*)(std::shared_ptr<KVResultSet>, void *))vfn;
+				void (*fn)(KVResultSet, void *) = (void (*)(KVResultSet, void *))vfn;
 				fn(rs,ad->data);
 			}
 			delete(ad);
@@ -107,7 +107,7 @@ namespace kvstore {
 		}
 	}
 
-	void KVRequest::async_execute(void (*fn)(std::shared_ptr<KVResultSet>, void *), void *data){
+	void KVRequest::async_execute(void (*fn)(KVResultSet, void *), void *data){
 		int sz=operation_type.size()-1;  /*NOTE -1 for last operation*/
 		int gi=0,pi=0,di=0;
 		for(int i=0;i<sz;i++){

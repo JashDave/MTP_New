@@ -70,25 +70,25 @@ namespace kvstore {
             mtx.unlock();
             // count--;
             if(reply->type == REDIS_REPLY_STRING){
-                ret->ierr = 0;
+                ret.ierr = 0;
                 // if(reply->str == NULL){
                 //   cout<<"NULL in str :"<<__FILE__<<endl;
                 // }
-                ret->value = string(reply->str);
-                // cout<<"Got:"<<ret->value<<endl;
+                ret.value = string(reply->str);
+                // cout<<"Got:"<<ret.value<<endl;
             } else if (reply->type == REDIS_REPLY_STATUS){
-                ret->ierr = 0;
+                ret.ierr = 0;
               //str == OK
             } else if (reply->type == REDIS_REPLY_NIL){
-                ret->ierr = -1;
-                ret->serr = "Value doesn't exists.";
+                ret.ierr = -1;
+                ret.serr = "Value doesn't exists.";
               //value doesnt exists
             } else if (reply->type == REDIS_REPLY_INTEGER){
                 if(reply->integer <= 0){
-                  ret->ierr = -1; /*reply->integer;*/
-                  ret->serr = "Value doesn't exists.";
+                  ret.ierr = -1; /*reply->integer;*/
+                  ret.serr = "Value doesn't exists.";
                 } else {
-                  ret->ierr = 0;
+                  ret.ierr = 0;
                 }
             } else {
               cerr<<"Reply type:"<<reply->type<<endl;
@@ -154,17 +154,17 @@ namespace kvstore {
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "get %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
-      ret->ierr = -1;
-      ret->serr = "Unknown error.";
+      ret.ierr = -1;
+      ret.serr = "Unknown error.";
       // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
       //redisClusterFree(c_kvsclient->rc); //??
     } else if(reply->str == NULL){
-      ret->ierr = -1;
-      ret->serr = "Value doesn't exists.";
+      ret.ierr = -1;
+      ret.serr = "Value doesn't exists.";
       freeReplyObject(reply);
     } else {
-      ret->ierr = 0;
-      ret->value = string(reply->str);
+      ret.ierr = 0;
+      ret.value = string(reply->str);
       freeReplyObject(reply);
     }
     return ret;
@@ -175,12 +175,12 @@ namespace kvstore {
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "set %s %s", (c_kvsclient->tablename+key).c_str(), val.c_str());
     if(reply == NULL)
     {
-      ret->ierr = -1;
-      ret->serr = "Unknown error.";
+      ret.ierr = -1;
+      ret.serr = "Unknown error.";
       // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
       //redisClusterFree(c_kvsclient->rc); //??
     } else {
-      ret->ierr = 0;
+      ret.ierr = 0;
       freeReplyObject(reply);
     }
     return ret;
@@ -191,16 +191,16 @@ namespace kvstore {
     redisReply *reply = (redisReply *)redisClusterCommand(c_kvsclient->rc, "del %s", (c_kvsclient->tablename+key).c_str());
     if(reply == NULL)
     {
-      ret->ierr = -1;
-      ret->serr = "Unknown error.";
+      ret.ierr = -1;
+      ret.serr = "Unknown error.";
       // printf("reply is null[%s]\n", c_kvsclient->rc->errstr);
       //redisClusterFree(c_kvsclient->rc); //??
     } else {
       if(reply->integer <= 0){
-        ret->ierr = -1;
-        ret->serr = "Value doesn't exists.";
+        ret.ierr = -1;
+        ret.serr = "Value doesn't exists.";
       } else {
-        ret->ierr = 0;
+        ret.ierr = 0;
       }
       freeReplyObject(reply);
     }
@@ -231,11 +231,11 @@ namespace kvstore {
         } else {
           std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
           if(reply->type == REDIS_REPLY_STRING){
-              ret->ierr = 0;
-              ret->value = string(reply->str);
+              ret.ierr = 0;
+              ret.value = string(reply->str);
           } else if (reply->type == REDIS_REPLY_NIL){
-              ret->ierr = -1;
-              ret->serr = "Value doesn't exists.";
+              ret.ierr = -1;
+              ret.serr = "Value doesn't exists.";
           } else {
             cerr<<"Reply type:"<<reply->type<<endl;
           }
@@ -269,7 +269,7 @@ namespace kvstore {
         } else {
           std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
           if (reply->type == REDIS_REPLY_STATUS){
-              ret->ierr = 0;
+              ret.ierr = 0;
               // cout<<reply->str<<endl;
           } else {
             cerr<<"Reply type:"<<reply->type<<endl;
@@ -302,10 +302,10 @@ namespace kvstore {
           std::shared_ptr<KVData<string>> ret = std::make_shared<KVData<string>>();
           if (reply->type == REDIS_REPLY_INTEGER){
               if(reply->integer <= 0){
-                ret->ierr = -1; /*reply->integer;*/
-                ret->serr = "Value doesn't exists.";
+                ret.ierr = -1; /*reply->integer;*/
+                ret.serr = "Value doesn't exists.";
               } else {
-                ret->ierr = 0;
+                ret.ierr = 0;
               }
           } else {
             cerr<<"Reply type:"<<reply->type<<endl;
