@@ -43,7 +43,7 @@ namespace kvstore {
     void eventLoop(){
       redisReply *reply;
       int rep;
-      std::chrono::milliseconds waittime(10);
+      std::chrono::milliseconds waittime(500);
 
       while(keeprunning){
         while(true){mtx.lock();if(!q.empty()){mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
