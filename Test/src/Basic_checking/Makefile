@@ -4,7 +4,8 @@ G++ = g++ -std=c++11 -g
 ifeq ($(kvs),leveldb)
 	KVSTORE = -lkvs_leveldb_v2
 	#DEFINES = -DCONF=string\(\"10.129.28.44:8091\"\)
-	DEFINES = -DCONF=string\(\"127.1.1.1:8090\"\)
+	#DEFINES = -DCONF=string\(\"127.1.1.1:8090\"\)
+	DEFINES = -DCONF=string\(\"10.129.28.44:8090\"\)
 else
         KVSTORE = -lkvs_redis_v2
 	DEFINES = -DCONF=string\(\"10.129.28.141:7003\"\)

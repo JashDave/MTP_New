@@ -6,8 +6,8 @@
 
 #define RUN_TIME 20
 #define THREAD_COUNT 300
-#define KEY_SIZE 5
-#define VALUE_SIZE 10
+#define KEY_SIZE 30
+#define VALUE_SIZE 2000
 #define DATASET_SIZE 10000
 #define SRAND_ON 1
 
@@ -18,9 +18,11 @@
 
 //#define IP "10.129.26.81"
 //#define PORT "11100"
-#define IP "10.129.28.141"
-#define PORT "7003"
-// #define PORT "8090"
+//#define IP "10.129.28.44"
+#define IP "10.129.28.101"
+#define PORT "8092"
+// #define IP "10.129.28.141"
+// #define PORT "7003"
 #define SERVER_CTRL_PORT 8091
 
 
@@ -38,8 +40,8 @@
 #include <sstream>  // stringstream
 
 #include <kvstore/KVStoreHeader_v2.h>
-#include "TestUtils.h"
 //#include "KVImplementation.h"
+#include "TestUtils.h"
 #include "MessageClient.cpp"
 #include "RandomNumberGenerator.cpp"
 #include "DataSetGenerator.cpp"
@@ -143,7 +145,9 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
   }
 
-  vector<string> server_list = {"10.129.28.101:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
+  vector<string> server_list = {"10.129.28.101:8091"};
+  // vector<string> server_list = {"10.129.28.101:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
+
   vector<string> key = DataSetGenerator::getRandomStrings(DATASET_SIZE,KEY_SIZE);
   vector<string> value = DataSetGenerator::getRandomStrings(DATASET_SIZE,VALUE_SIZE);
 
@@ -166,7 +170,7 @@ int main(int argc, char *argv[]){
   // e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
 
   sm.startMonitoring();
-  e.setReadProb(0);
+  e.setReadProb(1);
   e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
   sm.stopMonitoring();
 
