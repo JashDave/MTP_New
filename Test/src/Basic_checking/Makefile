@@ -10,6 +10,13 @@ else
         KVSTORE = -lkvs_redis_v2
 	DEFINES = -DCONF=string\(\"10.129.28.141:7003\"\)
 endif
+
+
+ifeq ($(kvs),memcached)
+	KVSTORE = -lmemcached -lkvs_memcached_v2 -lmemcached 
+	DEFINES = -DCONF=string\(\"--SERVER=10.129.26.154:11211\"\)
+endif
+
 LIBS = -lkvstore_v2 -lboost_serialization -pthread $(KVSTORE)
 
 all:	test

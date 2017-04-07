@@ -5,11 +5,13 @@
 
 #define RUN_TIME 10
 #define THREAD_COUNT 20
-//#define IP "10.129.26.81"
-//#define PORT "11100"
-#define IP "10.129.28.44"
-//#define PORT "7001"
-#define PORT "8090"
+// #define IP "10.129.26.81"
+// #define IP "10.129.28.44"
+#define IP "10.129.26.154"
+// #define PORT "11100"
+// #define PORT "7001"
+// #define PORT "8090"
+#define PORT "11211"
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
