@@ -50,12 +50,12 @@ public:
 
   void loadData(){
     KVStore<string,string> k;
-    std::shared_ptr<KVData<string> > kd;
+    KVData<string> kd;
     k.bind(conn,tablename);
     for(int i=0;i<dataSz;i++){
       kd = k.put(key[i],value[i]);
-      if(kd->ierr != 0){
-        cerr << "Failure in loading data at index " << i << " Error:" << kd->serr << endl;
+      if(kd.ierr != 0){
+        cerr << "Failure in loading data at index " << i << " Error:" << kd.serr << endl;
       }
     }
   }
@@ -75,7 +75,7 @@ public:
     double rp = readp * RAND_MAX;
     int r1,r2;
     bool succ;
-    std::shared_ptr<KVData<string> > kd;
+    KVData<string> kd;
 
     while(!run);
     //TRACE(cout<<"Tid "<<tid<<" started"<<endl;)
@@ -98,7 +98,7 @@ public:
         m[id].start();
         kd = k.get(key[r2]);
         m[id].end();
-        if(kd->ierr != 0 || kd->value != value[r2]){
+        if(kd.ierr != 0 || kd.value != value[r2]){
           m[id].incfcount();
         }
       } else {
@@ -106,7 +106,7 @@ public:
         m[id].start();
         kd = k.put(key[r2],value[r2]);
         m[id].end();
-        if(kd->ierr != 0){
+        if(kd.ierr != 0){
           m[id].incfcount();
         }
       }

@@ -16,15 +16,15 @@
 #define DIST UNIFORM
 // #define DIST ZIPF
 
-//#define IP "10.129.26.81"
+#define IP "10.129.26.81"
 //#define PORT "11100"
 //#define IP "10.129.28.44"
-#define IP "10.129.28.101"
-#define PORT "8092"
+// #define IP "10.129.28.101"
+// #define PORT "8092"
 // #define IP "10.129.28.141"
-// #define PORT "7003"
+#define PORT "7003"
 #define SERVER_CTRL_PORT 8091
-
+#define SERVER_LIST {"10.129.26.246:8091", "10.129.28.141:8091", "10.129.26.81:8091"}
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
@@ -60,14 +60,6 @@ using namespace MessageClientNS;
 // using namespace RAMCloud;
 // using namespace kvstore;
 
-#ifdef DEFAULTIMPL
-  class KVImplementation {
-  public:
-    bool bind(string ip, string port){return false;}
-    bool put(string key, string value){return false;}
-    string get(string key){return "Err";}
-  };
-#endif
 
 
 #ifdef MDEBUG
@@ -145,8 +137,8 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
   }
 
-  vector<string> server_list = {"10.129.28.101:8091"};
-  // vector<string> server_list = {"10.129.28.101:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
+  // vector<string> server_list = SERVER_LIST; // {"10.129.28.101:8091"};
+  vector<string> server_list = SERVER_LIST; //{"10.129.26.246:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
 
   vector<string> key = DataSetGenerator::getRandomStrings(DATASET_SIZE,KEY_SIZE);
   vector<string> value = DataSetGenerator::getRandomStrings(DATASET_SIZE,VALUE_SIZE);
