@@ -13,18 +13,20 @@
 
 #define UNIFORM "Uniform"
 #define ZIPF "Zipf"
-#define DIST UNIFORM
-// #define DIST ZIPF
+// #define DIST UNIFORM
+#define DIST ZIPF
 
-#define IP "10.129.26.81"
 //#define PORT "11100"
 //#define IP "10.129.28.44"
 // #define IP "10.129.28.101"
 // #define PORT "8092"
 // #define IP "10.129.28.141"
-#define PORT "7003"
+#define IP "10.129.26.81"
+#define PORT "8001"
 #define SERVER_CTRL_PORT 8091
-#define SERVER_LIST {"10.129.26.246:8091", "10.129.28.141:8091", "10.129.26.81:8091"}
+
+#define SERVER_LIST {"10.129.28.207:8091"}
+// #define SERVER_LIST {"10.129.28.207:8091", "10.129.28.141:8091", "10.129.26.81:8091", "10.129.26.246:8091", "10.129.28.35:8091", "10.129.26.195:8091"}
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"
 #include <iostream>
@@ -137,7 +139,6 @@ int main(int argc, char *argv[]){
     srand(time(NULL));
   }
 
-  // vector<string> server_list = SERVER_LIST; // {"10.129.28.101:8091"};
   vector<string> server_list = SERVER_LIST; //{"10.129.26.246:8091", "10.129.28.141:8091", "10.129.26.81:8091"};
 
   vector<string> key = DataSetGenerator::getRandomStrings(DATASET_SIZE,KEY_SIZE);
@@ -162,9 +163,14 @@ int main(int argc, char *argv[]){
   // e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
 
   sm.startMonitoring();
-  e.setReadProb(1);
+  e.setReadProb(0.5);
   e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
   sm.stopMonitoring();
+
+  // sm.startMonitoring();
+  // e.setReadProb(0.95);
+  // e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
+  // sm.stopMonitoring();
 
   // long num_cpus = std::thread::hardware_concurrency();
   // string detailes = "CPU count, CPU util, NW rx(KBps), NW tx(KBps), NW util, Mem Size, Mem util, Disk util, Page Faults";
