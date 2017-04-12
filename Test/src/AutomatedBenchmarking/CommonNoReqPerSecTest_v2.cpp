@@ -4,7 +4,7 @@
 
 // -DDS="Redis"
 
-#define RUN_TIME 20
+#define RUN_TIME 30
 #define THREAD_COUNT 300
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
@@ -13,7 +13,7 @@
 
 #define UNIFORM "Uniform"
 #define ZIPF "Zipf"
-// #define DIST UNIFORM
+//#define DIST UNIFORM
 #define DIST ZIPF
 
 //#define PORT "11100"
@@ -21,8 +21,10 @@
 // #define IP "10.129.28.101"
 // #define PORT "8092"
 // #define IP "10.129.28.141"
-#define IP "10.129.26.81"
+#define IP "10.129.28.207"
 #define PORT "8001"
+
+#define CONN {"10.129.28.207:8001", "10.129.28.207:8002", "10.129.28.207:8003", "10.129.28.207:8004"}
 #define SERVER_CTRL_PORT 8091
 
 #define SERVER_LIST {"10.129.28.207:8091"}
@@ -146,7 +148,8 @@ int main(int argc, char *argv[]){
 
   int thread_count = THREAD_COUNT;
   int run_time = RUN_TIME;
-  Experiment e = Experiment(key, value, string(IP)+":"+string(PORT), thread_count, run_time,0); //vector<string> &k, vector<string> &v, string con, int tc, int rt, int dist
+  vector<string> conn = CONN;
+  Experiment e = Experiment(key, value, conn, thread_count, run_time,0); //vector<string> &k, vector<string> &v, string con, int tc, int rt, int dist
 
   string sep="/";
   string DATE=currentDateTime("%Y-%m-%d");

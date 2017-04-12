@@ -13,12 +13,13 @@ private:
   int dataSz;
   vector<Measure> m;
   bool run;
-  string conn;
+  vector<string> conn;
+  int connsz;
   string tablename = "TestTable123_977";
   string dsname = "See folder name";
   int distribution;
 public:
-  Experiment(vector<string> &k, vector<string> &v, string con, int tc, int rt, int dist){
+  Experiment(vector<string> &k, vector<string> &v, vector<string> con, int tc, int rt, int dist){
     key = k;
     value = v;
     dataSz = k.size();
@@ -28,6 +29,7 @@ public:
     m.resize(tc);
     run = false;
     conn = con;
+    connsz = conn.size();
     distribution = dist;
     loadData(); //? to be invoked here or not?
   }
@@ -51,7 +53,7 @@ public:
   void loadData(){
     KVStore<string,string> k;
     KVData<string> kd;
-    k.bind(conn,tablename);
+    k.bind(conn[0],tablename);
     for(int i=0;i<dataSz;i++){
       kd = k.put(key[i],value[i]);
       if(kd.ierr != 0){
@@ -70,7 +72,7 @@ public:
 
   void worker(int id){
     KVStore<string,string> k;
-    k.bind(conn,tablename);
+    k.bind(conn[id%connsz],tablename);
 
     double rp = readp * RAND_MAX;
     int r1,r2;
