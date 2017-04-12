@@ -77,6 +77,9 @@ public:
   // vector<uint64_t> start_entries;//(10000);
   // vector<uint64_t> end_entries;//(10000);
 public:
+  Measure(){
+    diff_entries.reserve(4e6);
+  }
 
   void reset(){
     min=numeric_limits<long long>::max();
