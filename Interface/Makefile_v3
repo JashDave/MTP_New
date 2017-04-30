@@ -1,0 +1,10 @@
+# Make for version 3
+
+INSTALL_PATH=/usr/local
+
+install:	KVImpl_v3.h KVStoreHeader_v3.h
+	cp -f KVImpl_v3.h $(INSTALL_PATH)/include/kvstore/
+	cp -f KVStoreHeader_v3.h $(INSTALL_PATH)/include/kvstore/
+
+uninstall:
+	rm -r $(INSTALL_PATH)/include/kvstore/
