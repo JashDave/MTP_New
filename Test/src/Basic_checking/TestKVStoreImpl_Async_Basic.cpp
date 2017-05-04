@@ -6,7 +6,7 @@
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
-#define JDEBUG
+// #define JDEBUG
 
 #include "../jutils.h"
 #include <iostream>
@@ -17,7 +17,7 @@ using namespace std;
 using namespace kvstore;
 
 void successfullGetCallBack(KVData<string> r,void *data){
-  cout<<"DP1"<<endl;
+  // cout<<"DP1"<<endl;
   jAssert(r.ierr!=0, cout<<" Error in get(1):"<<r.serr<<" called from line "<<*((int*)data)<<endl;)
   jAssert(r.value!="One", cout<<"Incorrect value from get(1) got:"<<r.value<<" called from line "<<*((int*)data)<<endl;)
   TRACE(cout<<"successfull get :"<<r.value<<endl;)
@@ -51,18 +51,22 @@ int main(){
   /* Check successfull put */
   IS_REACHABLE
   int line_no1 = __LINE__; ks.async_put(1,"One",successfullCallBack,&line_no1);
+  sleep(1); /*wait for callbacks to complete*/
 
   /* Check successfull get */
   IS_REACHABLE
   int line_no2 = __LINE__; ks.async_get(1,successfullGetCallBack,&line_no2);
+  sleep(1); /*wait for callbacks to complete*/
 
   /* Check successfull del */
   IS_REACHABLE
   int line_no3 = __LINE__; ks.async_del(1,successfullCallBack,&line_no3);
+  sleep(1); /*wait for callbacks to complete*/
 
   /* Check unsuccessfull get */
   IS_REACHABLE
   int line_no4 = __LINE__; ks.async_get(1,unsuccessfullGetCallBack,&line_no4);
+  sleep(1); /*wait for callbacks to complete*/
 
   /* Check unsuccessfull del */
   IS_REACHABLE

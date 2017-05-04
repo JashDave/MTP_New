@@ -25,6 +25,7 @@ namespace kvstore {
     int type;
     string key;
     string value;
+    KVImplHelper *kh;
   };
 
   #define KVGET 0
@@ -85,7 +86,7 @@ namespace kvstore {
                 ret.ierr = 0;
                 ret.serr = "";
                 ret.value = string(return_value,return_value_length);
-                cout<<"val:"<<ret.value<<endl;
+                // cout<<"val:"<<ret.value<<endl;
                 itr++;
                 break;
               } else {
@@ -107,9 +108,9 @@ namespace kvstore {
           }
           // return 0;
         } else if(ad.type == KVPUT){
-
+          ret = ad.kh->put(ad.key,ad.value);
         } else if(ad.type == KVDEL){
-
+          ret = ad.kh->del(ad.key);
         }
         ad.fn(ret,ad.data,ad.vfn);
       }
@@ -367,7 +368,7 @@ namespace kvstore {
       return;
     }
 
-    struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), ""};
+    struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), "", NULL};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
@@ -376,10 +377,18 @@ namespace kvstore {
   }
 
   void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    cerr<<"Asyn not yet implemented."<<endl;
+    struct async_data ad = {fn, data, vfn, KVPUT, key, val, this};
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
+    // cerr<<"Asyn not yet implemented."<<endl;
   }
   void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    cerr<<"Asyn not yet implemented."<<endl;
+    struct async_data ad = {fn, data, vfn, KVDEL, key, "", this};
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
+    // cerr<<"Asyn not yet implemented."<<endl;
   }
 
 
