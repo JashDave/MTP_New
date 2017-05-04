@@ -6,7 +6,7 @@
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
-// #define JDEBUG
+#define JDEBUG
 
 #include "../jutils.h"
 #include <iostream>
@@ -17,6 +17,7 @@ using namespace std;
 using namespace kvstore;
 
 void successfullGetCallBack(KVData<string> r,void *data){
+  cout<<"DP1"<<endl;
   jAssert(r.ierr!=0, cout<<" Error in get(1):"<<r.serr<<" called from line "<<*((int*)data)<<endl;)
   jAssert(r.value!="One", cout<<"Incorrect value from get(1) got:"<<r.value<<" called from line "<<*((int*)data)<<endl;)
   TRACE(cout<<"successfull get :"<<r.value<<endl;)

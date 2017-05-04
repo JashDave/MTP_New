@@ -76,7 +76,8 @@ namespace kvstore {
           size_t return_value_length;
           memcached_return_t error;
           int itr=0;
-          while ((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
+          //while
+          if((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
           {
             string rkey = string(return_key,return_key_length);
             while(itr<sz){
@@ -84,6 +85,8 @@ namespace kvstore {
                 ret.ierr = 0;
                 ret.serr = "";
                 ret.value = string(return_value,return_value_length);
+                cout<<"val:"<<ret.value<<endl;
+                itr++;
                 break;
               } else {
                 ret.ierr = -1;
@@ -96,6 +99,11 @@ namespace kvstore {
             if(itr>1){
               cerr<<"Implementation problem -> Multiple fatches in one go."<<endl;
             }
+          } else {
+            ret.ierr = -1;
+            ret.serr = "Value not found or Unknown error [error type cannot be identified].";
+            ret.value = "";
+            // itr++;
           }
           // return 0;
         } else if(ad.type == KVPUT){
@@ -250,10 +258,10 @@ namespace kvstore {
       return -1;
     }
     int itr=0;
-    cout<<"DP7"<<endl;
+    // cout<<"DP7"<<endl;
     while ((return_value = memcached_fetch(c_kvsclient->memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
     {
-      cout<<"DP8"<<endl;
+      // cout<<"DP8"<<endl;
       string rkey = string(return_key,return_key_length);
       while(itr<sz){
         if(string(keys[itr]) == rkey){
@@ -340,15 +348,15 @@ namespace kvstore {
     int sz = 1; //key.size();
     size_t key_length[sz];
     const char *keys[sz];
-    string tbkey;
+    string tbkey[sz];
     for(int i=0;i<sz;i++){
-      tbkey = c_kvsclient->tablename + key;//tbkey =  tablename[i] + key[i];
-      replaceStrChar(tbkey, ' ', '_');
-      replaceStrChar(tbkey, '\t', '_');
-      replaceStrChar(tbkey, '\n', '_');
-      replaceStrChar(tbkey, '\r', '_');
-      key_length[i] = tbkey.size();
-      keys[i] = tbkey.c_str();
+      tbkey[i] = c_kvsclient->tablename + key;//tbkey =  tablename[i] + key[i];
+      replaceStrChar(tbkey[i], ' ', '_');
+      replaceStrChar(tbkey[i], '\t', '_');
+      replaceStrChar(tbkey[i], '\n', '_');
+      replaceStrChar(tbkey[i], '\r', '_');
+      key_length[i] = tbkey[i].size();
+      keys[i] = tbkey[i].c_str();
     }
 
 
@@ -359,12 +367,12 @@ namespace kvstore {
       return;
     }
 
-    struct async_data ad = {fn, data, vfn, KVGET, key, ""};
+    struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), ""};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
 
-    cerr<<"Asyn not yet implemented."<<endl;
+    // cerr<<"Asyn not yet implemented."<<endl;
   }
 
   void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
