@@ -61,9 +61,11 @@ int main(){
   /* Check successfull get */
   IS_REACHABLE
   for(int i=0;i<keys.size();i++){
+    // cout<<"Keyy:"<<keys[i]<<endl;
     kr.get<int,string>(keys[i],TABLE);
   }
   rs = kr.execute();
+  cout<<"Key_sz"<<keys.size()<<"  rs_sz:"<<rs.size()<<endl;
   jAssert(rs.size()!=keys.size(),cout<<"Get size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
   for(int i=0;i<rs.size();i++){
     kd = rs.get<string>(i);

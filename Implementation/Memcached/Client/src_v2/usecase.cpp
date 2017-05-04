@@ -129,8 +129,11 @@ int main(){
     char *return_value;
     size_t return_value_length;
 
-    rc= memcached_mget(memc, keys, key_length, 5);
-    x= 0;
+    rc = memcached_mget(memc, keys, key_length, 5);
+    if(rc != MEMCACHED_SUCCESS){
+      cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,rc))<<endl;
+    }
+    x = 0;
     // while ((return_value= memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &rc)))
     // {
     //   cout<<"K:"<< return_key<<"V:"<<return_value<<endl;

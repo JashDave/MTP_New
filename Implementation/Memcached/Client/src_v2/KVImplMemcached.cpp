@@ -23,7 +23,13 @@ namespace kvstore {
     void *data;
     void *vfn;
     int type;
+    string key;
+    string value;
   };
+
+  #define KVGET 0
+  #define KVPUT 1
+  #define KVDEL 2
 
   class KVStoreClient{
   public:
@@ -37,89 +43,73 @@ namespace kvstore {
 //     redisClusterContext* rc=NULL;
 //     string tablename;
 //     string conn;
-//     std::mutex mtx;
-//     std::queue<struct async_data> q;
-//     bool keeprunning = true;
-//     thread td;
+    std::mutex mtx;
+    std::queue<struct async_data> q;
+    bool keeprunning = true;
+    thread td;
 //     // std::atomic<long long> count;
 //     KVStoreClient(){
 //       // count=0;
 //     }
-//     ~KVStoreClient(){
-//       keeprunning = false;
-//       if(td.joinable()){
-//         td.join();
-//       }
-//       // std::terminate(td);
-//       if(rc!=NULL)
-//       redisClusterFree(rc);
-//     }
-//     void eventLoop(){
-//       redisReply *reply;
-//       int rep;
-//       std::chrono::milliseconds waittime(500);
-//
-//       while(keeprunning){
-//         while(true){mtx.lock();if(!q.empty()){mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
-//         mtx.lock();
-//         rep = redisClusterGetReply(rc, (void**)&reply);
-//         mtx.unlock();
-//
-// // #define REDIS_REPLY_STRING 1
-// // #define REDIS_REPLY_ARRAY 2
-// // #define REDIS_REPLY_INTEGER 3
-// // #define REDIS_REPLY_NIL 4
-// // #define REDIS_REPLY_STATUS 5
-// // #define REDIS_REPLY_ERROR 6
-// 				if(rep == REDIS_OK){
-//           if(reply == NULL){
-//             cerr<<"Reply Null"<<endl;
-//           } else {
-//             KVData<string> ret = KVData<string>();
-//             mtx.lock();
-//             // if(q.empty()){
-//             //   cout<<"Queue empty :"<<__FILE__<<endl;
-//             // }
-//             struct async_data ad = q.front(); q.pop();  //? lock required?
-//             mtx.unlock();
-//             // count--;
-//             if(reply->type == REDIS_REPLY_STRING){
-//                 ret.ierr = 0;
-//                 // if(reply->str == NULL){
-//                 //   cout<<"NULL in str :"<<__FILE__<<endl;
-//                 // }
-//                 ret.value = string(reply->str);
-//                 // cout<<"Got:"<<ret.value<<endl;
-//             } else if (reply->type == REDIS_REPLY_STATUS){
-//                 ret.ierr = 0;
-//               //str == OK
-//             } else if (reply->type == REDIS_REPLY_NIL){
-//                 ret.ierr = -1;
-//                 ret.serr = "Value doesn't exists.";
-//               //value doesnt exists
-//             } else if (reply->type == REDIS_REPLY_INTEGER){
-//                 if(reply->integer <= 0){
-//                   ret.ierr = -1; /*reply->integer;*/
-//                   ret.serr = "Value doesn't exists.";
-//                 } else {
-//                   ret.ierr = 0;
-//                 }
-//             } else {
-//               cerr<<"Reply type:"<<reply->type<<endl;
-//             }
-//             ad.fn(ret,ad.data,ad.vfn);
-//             freeReplyObject(reply);
-//           }
-// 				} else {
-//           cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
-// 					// redisClusterReset(cc);
-// 				}
-//       }
-//     }
-//     void startEventLoop(){
-//       td = thread([&]{eventLoop();});
-//       // td = thread(KVStoreClient::eventLoop,this);
-//     }
+    ~KVStoreClient(){
+      keeprunning = false;
+      if(td.joinable()){
+        td.join();
+      }
+      // std::terminate(td);
+      // if(rc!=NULL)
+      // redisClusterFree(rc);
+    }
+    void eventLoop(){
+      std::chrono::milliseconds waittime(500);
+      struct async_data ad;
+      while(keeprunning){
+        while(true){mtx.lock();if(!q.empty()){ad=q.front(); q.pop(); mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
+
+        KVData<string> ret = KVData<string>();
+        if(ad.type == KVGET){
+          int sz = 1; //key.size();
+          uint32_t flags;
+          char return_key[MEMCACHED_MAX_KEY];
+          size_t return_key_length;
+          char *return_value;
+          size_t return_value_length;
+          memcached_return_t error;
+          int itr=0;
+          while ((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
+          {
+            string rkey = string(return_key,return_key_length);
+            while(itr<sz){
+              if(ad.key == rkey){
+                ret.ierr = 0;
+                ret.serr = "";
+                ret.value = string(return_value,return_value_length);
+                break;
+              } else {
+                ret.ierr = -1;
+                ret.serr = "Unknown error [error type cannot be identified].";
+                ret.value = "";
+                itr++;
+              }
+            }
+            free(return_value);
+            if(itr>1){
+              cerr<<"Implementation problem -> Multiple fatches in one go."<<endl;
+            }
+          }
+          // return 0;
+        } else if(ad.type == KVPUT){
+
+        } else if(ad.type == KVDEL){
+
+        }
+        ad.fn(ret,ad.data,ad.vfn);
+      }
+    } //end of eventLoop() function
+    void startEventLoop(){
+      td = thread([&]{eventLoop();});
+      // td = thread(KVStoreClient::eventLoop,this);
+    }
   };
 
   KVImplHelper::KVImplHelper(){
@@ -147,7 +137,7 @@ namespace kvstore {
       /* cerr<<"Error creating memcached connection."<<endl; */
       return false;
     }
-    // c_kvsclient->startEventLoop();
+    c_kvsclient->startEventLoop();
     return true;
   }
 
@@ -225,18 +215,28 @@ namespace kvstore {
   int KVImplHelper::mget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& vret){
     KVData<string> ret = KVData<string>();
     int sz = key.size();
+    if(sz==0){
+      // cout<<"Keys size zero"<<endl;
+      return -1;
+    }
     size_t key_length[sz];
     const char *keys[sz];
-    string tbkey;
+    string tbkey[sz];
     for(int i=0;i<sz;i++){
-      tbkey =  tablename[i] + key[i];
-      replaceStrChar(tbkey, ' ', '_');
-      replaceStrChar(tbkey, '\t', '_');
-      replaceStrChar(tbkey, '\n', '_');
-      replaceStrChar(tbkey, '\r', '_');
-      key_length[i] = tbkey.size();
-      keys[i] = tbkey.c_str();
+      tbkey[i] =  tablename[i] + key[i];
+      replaceStrChar(tbkey[i], ' ', '_');
+      replaceStrChar(tbkey[i], '\t', '_');
+      replaceStrChar(tbkey[i], '\n', '_');
+      replaceStrChar(tbkey[i], '\r', '_');
+      key_length[i] = tbkey[i].size();
+      keys[i] = tbkey[i].c_str();
+      // cout<<"keys["<<i<<"]:"<<keys[i]<<endl;
+      // cout<<"%keys[0]:"<<keys[0]<<endl;
     }
+    for(int i=0;i<sz;i++){
+      // cout<<"#keys["<<i<<"]:"<<keys[i]<<endl;
+    }
+    // cout<<"Done"<<endl;
     uint32_t flags;
     char return_key[MEMCACHED_MAX_KEY];
     size_t return_key_length;
@@ -244,32 +244,44 @@ namespace kvstore {
     size_t return_value_length;
     memcached_return_t error;
 
-
     error = memcached_mget(c_kvsclient->memc, keys, key_length, sz);
     if(error != MEMCACHED_SUCCESS){
       cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,error))<<endl;
       return -1;
     }
     int itr=0;
+    cout<<"DP7"<<endl;
     while ((return_value = memcached_fetch(c_kvsclient->memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
     {
+      cout<<"DP8"<<endl;
       string rkey = string(return_key,return_key_length);
       while(itr<sz){
-        if(key[itr] == rkey){
+        if(string(keys[itr]) == rkey){
           ret.ierr = 0;
           ret.serr = "";
           ret.value = string(return_value,return_value_length);
+          // cout<<"DP5 key:"<<rkey<<endl;
+          // cout<<"DP5 val:"<<ret.value<<endl;
           vret.push_back(ret);
+          itr++;
           break;
         } else {
+          // cout<<"executed"<<endl;
           ret.ierr = -1;
           ret.serr = "Unknown error [error type cannot be identified].";
           ret.value = "";
           vret.push_back(ret);
-          itr++;
         }
+        itr++;
       }
+      // cout<<"Broken"<<endl;
       free(return_value);
+    }
+    for(;itr<sz;itr++){
+      ret.ierr = -1;
+      ret.serr = "Value not found or Unknown error [error type cannot be identified].";
+      ret.value = "";
+      vret.push_back(ret);
     }
     return 0;
   }
@@ -325,6 +337,33 @@ namespace kvstore {
   }
 
   void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+    int sz = 1; //key.size();
+    size_t key_length[sz];
+    const char *keys[sz];
+    string tbkey;
+    for(int i=0;i<sz;i++){
+      tbkey = c_kvsclient->tablename + key;//tbkey =  tablename[i] + key[i];
+      replaceStrChar(tbkey, ' ', '_');
+      replaceStrChar(tbkey, '\t', '_');
+      replaceStrChar(tbkey, '\n', '_');
+      replaceStrChar(tbkey, '\r', '_');
+      key_length[i] = tbkey.size();
+      keys[i] = tbkey.c_str();
+    }
+
+
+    memcached_return_t error;
+    error = memcached_mget(c_kvsclient->memc, keys, key_length, sz);
+    if(error != MEMCACHED_SUCCESS){
+      cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,error))<<endl;
+      return;
+    }
+
+    struct async_data ad = {fn, data, vfn, KVGET, key, ""};
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
+
     cerr<<"Asyn not yet implemented."<<endl;
   }
 

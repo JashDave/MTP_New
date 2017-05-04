@@ -74,7 +74,7 @@ namespace kvstore {
 	template<typename KeyType, typename ValType>
 	class KVStore {
 	private:
-		KVImplHelper kh;
+		KVImplHelper kh; //RR LB object 
 		void *kvsclient;
 	public:
 		KVStore();

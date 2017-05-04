@@ -66,7 +66,7 @@ namespace kvstore {
             // if(q.empty()){
             //   cout<<"Queue empty :"<<__FILE__<<endl;
             // }
-            struct async_data ad = q.front(); q.pop();  //? lock required?
+            struct async_data ad = q.front(); q.pop();  //? lock required? Answer is Yes
             mtx.unlock();
             // count--;
             if(reply->type == REDIS_REPLY_STRING){

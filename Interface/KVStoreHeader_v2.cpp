@@ -55,15 +55,21 @@ namespace kvstore {
 		vector<KVData<string>> mput_res;
 		vector<KVData<string>> mget_res;
 		vector<KVData<string>> mdel_res;
+
+		cout<<"DP1 : "<< put_key.size()<<endl;
+		cout<<"DP2 : "<< get_key.size()<<endl;
+		cout<<"DP3 : "<< del_key.size()<<endl;
 		int mp = kh.mput(put_key, put_value, put_tablename, mput_res);
 		int mg = kh.mget(get_key, get_tablename, mget_res);
 		int md = kh.mdel(del_key, del_tablename, mdel_res);
 
+		cout<<"DP4"<<endl;
 		/* Combine the results in given order. */
 		vector<KVData<string>> combined_res;
 		int sz=operation_type.size();
 		int pi=0,gi=0,di=0;
 		for(int i=0;i<sz;i++){
+			cout<<"DP5"<<endl;
 			if(operation_type[i] == OPR_TYPE_PUT){
 				combined_res.push_back(mput_res[pi]);
 				pi++;
@@ -77,6 +83,7 @@ namespace kvstore {
 				cerr<<"Invalid operation type in "<<__FILE__<<", "<<__FUNCTION__<<endl;
 			}
 		}
+		cout<<"DP6"<<endl;
 		KVResultSet rs = KVResultSet(combined_res,operation_type);
 		return rs;
 	}
