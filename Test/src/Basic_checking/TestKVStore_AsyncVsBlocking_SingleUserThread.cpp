@@ -18,7 +18,7 @@
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 
-// #define JDEBUG
+#define JDEBUG
 
 #include "../jutils.h"
 #include "../TestUtils.h"
@@ -109,7 +109,7 @@ int main(){
         failure_count++;
       }
       opr_count--;
-      TRACE(if(opr_count%500 == 0){
+      TRACE(if(opr_count%1000 == 0){
         cout<<opr_count<<endl;
       })
     }

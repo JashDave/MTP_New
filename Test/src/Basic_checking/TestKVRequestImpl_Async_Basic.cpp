@@ -19,6 +19,8 @@ using namespace kvstore;
 
 #define KEYS vector<int> keys = {1,2,3};
 #define VALUES vector<string> vals = {"One","Two","Three"};
+// #define KEYS vector<int> keys = {4,5};
+// #define VALUES vector<string> vals = {"Four","Five"};
 
 int main(){
   KEYS
@@ -40,7 +42,7 @@ int main(){
   auto lambda_fn = [](KVResultSet rs,void *p){
     KEYS
     VALUES
-    // cout<<"Lambda"<<endl;
+    cout<<"Put lambda called"<<endl;
     KVData<string> kd;
     jAssert(rs.size()!=keys.size(),cout<<"Put size mismatch expected:"<<keys.size()<<" got:"<<rs.size()<<endl;)
     for(int i=0;i<rs.size();i++){
@@ -55,7 +57,22 @@ int main(){
   kr.reset();
   IS_REACHABLE
 
+  sleep(1);
 
+
+// {
+//
+//   KVStore<int,string> kr;
+//   IS_REACHABLE
+//   bool succ = kr.bind(CONF,TABLE);
+//   jAssert(!succ,cout<<"Connection error"<<endl;);
+//   auto res=kr.get(keys[0]);
+//   if(res.ierr != 0){
+//     cout<<"Err:"<<res.serr<<endl;
+//   } else {
+//     cout<<"Value:"<<res.value<<endl;
+//   }
+// }
   /* Check successfull get */
   IS_REACHABLE
   for(int i=0;i<keys.size();i++){
@@ -74,6 +91,7 @@ int main(){
     }
   },NULL);
   kr.reset();
+  sleep(1);
 
   /* Check successfull del */
   IS_REACHABLE
@@ -92,6 +110,7 @@ int main(){
     }
   },NULL);
   kr.reset();
+  sleep(1);
 
   /* Check unsuccessfull get */
   IS_REACHABLE
@@ -110,6 +129,7 @@ int main(){
     }
   },NULL);
   kr.reset();
+  sleep(1);
 
   /* Check unsuccessfull del */
   IS_REACHABLE
@@ -128,8 +148,9 @@ int main(){
     }
   },NULL);
   kr.reset();
+  sleep(1);
 
-  sleep(5); /*Wait for async to complete;*/
+  // sleep(5); /*Wait for async to complete;*/
   cout<<"All testcases passed successfully for "<<__FILE__<<"."<<endl;
   return 0;
 }

@@ -25,12 +25,14 @@ namespace kvstore {
     int type;
     string key;
     string value;
+    string tablename;
     KVImplHelper *kh;
   };
 
   #define KVGET 0
   #define KVPUT 1
   #define KVDEL 2
+  #define KVMGET 3
 
   class KVStoreClient{
   public:
@@ -68,6 +70,7 @@ namespace kvstore {
         while(true){mtx.lock();if(!q.empty()){ad=q.front(); q.pop(); mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}
 
         KVData<string> ret = KVData<string>();
+        ret.ierr = -1;
         if(ad.type == KVGET){
           int sz = 1; //key.size();
           uint32_t flags;
@@ -77,10 +80,10 @@ namespace kvstore {
           size_t return_value_length;
           memcached_return_t error;
           int itr=0;
-          //while
-          if((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
+          while((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &error)))
           {
             string rkey = string(return_key,return_key_length);
+            // cout<<"DP3: ad.key:"<<ad.key<<"\n     rkey  :"<<rkey<<endl;
             while(itr<sz){
               if(ad.key == rkey){
                 ret.ierr = 0;
@@ -100,17 +103,32 @@ namespace kvstore {
             if(itr>1){
               cerr<<"Implementation problem -> Multiple fatches in one go."<<endl;
             }
-          } else {
-            ret.ierr = -1;
-            ret.serr = "Value not found or Unknown error [error type cannot be identified].";
-            ret.value = "";
-            // itr++;
-          }
+          } //else {
+          //   ret.ierr = -1;
+          //   ret.serr = "Value not found or Unknown error [error type cannot be identified].";
+          //   ret.value = "";
+          //   // itr++;
+          // }
           // return 0;
         } else if(ad.type == KVPUT){
-          ret = ad.kh->put(ad.key,ad.value);
+          vector<KVData<string>> vret;
+          vector<string> k(1,ad.key);
+          vector<string> v(1,ad.value);
+          vector<string> t(1,ad.tablename);
+          ad.kh->mput(k,v,t,vret);
+          ret = vret[0];
         } else if(ad.type == KVDEL){
-          ret = ad.kh->del(ad.key);
+          vector<KVData<string>> vret;
+          vector<string> k(1,ad.key);
+          vector<string> t(1,ad.tablename);
+          ad.kh->mdel(k,t,vret);
+          ret = vret[0];
+        } else if(ad.type == KVMGET){
+          vector<KVData<string>> vret;
+          vector<string> k(1,ad.key);
+          vector<string> t(1,ad.tablename);
+          ad.kh->mget(k,t,vret);
+          ret = vret[0];
         }
         ad.fn(ret,ad.data,ad.vfn);
       }
@@ -157,7 +175,7 @@ namespace kvstore {
     replaceStrChar(key, '\t', '_');
     replaceStrChar(key, '\n', '_');
     replaceStrChar(key, '\r', '_');
-
+    // cout<<"DP2 key:"<<key<<endl;
     char *op;
     size_t value_length;
     uint32_t flags;
@@ -346,45 +364,53 @@ namespace kvstore {
   }
 
   void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    int sz = 1; //key.size();
-    size_t key_length[sz];
-    const char *keys[sz];
-    string tbkey[sz];
-    for(int i=0;i<sz;i++){
-      tbkey[i] = c_kvsclient->tablename + key;//tbkey =  tablename[i] + key[i];
-      replaceStrChar(tbkey[i], ' ', '_');
-      replaceStrChar(tbkey[i], '\t', '_');
-      replaceStrChar(tbkey[i], '\n', '_');
-      replaceStrChar(tbkey[i], '\r', '_');
-      key_length[i] = tbkey[i].size();
-      keys[i] = tbkey[i].c_str();
-    }
+    // int sz = 1; //key.size();
+    // size_t key_length[sz];
+    // const char *keys[sz];
+    // string tbkey[sz];
+    // for(int i=0;i<sz;i++){
+    //   tbkey[i] = c_kvsclient->tablename + key;//tbkey =  tablename[i] + key[i];
+    //   replaceStrChar(tbkey[i], ' ', '_');
+    //   replaceStrChar(tbkey[i], '\t', '_');
+    //   replaceStrChar(tbkey[i], '\n', '_');
+    //   replaceStrChar(tbkey[i], '\r', '_');
+    //   key_length[i] = tbkey[i].size();
+    //   keys[i] = tbkey[i].c_str();
+    // }
+    //
+    // memcached_return_t error;
+    // c_kvsclient->mtx.lock();
+    // error = memcached_mget(c_kvsclient->memc, keys, key_length, sz);
+    // c_kvsclient->mtx.unlock();
+    // if(error != MEMCACHED_SUCCESS){
+    //   cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,error))<<endl;
+    //   return;
+    // }
+    //
+    // struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), "", c_kvsclient->tablename, NULL};
+    // c_kvsclient->mtx.lock();
+    // c_kvsclient->q.push(ad);
+    // c_kvsclient->mtx.unlock();
 
 
-    memcached_return_t error;
-    error = memcached_mget(c_kvsclient->memc, keys, key_length, sz);
-    if(error != MEMCACHED_SUCCESS){
-      cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,error))<<endl;
-      return;
-    }
-
-    struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), "", NULL};
+    struct async_data ad = {fn, data, vfn, KVMGET, key, "",  c_kvsclient->tablename, this};
+    // cout<<"DP11 keys:"<<keys[0]<<endl;
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
-
     // cerr<<"Asyn not yet implemented."<<endl;
   }
 
   void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVPUT, key, val, this};
+    struct async_data ad = {fn, data, vfn, KVPUT, key, val, c_kvsclient->tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
     // cerr<<"Asyn not yet implemented."<<endl;
   }
+
   void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVDEL, key, "", this};
+    struct async_data ad = {fn, data, vfn, KVDEL, key, "",  c_kvsclient->tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
@@ -393,13 +419,49 @@ namespace kvstore {
 
 
   void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    cerr<<"Asyn not yet implemented."<<endl;
+    // int sz = 1; //key.size();
+    // size_t key_length[sz];
+    // const char *keys[sz];
+    // string tbkey[sz];
+    // for(int i=0;i<sz;i++){
+    //   tbkey[i] = tablename + key;//tbkey =  tablename[i] + key[i];
+    //   replaceStrChar(tbkey[i], ' ', '_');
+    //   replaceStrChar(tbkey[i], '\t', '_');
+    //   replaceStrChar(tbkey[i], '\n', '_');
+    //   replaceStrChar(tbkey[i], '\r', '_');
+    //   key_length[i] = tbkey[i].size();
+    //   keys[i] = tbkey[i].c_str();
+    //   cout<<"DP1 keys:"<<keys[i]<<endl;
+    // }
+    //
+    // memcached_return_t error;
+    // c_kvsclient->mtx.lock();
+    // error = memcached_mget(c_kvsclient->memc, keys, key_length, sz);
+    // c_kvsclient->mtx.unlock();
+    // if(error != MEMCACHED_SUCCESS){
+    //   cerr<<""<<__FILE__<<" :"<<__LINE__<<" Error in memcached_mget :"<<string(memcached_strerror(NULL,error))<<endl;
+    //   return;
+    // }
+
+    // struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), "", tablename, NULL};
+    struct async_data ad = {fn, data, vfn, KVMGET, key, "", tablename, this};
+    // cout<<"DP11 keys:"<<keys[0]<<endl;
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
+    // cerr<<"Asyn not yet implemented."<<endl;
   }
 
   void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    cerr<<"Asyn not yet implemented."<<endl;
+    struct async_data ad = {fn, data, vfn, KVPUT, key, val, tablename, this};
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
   }
   void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    cerr<<"Asyn not yet implemented."<<endl;
+    struct async_data ad = {fn, data, vfn, KVDEL, key, "", tablename, this};
+    c_kvsclient->mtx.lock();
+    c_kvsclient->q.push(ad);
+    c_kvsclient->mtx.unlock();
   }
 }
