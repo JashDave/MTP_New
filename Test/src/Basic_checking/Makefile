@@ -18,12 +18,20 @@ ifeq ($(kvs),memcached)
 	DEFINES = -DCONF=string\(\"--SERVER=10.129.28.207:12000\"\)
 endif
 
+
+ifeq ($(kvs),ramcloud)
+	KVSTORE = -L/home/$(USER)/RAMCloud/install/lib/ramcloud  -lkvs_ramcloud_v2 -lramcloud -lprotobuf -lpcrecpp -lboost_system -lzookeeper_mt
+	#DEFINES = -DCONF=string\(\"tcp:host=10.129.26.81,port=11100\"\)
+	DEFINES = -DCONF=string\(\"tcp:host=10.129.28.101,port=11100\"\)
+endif
+
+
 LIBS = -lkvstore_v2 -lboost_serialization -pthread $(KVSTORE)
 
 all:	test
 
 test:
-	$(G++) TestKVStoreImpl_Basic.cpp $(LIBS) $(DEFINES) -o Basic_KVStore.out
+	$(G++) TestKVStoreImpl_Basic.cpp $(LIBS) $(DEFINES) -o Basic_KVStore.out 
 	$(G++) TestKVRequestImpl_Basic.cpp $(LIBS) $(DEFINES) -o Basic_KVRequest.out
 	$(G++) TestKVStoreImpl_Async_Basic.cpp $(LIBS) $(DEFINES) -o Async_KVStore.out
 	$(G++) TestKVRequestImpl_Async_Basic.cpp $(LIBS) $(DEFINES) -o Async_KVRequest.out

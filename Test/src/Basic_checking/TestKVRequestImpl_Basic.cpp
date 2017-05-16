@@ -4,7 +4,7 @@
 
 // #define CONF string("10.129.28.44:8091")
 // #define CONF string("10.129.28.141:7003")
-#define TABLE string("TestTable123")
+#define TABLE string("TestTable1")
 
 // #define JDEBUG
 
@@ -43,6 +43,7 @@ int main(){
   }
   kr.reset();
 
+  if(1==0)
   {
   /* Check successfull get */
     KVStore<int,string> ks;
@@ -52,9 +53,11 @@ int main(){
     IS_REACHABLE
     KVData<string> kd;
     for(int i=0;i<keys.size();i++){
+      // ks.put(keys[i],vals[i]);
       kd = ks.get(keys[i]);
       jAssert(kd.ierr!=0, cout<<" Error in get serr:"<<kd.serr<<" for index="<<i<<endl;)
       jAssert(kd.value!=vals[i], cout<<"Incorrect value for get("<<keys[i]<<") expected:"<<vals[i]<<" got:"<<kd.value<<endl;)
+      TRACE(cout<<"i:"<<i<<" val:"<<kd.value<<endl;)
     }
   }
 
