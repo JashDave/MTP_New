@@ -19,8 +19,8 @@ namespace kvstore {
   #define c_kvsclient ((KVStoreClient*)dataholder)
 
   struct async_data{
-    void (*fn)(KVData<string>,void *,void *);
-    void *data;
+    void (*fn)(KVData<string>,void *);
+    // void *data;
     void *vfn;
     int type;
     string key;
@@ -130,7 +130,7 @@ namespace kvstore {
           ad.kh->mget(k,t,vret);
           ret = vret[0];
         }
-        ad.fn(ret,ad.data,ad.vfn);
+        ad.fn(ret,ad.vfn);
       }
     } //end of eventLoop() function
     void startEventLoop(){
@@ -363,7 +363,7 @@ namespace kvstore {
     return 0;
   }
 
-  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *), void *vfn){
     // int sz = 1; //key.size();
     // size_t key_length[sz];
     // const char *keys[sz];
@@ -393,7 +393,7 @@ namespace kvstore {
     // c_kvsclient->mtx.unlock();
 
 
-    struct async_data ad = {fn, data, vfn, KVMGET, key, "",  c_kvsclient->tablename, this};
+    struct async_data ad = {fn, vfn, KVMGET, key, "",  c_kvsclient->tablename, this};
     // cout<<"DP11 keys:"<<keys[0]<<endl;
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
@@ -401,16 +401,16 @@ namespace kvstore {
     // cerr<<"Asyn not yet implemented."<<endl;
   }
 
-  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVPUT, key, val, c_kvsclient->tablename, this};
+  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *), void *vfn){
+    struct async_data ad = {fn, vfn, KVPUT, key, val, c_kvsclient->tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
     // cerr<<"Asyn not yet implemented."<<endl;
   }
 
-  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVDEL, key, "",  c_kvsclient->tablename, this};
+  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *), void *vfn){
+    struct async_data ad = {fn, vfn, KVDEL, key, "",  c_kvsclient->tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
@@ -418,7 +418,7 @@ namespace kvstore {
   }
 
 
-  void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *), void *vfn){
     // int sz = 1; //key.size();
     // size_t key_length[sz];
     // const char *keys[sz];
@@ -444,7 +444,7 @@ namespace kvstore {
     // }
 
     // struct async_data ad = {fn, data, vfn, KVGET, string(keys[0]), "", tablename, NULL};
-    struct async_data ad = {fn, data, vfn, KVMGET, key, "", tablename, this};
+    struct async_data ad = {fn, vfn, KVMGET, key, "", tablename, this};
     // cout<<"DP11 keys:"<<keys[0]<<endl;
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
@@ -452,14 +452,14 @@ namespace kvstore {
     // cerr<<"Asyn not yet implemented."<<endl;
   }
 
-  void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVPUT, key, val, tablename, this};
+  void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *), void *vfn){
+    struct async_data ad = {fn, vfn, KVPUT, key, val, tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
   }
-  void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-    struct async_data ad = {fn, data, vfn, KVDEL, key, "", tablename, this};
+  void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *), void *vfn){
+    struct async_data ad = {fn, vfn, KVDEL, key, "", tablename, this};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
