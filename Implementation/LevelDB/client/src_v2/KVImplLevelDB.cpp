@@ -16,8 +16,7 @@ using namespace std;
 namespace kvstore {
 
   struct async_data{
-    void (*fn)(KVData<string>,void *,void *);
-    void *data;
+    void (*fn)(KVData<string>,void *);
     void *vfn;
     int type;
   };
@@ -57,7 +56,7 @@ namespace kvstore {
         if(ret.ierr==0 && ad.type == 1){
           ret.value = v[1];
         }
-        ad.fn(ret,ad.data,ad.vfn);
+        ad.fn(ret,ad.vfn);
       }
     }
 
@@ -160,7 +159,7 @@ namespace kvstore {
     return ret;
   }
 
-  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *), void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -168,13 +167,13 @@ namespace kvstore {
     v.push_back("Get");
     v.push_back(key);
     c_kvsclient->kc->send(v);
-    struct async_data ad{fn,data,vfn,1};
+    struct async_data ad{fn,vfn,1};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
   }
 
-  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>, void *), void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -183,13 +182,13 @@ namespace kvstore {
     v.push_back(key);
     v.push_back(val);
     c_kvsclient->kc->send(v);
-    struct async_data ad{fn,data,vfn,2};
+    struct async_data ad{fn,vfn,2};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
   }
 
-  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+  void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *), void *vfn){
     std::vector<string> v;
     v.push_back("Multiple");
     v.push_back("CreateTable");
@@ -197,7 +196,7 @@ namespace kvstore {
     v.push_back("Del");
     v.push_back(key);
     c_kvsclient->kc->send(v);
-    struct async_data ad{fn,data,vfn,3};
+    struct async_data ad{fn,vfn,3};
     c_kvsclient->mtx.lock();
     c_kvsclient->q.push(ad);
     c_kvsclient->mtx.unlock();
@@ -292,7 +291,7 @@ namespace kvstore {
   }
 
 
-    void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *), void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");
@@ -300,13 +299,13 @@ namespace kvstore {
       v.push_back("Get");
       v.push_back(key);
       c_kvsclient->kc->send(v);
-      struct async_data ad{fn,data,vfn,1};
+      struct async_data ad{fn,vfn,1};
       c_kvsclient->mtx.lock();
       c_kvsclient->q.push(ad);
       c_kvsclient->mtx.unlock();
     }
 
-    void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>, void *), void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");
@@ -315,13 +314,13 @@ namespace kvstore {
       v.push_back(key);
       v.push_back(val);
       c_kvsclient->kc->send(v);
-      struct async_data ad{fn,data,vfn,2};
+      struct async_data ad{fn,vfn,2};
       c_kvsclient->mtx.lock();
       c_kvsclient->q.push(ad);
       c_kvsclient->mtx.unlock();
     }
 
-    void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
+    void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *), void *vfn){
       std::vector<string> v;
       v.push_back("Multiple");
       v.push_back("CreateTable");
@@ -329,7 +328,7 @@ namespace kvstore {
       v.push_back("Del");
       v.push_back(key);
       c_kvsclient->kc->send(v);
-      struct async_data ad{fn,data,vfn,3};
+      struct async_data ad{fn,vfn,3};
       c_kvsclient->mtx.lock();
       c_kvsclient->q.push(ad);
       c_kvsclient->mtx.unlock();

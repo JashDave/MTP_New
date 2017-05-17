@@ -50,8 +50,7 @@ namespace kvstore {
   #define KVPUT 1
   #define KVDEL 2
   struct async_data{
-    void (*fn)(KVData<string>,void *,void *);
-    void *data;
+    void (*fn)(KVData<string>,void *);
     void *vfn;
     int type;
     string key;
@@ -109,7 +108,7 @@ namespace kvstore {
           ad.kh->mget(k,t,vret);
           ret = vret[0];
         }
-        ad.fn(ret,ad.data,ad.vfn);
+        ad.fn(ret,ad.vfn);
       }
     }
 
@@ -306,42 +305,42 @@ int KVImplHelper::mdel(vector<string>& key, vector<string>& tablename, vector<KV
   return 0;
 }
 
-void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVGET,key,"",c_kvsclient->tablename,this};
+void KVImplHelper::async_get(string key, void (*fn)(KVData<string>,void *), void *vfn){
+  struct async_data ad{fn,vfn,KVGET,key,"",c_kvsclient->tablename,this};
   c_kvsclient->mtx.lock();
   c_kvsclient->q.push(ad);
   c_kvsclient->mtx.unlock();
 }
 
-void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVPUT,key,val,c_kvsclient->tablename,this};
+void KVImplHelper::async_put(string key,string val, void (*fn)(KVData<string>, void *), void *vfn){
+  struct async_data ad{fn,vfn,KVPUT,key,val,c_kvsclient->tablename,this};
   c_kvsclient->mtx.lock();
   c_kvsclient->q.push(ad);
   c_kvsclient->mtx.unlock();
 }
-void KVImplHelper::async_del(string key, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVDEL,key,"",c_kvsclient->tablename,this};
-  c_kvsclient->mtx.lock();
-  c_kvsclient->q.push(ad);
-  c_kvsclient->mtx.unlock();
-}
-
-
-void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVGET,key,"",tablename,this};
+void KVImplHelper::async_del(string key, void (*fn)(KVData<string>, void *), void *vfn){
+  struct async_data ad{fn,vfn,KVDEL,key,"",c_kvsclient->tablename,this};
   c_kvsclient->mtx.lock();
   c_kvsclient->q.push(ad);
   c_kvsclient->mtx.unlock();
 }
 
-void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVPUT,key,val,tablename,this};
+
+void KVImplHelper::async_get(string key, string tablename, void (*fn)(KVData<string>, void *), void *vfn){
+  struct async_data ad{fn,vfn,KVGET,key,"",tablename,this};
   c_kvsclient->mtx.lock();
   c_kvsclient->q.push(ad);
   c_kvsclient->mtx.unlock();
 }
-void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>,void *, void *),void *data, void *vfn){
-  struct async_data ad{fn,data,vfn,KVDEL,key,"",tablename,this};
+
+void KVImplHelper::async_put(string key,string val, string tablename, void (*fn)(KVData<string>, void *), void *vfn){
+  struct async_data ad{fn,vfn,KVPUT,key,val,tablename,this};
+  c_kvsclient->mtx.lock();
+  c_kvsclient->q.push(ad);
+  c_kvsclient->mtx.unlock();
+}
+void KVImplHelper::async_del(string key, string tablename, void (*fn)(KVData<string>, void *), void *vfn){
+  struct async_data ad{fn,vfn,KVDEL,key,"",tablename,this};
   c_kvsclient->mtx.lock();
   c_kvsclient->q.push(ad);
   c_kvsclient->mtx.unlock();
