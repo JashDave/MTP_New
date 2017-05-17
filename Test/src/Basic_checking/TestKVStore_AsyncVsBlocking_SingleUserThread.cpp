@@ -37,7 +37,7 @@ struct data_holder {
   long long failure_count;
 };
 
-void callback_handler(KVData<string> kd, void *data){
+void callback_handler(void *data, KVData<string> kd){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
   if(kd.ierr != 0){

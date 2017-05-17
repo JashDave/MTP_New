@@ -36,7 +36,7 @@ struct data_holder {
   long long failure_count;
 };
 
-void callback_handler(KVData<string> kd, void *data){
+void callback_handler(void *data,KVData<string> kd){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
   // cout<<dh->opr_count<<endl;
@@ -47,7 +47,7 @@ void callback_handler(KVData<string> kd, void *data){
   }
 }
 
-void async_execute_handler(KVResultSet rs, void *data){
+void async_execute_handler(void *data,KVResultSet rs){
   struct data_holder *dh = (struct data_holder *)data;
   dh->opr_count++;
   for(int i=0;i<LOCAL_OPERATION_COUNT;i++){

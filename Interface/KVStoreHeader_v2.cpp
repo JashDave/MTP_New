@@ -89,57 +89,22 @@ namespace kvstore {
 	}
 
 /*---------------Helper for async_execute --------------------*/
-	class async_execute_data{
-	public:
-		void *data;
-		vector<string> operation_type;
-		async_execute_data(void *d,vector<string> &ot){
-			data=d;
-			operation_type=ot;
-		}
-	};
+	async_execute_data::async_execute_data(void *d,vector<string> &ot){
+		vfn=d;
+		operation_type=ot;
+	}
 
-  void fun(KVData<string> kd, void *data, void *vfn){
+  void fun(KVData<string> kd, void *data){
 		static vector<KVData<string>> combined_res;
 		combined_res.push_back(kd);
 		if(data != NULL){
 			async_execute_data *ad = (async_execute_data*)data;
 			KVResultSet rs = KVResultSet(combined_res,ad->operation_type);
-			if(vfn!=NULL){
-				void (*fn)(KVResultSet, void *) = (void (*)(KVResultSet, void *))vfn;
-				fn(rs,ad->data);
-			}
+			function<void(KVResultSet)> *fn = (function<void(KVResultSet)> *) ad->vfn;
+			(*fn)(rs);
+			delete(fn);
 			delete(ad);
 			combined_res.clear();
-		}
-	}
-
-	void KVRequest::async_execute(void (*fn)(KVResultSet, void *), void *data){
-		int sz=operation_type.size()-1;  /*NOTE -1 for last operation*/
-		int gi=0,pi=0,di=0;
-		for(int i=0;i<sz;i++){
-			if(operation_type[i] == OPR_TYPE_GET){
-				kh.async_get(get_key[gi], get_tablename[gi], fun, NULL, NULL);
-				gi++;
-			} else if(operation_type[i] == OPR_TYPE_PUT){
-				kh.async_put(put_key[pi], put_value[pi], put_tablename[pi], fun, NULL, NULL);
-				pi++;
-			} else {
-				kh.async_del(del_key[di], del_tablename[di], fun, NULL, NULL);
-				di++;
-			}
-		}
-		/*Last operation*/
-		struct async_execute_data *ad = new async_execute_data(data,operation_type);
-		if(operation_type[sz] == OPR_TYPE_GET){
-			kh.async_get(get_key[gi], get_tablename[gi], fun, (void*)ad, (void*)fn);
-			gi++;
-		} else if(operation_type[sz] == OPR_TYPE_PUT){
-			kh.async_put(put_key[pi], put_value[pi], put_tablename[pi], fun, (void*)ad, (void*)fn);
-			pi++;
-		} else {
-			kh.async_del(del_key[di], del_tablename[di], fun, (void*)ad, (void*)fn);
-			di++;
 		}
 	}
 

@@ -15,6 +15,7 @@
 #include <sstream>
 #include <vector>
 #include <thread>
+#include <functional>
 
 //For returning hetrogeneous array as return of execute()
 //#include <tuple> //Not used
@@ -137,7 +138,8 @@ namespace kvstore {
 		void del(KeyType const& key,string tablename);
 
 		KVResultSet execute();
-		void async_execute(void (*fn)(KVResultSet, void *), void *data); /* */
+		template<typename Fn, typename... Args>
+		void async_execute(Fn&& f, Args&&... args); /* */
 		void reset();
 	};
 
@@ -170,6 +172,46 @@ namespace kvstore {
 		del_tablename.push_back(tablename);
 		// kh.del(skey,tablename);
 	}
+	/*----------- KVRequest::async_execute() ---*/
+	class async_execute_data{
+		public:
+			void *vfn;
+			vector<string> operation_type;
+			async_execute_data(void *d,vector<string> &ot);
+	};
+	void fun(KVData<string> kd, void *data);
+	template<typename Fn, typename... Args>
+	void KVRequest::async_execute(Fn&& f, Args&&... args){
+		int sz=operation_type.size()-1;  /*NOTE -1 for last operation*/
+		int gi=0,pi=0,di=0;
+		for(int i=0;i<sz;i++){
+			if(operation_type[i] == OPR_TYPE_GET){
+				kh.async_get(get_key[gi], get_tablename[gi], fun, NULL);
+				gi++;
+			} else if(operation_type[i] == OPR_TYPE_PUT){
+				kh.async_put(put_key[pi], put_value[pi], put_tablename[pi], fun, NULL);
+				pi++;
+			} else {
+				kh.async_del(del_key[di], del_tablename[di], fun, NULL);
+				di++;
+			}
+		}
+		/*Last operation*/
+		function<void(KVResultSet)> tfn = std::bind(f,args...,std::placeholders::_1);// = std::bind(f,args...,std::placeholders::_1);
+		function<void(KVResultSet)> *fn = new function<void(KVResultSet)>(tfn);
+		// void *fn;
+		async_execute_data *ad = new async_execute_data((void*)fn,operation_type);
+		if(operation_type[sz] == OPR_TYPE_GET){
+			kh.async_get(get_key[gi], get_tablename[gi], fun, (void*)ad);
+			gi++;
+		} else if(operation_type[sz] == OPR_TYPE_PUT){
+			kh.async_put(put_key[pi], put_value[pi], put_tablename[pi], fun, (void*)ad);
+			pi++;
+		} else {
+			kh.async_del(del_key[di], del_tablename[di], fun, (void*)ad);
+			di++;
+		}
+	}
 
 
 	/*
@@ -187,9 +229,12 @@ namespace kvstore {
 		KVData<ValType> get(KeyType const& key);
 		KVData<ValType> put(KeyType const& key,ValType const& val);
 		KVData<ValType> del(KeyType const& key);
-		void async_get(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data);
-		void async_put(KeyType const& key,ValType const& val, void (*fn)(KVData<ValType>,void *),void *data);
-		void async_del(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data);
+		template<typename Fn, typename... Args>
+		void async_get(KeyType const& key, Fn&& f, Args&&... args);
+		template<typename Fn, typename... Args>
+		void async_put(KeyType const& key,ValType const& val, Fn&& f, Args&&... args);
+		template<typename Fn, typename... Args>
+		void async_del(KeyType const& key, Fn&& f, Args&&... args);
 		bool clear();
 	};
 	/*-------KVStore::KVStore()----------*/
@@ -241,46 +286,61 @@ namespace kvstore {
 	}
 	/*-------KVRequest::async_get()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_get(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data){
+	template<typename Fn, typename... Args>
+	void KVStore<KeyType,ValType>::async_get(KeyType const& key, Fn&& f, Args&&... args){
+		// cout<<"DP:"<<" file:"<<__FILE__<<" line:"<<__LINE__<<endl;
 		string skey=toBoostString(key);
-		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+		function<void(KVData<ValType>)> tfn = std::bind(f,args...,std::placeholders::_1);
+		function<void(KVData<ValType>)> *fn = new function<void(KVData<ValType>)>(tfn);
+		auto lambda_fn = [](KVData<string> res, void *vfn)->void{
 			KVData<ValType> kvd = KVData<ValType>();
 			kvd.ierr = res.ierr;
 			kvd.serr = res.serr;
 			if(kvd.ierr==0){
 				kvd.value = toBoostObject<ValType>(res.value);
 			}
-			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
-			fn(kvd,pdata);
+			// cout<<"DP:"<<" file:"<<__FILE__<<" line:"<<__LINE__<<endl;
+			function<void(KVData<ValType>)> *fn = (function<void(KVData<ValType>)> *)vfn;
+			(*fn)(kvd);
+			delete(fn);
 		};
-		kh.async_get(skey,lambda_fn,data,(void *)fn);
+		// cout<<"DP:"<<" file:"<<__FILE__<<" line:"<<__LINE__<<endl;
+		kh.async_get(skey,lambda_fn,(void *)fn);
 	}
 	/*-------KVRequest::async_put()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, void (*fn)(KVData<ValType>,void *),void *data){
+	template<typename Fn, typename... Args>
+	void KVStore<KeyType,ValType>::async_put(KeyType const& key,ValType const& val, Fn&& f, Args&&... args){
 		string skey=toBoostString(key);
 		string sval=toBoostString(val);
-		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+		function<void(KVData<ValType>)> tfn = std::bind(f,args...,std::placeholders::_1);
+		function<void(KVData<ValType>)> *fn = new function<void(KVData<ValType>)>(tfn);
+		auto lambda_fn = [](KVData<string> res, void *vfn)->void{
 			KVData<ValType> kvd = KVData<ValType>();
 			kvd.ierr = res.ierr;
 			kvd.serr = res.serr;
-			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
-			fn(kvd,pdata);
+			function<void(KVData<ValType>)> *fn = (function<void(KVData<ValType>)> *)vfn;
+			(*fn)(kvd);
+			delete(fn);
 		};
-		kh.async_put(skey,sval,lambda_fn,data,(void *)fn);
+		kh.async_put(skey,sval,lambda_fn,(void *)fn);
 	}
 	/*-------KVRequest::async_del()--------*/
 	template<typename KeyType, typename ValType>
-	void KVStore<KeyType,ValType>::async_del(KeyType const& key, void (*fn)(KVData<ValType>,void *),void *data){
+	template<typename Fn, typename... Args>
+	void KVStore<KeyType,ValType>::async_del(KeyType const& key, Fn&& f, Args&&... args){
 		string skey=toBoostString(key);
-		auto lambda_fn = [](KVData<string> res,void *pdata, void *vfn)->void{
+		function<void(KVData<ValType>)> tfn = std::bind(f,args...,std::placeholders::_1);
+		function<void(KVData<ValType>)> *fn = new function<void(KVData<ValType>)>(tfn);
+		auto lambda_fn = [](KVData<string> res, void *vfn)->void{
 			KVData<ValType> kvd = KVData<ValType>();
 			kvd.ierr = res.ierr;
 			kvd.serr = res.serr;
-			void (*fn)(KVData<ValType>,void*) = (void (*)(KVData<ValType>,void*))vfn;
-			fn(kvd,pdata);
+			function<void(KVData<ValType>)> *fn = (function<void(KVData<ValType>)> *)vfn;
+			(*fn)(kvd);
+			delete(fn);
 		};
-		kh.async_del(skey,lambda_fn,data,(void*)fn);
+		kh.async_del(skey,lambda_fn,(void*)fn);
 	}
 	/*-------KVStore::clear()----------*/
 	template<typename KeyType, typename ValType>
