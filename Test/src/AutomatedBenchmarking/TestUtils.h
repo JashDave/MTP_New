@@ -131,6 +131,16 @@ public:
     cout<<"Fail\t"<<fcount<<endl;
     cout<<"Tput\t"<<tput<<" ops"<<endl;
   }
+  void print(string desc, int dur){
+      cout<<desc<<endl;
+      cout<<"Min\t"<<min<<"us"<<endl;
+      cout<<"Max\t"<<max<<"us"<<endl;
+      cout<<"Avg\t"<<avg<<"us"<<endl;
+      cout<<"Count\t"<<count<<endl;
+      cout<<"Fail\t"<<fcount<<endl;
+      cout<<"Tput\t"<<tput<<" ops"<<endl;
+      cout<<"PerSecondTput\t"<<sum/dur<<" ops"<<endl;
+    }
 
   inline void incfcount(){
     fcount++;

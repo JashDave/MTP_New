@@ -143,7 +143,7 @@ public:
     Measure merged;
     merged.mergeAll(m);
     merged.saveToFile(desc,filename,true);
-    merged.print(desc);
+    merged.print(desc,run_time);
   }
 
 };
