@@ -4,7 +4,7 @@
 
 // -DDS="Redis"
 
-#define RUN_TIME 300
+#define RUN_TIME 60
 #define THREAD_COUNT 200
 #define THINKTIME 500
 
