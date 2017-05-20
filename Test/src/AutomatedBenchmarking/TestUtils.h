@@ -139,7 +139,7 @@ public:
       cout<<"Count\t"<<count<<endl;
       cout<<"Fail\t"<<fcount<<endl;
       cout<<"Tput\t"<<tput<<" ops"<<endl;
-      cout<<"PerSecondTput\t"<<sum/dur<<" ops"<<endl;
+      cout<<"PerSecondTput\t"<<count/dur<<" ops"<<endl;
     }
 
   inline void incfcount(){
