@@ -6,6 +6,8 @@
 
 #define RUN_TIME 300
 #define THREAD_COUNT 200
+#define THINKTIME 500
+
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 #define DATASET_SIZE 10000
@@ -25,13 +27,13 @@
 //#define PORT "8001"
 
 //#define CONN {"10.129.26.246:8001"}
-#define CONN {"10.129.28.207:8001"}
+#define CONN {"10.129.28.141:8001"}
 //#define CONN {"--SERVER=10.129.28.207:8001"}
 //#define CONN {"10.129.28.207:8001", "10.129.28.207:8002", "10.129.28.207:8003", "10.129.28.207:8004", "10.129.28.207:8005"}
 #define SERVER_CTRL_PORT 8091
 
 //#define SERVER_LIST {"10.129.26.246:8091"}
-#define SERVER_LIST {"10.129.28.207:8091"}
+#define SERVER_LIST {"10.129.28.141:8091"}
 // #define SERVER_LIST {"10.129.28.207:8091", "10.129.28.141:8091", "10.129.26.81:8091", "10.129.26.246:8091", "10.129.28.35:8091", "10.129.26.195:8091"}
 
 // #include "../../Implementation/RAMCloud/client/src/KVStore.h"

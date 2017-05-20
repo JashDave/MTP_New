@@ -1,6 +1,6 @@
 
 #include <kvstore/KVStoreHeader_v2.h>
-
+#include <unistd.h>
 using namespace kvstore;
 
 class Experiment{
@@ -94,6 +94,7 @@ public:
         default:
           std::cerr << "Invalid value for distribution" << std::endl;
       }
+      usleep(THINKTIME);
 
       if(r1<rp){
         //Do read
