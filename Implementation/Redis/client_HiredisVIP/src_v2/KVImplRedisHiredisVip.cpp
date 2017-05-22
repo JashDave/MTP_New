@@ -95,11 +95,8 @@ namespace kvstore {
             ad.fn(ret,ad.vfn);
             freeReplyObject(reply);
           }
-				} else {
-          cerr<<"Response:"<<rep<<" Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
-          if(rep == REDIS_REPLY_ERROR){
-            cerr<<"Error string:"<<string(reply->str,reply->len)<<endl;
-          }
+				} else { //REDIS_ERR
+          cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<" err:"<<rc->errstr<<endl;
 					redisClusterReset(rc);
 				}
       }
