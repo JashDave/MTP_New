@@ -97,7 +97,10 @@ namespace kvstore {
           }
 				} else {
           cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
-					// redisClusterReset(cc);
+          if(rep == REDIS_REPLY_ERROR){
+            cerr<<"Error string:"<<string(reply->str,reply->len)<<endl;
+          }
+					redisClusterReset(rc);
 				}
       }
     }
