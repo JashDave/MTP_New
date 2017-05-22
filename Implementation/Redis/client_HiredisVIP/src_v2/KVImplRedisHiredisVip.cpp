@@ -96,7 +96,7 @@ namespace kvstore {
             freeReplyObject(reply);
           }
 				} else {
-          cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
+          cerr<<"Response:"<<rep<<" Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
           if(rep == REDIS_REPLY_ERROR){
             cerr<<"Error string:"<<string(reply->str,reply->len)<<endl;
           }
