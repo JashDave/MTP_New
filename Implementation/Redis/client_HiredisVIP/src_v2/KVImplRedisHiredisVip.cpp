@@ -58,7 +58,7 @@ namespace kvstore {
 // #define REDIS_REPLY_ERROR 6
 				if(rep == REDIS_OK){
           if(reply == NULL){
-            cerr<<"Reply Null"<<endl;
+            cerr<<"Reply Null :"<<rc->errstr<<endl;
           } else {
             KVData<string> ret = KVData<string>();
             mtx.lock();

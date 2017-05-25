@@ -19,6 +19,7 @@ public:
     config_string = conf;
     tablename = tb;
     memc = memcached(config_string.c_str(), config_string.size());
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_SUPPORT_CAS, 1);
     if(memc == NULL){
       return false;
     }
@@ -40,7 +41,7 @@ public:
     key = tablename + key;
     char *op;
     size_t value_length;
-    uint32_t flags;
+    uint32_t flags;// = MEMCACHED_BEHAVIOR_SUPPORT_CAS;
     memcached_return_t error;
     op = memcached_get(memc, key.c_str(), key.size(), &value_length, &flags, &error);
     if(error != MEMCACHED_SUCCESS){
@@ -118,6 +119,7 @@ int main(){
     if(memc == NULL){
       cout<<"connection error"<<endl;
     }
+    memcached_behavior_set(memc, MEMCACHED_BEHAVIOR_SUPPORT_CAS, 1);
     memcached_return_t rc;
     char *keys[]= {"TB1foo", "TB1foo", "fudge", "TB1son", "food"};
     size_t key_length[]= {6, 6, 5, 6, 4};
@@ -155,6 +157,7 @@ int main(){
         //  cout<<"DP3"<<endl;
         //  char *op = memcached_result_value(&rs);
          char *op = memcached_result_value(rs);
+         cout<<"ver:"<<memcached_result_cas(rs)<<endl;
         //  cout<<"DP4"<<endl;
          cout<<op<<endl;
         //  free(op);
