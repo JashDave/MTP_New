@@ -74,10 +74,12 @@ public:
   long long thread_count=1;
   long long avgthreadruntime;
   long long tput;
+  long long run_time;
   // vector<uint64_t> start_entries;//(10000);
   // vector<uint64_t> end_entries;//(10000);
 public:
-  Measure(){
+  Measure(long long rt){
+    run_time = rt;
     diff_entries.reserve(4e6);
   }
 
@@ -123,23 +125,15 @@ public:
   // }
 
   void print(string desc){
-    cout<<desc<<endl;
-    cout<<"Min\t"<<min<<"us"<<endl;
-    cout<<"Max\t"<<max<<"us"<<endl;
-    cout<<"Avg\t"<<avg<<"us"<<endl;
-    cout<<"Count\t"<<count<<endl;
-    cout<<"Fail\t"<<fcount<<endl;
-    cout<<"Tput\t"<<tput<<" ops"<<endl;
-  }
-  void print(string desc, int dur){
       cout<<desc<<endl;
       cout<<"Min\t"<<min<<"us"<<endl;
       cout<<"Max\t"<<max<<"us"<<endl;
       cout<<"Avg\t"<<avg<<"us"<<endl;
       cout<<"Count\t"<<count<<endl;
       cout<<"Fail\t"<<fcount<<endl;
+      cout<<"Fail%\t"<<fcount*100/count<<endl;
       cout<<"Tput\t"<<tput<<" ops"<<endl;
-      cout<<"PerSecondTput\t"<<count/dur<<" ops"<<endl;
+      cout<<"BTput\t"<<(count*1e6/avgthreadruntime)<<" ops"<<endl;
     }
 
   inline void incfcount(){
@@ -172,7 +166,8 @@ public:
     sum = std::accumulate(sorted_diff.begin(), sorted_diff.end(), 0L);
     avgthreadruntime = sum/thread_count;
     avg = sum/((double)count);
-    tput = (count*1e6/avgthreadruntime);
+    // tput = (count*1e6/avgthreadruntime);
+    tput = (count/run_time);
 
     file << desc << "\n";
     file << "Min (in microseconds),Max (us),Avg (us),Count,Sum,Failure Count,Throughput\n";

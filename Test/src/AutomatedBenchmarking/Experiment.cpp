@@ -26,7 +26,7 @@ public:
     thread_count = tc;
     run_time = rt;
     readp = 0.5;
-    m.resize(tc);
+    m.resize(tc,Measure(run_time));
     run = false;
     conn = con;
     connsz = conn.size();
@@ -36,11 +36,12 @@ public:
 
   void setRuntime(int rt){
     run_time = rt;
+    m.resize(thread_count,Measure(run_time));
   }
 
   void setThreadCount(int tc){
     thread_count = tc;
-    m.resize(tc);
+    m.resize(tc,Measure(run_time));
   }
 
   void setData(vector<string> &k, vector<string> &v) {
@@ -140,10 +141,10 @@ public:
 
     string desc = desc_p + string("Data Store,Work Load,Key Size(bytes),Value Size(bytes),Thread Count,Run Time") + string("\n") + string(dsname) +","+to_string(distribution)+" ReadProb:"+to_string(getReadProb())+","+to_string(key[0].size())+","+to_string(value[0].size())+","+to_string(thread_count)+","+to_string(run_time);
 
-    Measure merged;
+    Measure merged(run_time);
     merged.mergeAll(m);
     merged.saveToFile(desc,filename,true);
-    merged.print(desc,run_time);
+    merged.print(desc);
   }
 
 };
