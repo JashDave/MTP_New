@@ -18,6 +18,7 @@ private:
   string tablename = "TestTable123_977";
   string dsname = "See folder name";
   int distribution;
+  RandomNumberGenerator *rng;
 public:
   Experiment(vector<string> &k, vector<string> &v, vector<string> con, int tc, int rt, int dist){
     key = k;
@@ -31,7 +32,12 @@ public:
     conn = con;
     connsz = conn.size();
     distribution = dist;
+    rng = new RandomNumberGenerator(0,dataSz-1);
     loadData(); //? to be invoked here or not?
+  }
+
+  ~Experiment(){
+    delete rng;
   }
 
   void setRuntime(int rt){
@@ -87,10 +93,10 @@ public:
       r1 = rand();
       switch (distribution) {
         case 0:
-          r2 = RandomNumberGenerator::uniform(0,dataSz-1);
+          r2 = rng->uniform();
           break;
         case 1:
-          r2 = RandomNumberGenerator::zipf(0,dataSz-1);
+          r2 = rng->zipf();
           break;
         default:
           std::cerr << "Invalid value for distribution" << std::endl;
