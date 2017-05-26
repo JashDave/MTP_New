@@ -155,7 +155,7 @@ int main(int argc, char *argv[]){
   int thread_count = THREAD_COUNT;
   int run_time = RUN_TIME;
   vector<string> conn = CONN;
-  Experiment e = Experiment(key, value, conn, thread_count, run_time,0); //vector<string> &k, vector<string> &v, string con, int tc, int rt, int dist
+  Experiment e = Experiment(key, value, conn, thread_count, run_time,DIST==ZIPF); //vector<string> &k, vector<string> &v, string con, int tc, int rt, int dist
 
   string sep="/";
   string DATE=currentDateTime("%Y-%m-%d");
