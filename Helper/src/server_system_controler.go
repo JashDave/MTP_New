@@ -119,7 +119,7 @@ func handleClient(conn net.Conn) {
   for {
     strarr,err := readStrings(conn)
     if err!=nil {
-      fmt.Println("Error")
+      fmt.Println("Error:",err)
       return
     }
     for _,cmd := range strarr {
