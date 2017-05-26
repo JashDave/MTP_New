@@ -5,8 +5,8 @@
 // -DDS="Redis"
 
 #define RUN_TIME 60
-#define THREAD_COUNT 200
-#define THINKTIME 500
+#define THREAD_COUNT 80
+#define THINKTIME 0
 
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
