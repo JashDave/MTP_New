@@ -6,7 +6,7 @@
 // #define CONF string("10.129.28.141:7003")
 #define TABLE string("TestTable123")
 
-#define JDEBUG
+// #define JDEBUG
 
 #include "../jutils.h"
 #include <iostream>

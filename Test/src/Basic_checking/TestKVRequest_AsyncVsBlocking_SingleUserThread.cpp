@@ -61,6 +61,7 @@ void async_execute_handler(void *data,KVResultSet rs){
 
 
 int main(){
+  RandomNumberGenerator rng(0,DATA_SET_SIZE-1);
   cout<<"DATA_SET_SIZE:"<<DATA_SET_SIZE<<endl;
   shared_ptr<KVData<string>> kd;
   vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
@@ -103,8 +104,8 @@ int main(){
     long long start_time = currentMicros();
     while(opr_count){
       for(int i=0;i<local_opr_count;i++){
-        r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
-        r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
+        r1 = rand();
+        r2 = rng.zipf();
         if(r1<read_prob){
           kr.get<string,string>(keys[r2],TABLE);
         } else {
@@ -148,8 +149,8 @@ int main(){
     long long start_time = currentMicros();
     while(opr_count){
       for(int i=0;i<local_opr_count;i++){
-        r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
-        r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
+        r1 = rand();
+        r2 = rng.zipf();
         if(r1<read_prob){
           kr.get<string,string>(keys[r2],TABLE);
         } else {

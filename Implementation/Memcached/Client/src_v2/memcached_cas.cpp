@@ -28,7 +28,7 @@ public:
 
   bool put(string key, string val) {
     key = tablename + key;
-    memcached_return_t rc = memcached_set(memc, key.c_str(), key.size(), val.c_str(), val.size(), (time_t)0, (uint32_t)MEMCACHED_BEHAVIOR_SUPPORT_CAS);
+    memcached_return_t rc = memcached_set(memc, key.c_str(), key.size(), val.c_str(), val.size(), (time_t)0, (uint32_t)0);
     if (rc != MEMCACHED_SUCCESS)
     {
       cerr<<"set failure"<<endl;
@@ -41,7 +41,7 @@ public:
     key = tablename + key;
     char *op;
     size_t value_length;
-    uint32_t flags = MEMCACHED_BEHAVIOR_SUPPORT_CAS;
+    uint32_t flags = 0; //MEMCACHED_BEHAVIOR_SUPPORT_CAS;
     memcached_return_t error;
     op = memcached_get(memc, key.c_str(), key.size(), &value_length, &flags, &error);
     if(error != MEMCACHED_SUCCESS){
@@ -90,7 +90,7 @@ public:
   bool cas(string key, string val) {
     key = tablename + key;
     cout<<"version"<<version<<endl;
-    memcached_return_t rc = memcached_cas(memc, key.c_str(), key.size(), val.c_str(), val.size(), (time_t)0, (uint32_t)MEMCACHED_BEHAVIOR_SUPPORT_CAS, version);
+    memcached_return_t rc = memcached_cas(memc, key.c_str(), key.size(), val.c_str(), val.size(), (time_t)0, (uint32_t)0, version);
     if (rc != MEMCACHED_SUCCESS)
     {
       // cerr<<"CAS failure"<<endl;

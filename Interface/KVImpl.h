@@ -49,6 +49,9 @@ public:
 	void async_put(string key, string val, string tablename, void (*fn)(KVData<string>, void *), void *vfn);
 	void async_del(string key, string tablename, void (*fn)(KVData<string>,void *), void *vfn);
 
+  int smget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& ret);
+  int smput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<KVData<string>>& ret);
+
 };
 }
 #endif

@@ -414,4 +414,127 @@ namespace kvstore {
 			cerr<<"\n\n\ndel Append error\n\n\n"<<endl;
 		}
   }
+
+
+    int KVImplHelper::smget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& vret){
+      int sz = key.size();
+      int rep, rep2;
+      redisReply *reply;
+
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "unwatch");
+      if(rep == REDIS_ERR){
+        cerr<<"Unwatch Append error"<<endl;
+      }
+      for(int i=0;i<sz;i++){
+        rep = redisClusterAppendCommand(c_kvsclient->rc, "watch %s",(tablename[i]+key[i]).c_str()) ;
+        rep2 = redisClusterAppendCommand(c_kvsclient->rc, "get %s",(tablename[i]+key[i]).c_str()) ;
+        if(rep == REDIS_ERR || rep2 == REDIS_ERR){
+          cerr<<"Get Append error"<<endl;
+        }
+      }
+
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_ERR){
+        cerr<<"Unwatch reply error"<<endl;
+      }
+      if(reply != NULL){
+        freeReplyObject(reply);
+      }
+      for(int i=0;i<sz;i++){
+        rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+        if(rep == REDIS_ERR){
+          cerr<<"Watch reply error"<<endl;
+        }
+        if(reply != NULL){
+          freeReplyObject(reply);
+        }
+        rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+        if(rep == REDIS_OK){
+          if(reply == NULL){
+            cerr<<"Reply Null"<<endl;
+          } else {
+            KVData<string> ret = KVData<string>();
+            if(reply->type == REDIS_REPLY_STRING){
+                ret.ierr = 0;
+                ret.value = string(reply->str);
+            } else if (reply->type == REDIS_REPLY_NIL){
+                ret.ierr = -1;
+                ret.serr = "Value doesn't exists.";
+            } else {
+              cerr<<"Reply type:"<<reply->type<<endl;
+            }
+            freeReplyObject(reply);
+            vret.push_back(ret);
+          }
+        } else {
+          cerr<<"Error in return file:"<<__FILE__<<" line:"<<__LINE__<<endl;
+          // redisClusterReset(cc);
+        }
+      }
+      return 0;
+    }
+
+    int KVImplHelper::smput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<KVData<string>>& vret){
+      int sz = key.size();
+      int rep;
+      redisReply *reply;
+
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "multi");
+      if(rep == REDIS_ERR){
+        cerr<<"Multi Append error rep:"<<rep<<endl;
+      }
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_ERR){
+        cerr<<"Multi reply error"<<endl;
+      }
+      if(reply != NULL){
+        freeReplyObject(reply);
+      }
+
+      for(int i=0;i<sz;i++){
+        rep = redisClusterAppendCommand(c_kvsclient->rc, "set %s %s",(tablename[i]+key[i]).c_str(), val[i].c_str()) ;
+        if(rep == REDIS_ERR){
+          cerr<<"Set Append error"<<endl;
+        }
+      }
+      rep = redisClusterAppendCommand(c_kvsclient->rc, "exec");
+      if(rep == REDIS_ERR){
+        cerr<<"Exec Append error rep:"<<rep<<endl;
+      }
+
+      for(int i=0;i<sz;i++){
+        rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+        if(rep == REDIS_OK){
+          if(reply == NULL){
+            cerr<<"Reply Null"<<endl;
+          } else {
+            KVData<string> ret = KVData<string>();
+            if (reply->type == REDIS_REPLY_STATUS){
+                ret.ierr = 0;
+                // cout<<reply->str<<endl;
+            } else {
+              cerr<<"Reply type:"<<reply->type<<endl;
+            }
+            freeReplyObject(reply);
+            vret.push_back(ret);
+          }
+        }
+      }
+
+      rep = redisClusterGetReply(c_kvsclient->rc, (void**)&reply);
+      if(rep == REDIS_ERR){
+        cerr<<"Exec reply error"<<endl;
+      }
+      if(reply != NULL){
+        freeReplyObject(reply);
+      } else {
+        cerr<<"Exec reply null"<<endl;
+        for(int i=0;i<sz;i++){
+          vret[i].ierr = -1;
+          vret[i].serr = "Safe put failed, values may have changed since last read.";
+        }
+        return -1;
+      }
+      return 0;
+    }
 }

@@ -45,6 +45,8 @@ namespace kvstore {
 	#define OPR_TYPE_GET string("get")
 	#define OPR_TYPE_PUT string("put")
 	#define OPR_TYPE_DEL string("del")
+	#define OPR_TYPE_SGET string("sget")
+	#define OPR_TYPE_SPUT string("sput")
 
 	/* Class declaration */
 	template<typename KeyType, typename ValType>
@@ -88,7 +90,7 @@ namespace kvstore {
 		if(idx>=0 && idx<count){
 			ret.ierr = res[idx].ierr;
 			ret.serr = res[idx].serr;
-			if(ret.ierr==0 && operation_type[idx]==OPR_TYPE_GET){
+			if(ret.ierr==0 && (operation_type[idx]==OPR_TYPE_GET || operation_type[idx]==OPR_TYPE_SGET)){
 				ret.value = toBoostObject<ValType>(res[idx].value);
 			}
 		} else {
@@ -122,6 +124,13 @@ namespace kvstore {
 
 		std::vector<string> del_tablename;
 		std::vector<string> del_key;
+
+		std::vector<string> sput_tablename;
+		std::vector<string> sput_key;
+		std::vector<string> sput_value;
+
+		std::vector<string> sget_tablename;
+		std::vector<string> sget_key;
 	public:
 		KVRequest();
 		~KVRequest();		//For distroying connection object
@@ -133,6 +142,12 @@ namespace kvstore {
 
 		template<typename KeyType, typename ValType>
 		void put(KeyType const& key,ValType const& val,string tablename);
+
+		template<typename KeyType, typename ValType>
+		void sget(KeyType const& key,string tablename);
+
+		template<typename KeyType, typename ValType>
+		void sput(KeyType const& key,ValType const& val,string tablename);
 
 		template<typename KeyType, typename ValType>
 		void del(KeyType const& key,string tablename);
@@ -161,6 +176,27 @@ namespace kvstore {
 		put_key.push_back(skey);
 		put_value.push_back(sval);
 		put_tablename.push_back(tablename);
+		// kh.put(skey,sval,tablename);
+	}
+
+	/*-------KVRequest::sget()----------*/
+	template<typename KeyType, typename ValType>
+	void KVRequest::sget(KeyType const& key,string tablename){
+		string skey=toBoostString(key);
+		operation_type.push_back(OPR_TYPE_SGET);
+		sget_key.push_back(skey);
+		sget_tablename.push_back(tablename);
+		// kh.get(skey,tablename);
+	}
+	/*-------KVRequest::sput()----------*/
+	template<typename KeyType, typename ValType>
+	void KVRequest::sput(KeyType const& key,ValType const& val,string tablename){
+		string skey=toBoostString(key);
+		string sval=toBoostString(val);
+		operation_type.push_back(OPR_TYPE_SPUT);
+		sput_key.push_back(skey);
+		sput_value.push_back(sval);
+		sput_tablename.push_back(tablename);
 		// kh.put(skey,sval,tablename);
 	}
 	/*-------KVRequest::del()----------*/

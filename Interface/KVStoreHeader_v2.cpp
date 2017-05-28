@@ -55,6 +55,8 @@ namespace kvstore {
 		vector<KVData<string>> mput_res;
 		vector<KVData<string>> mget_res;
 		vector<KVData<string>> mdel_res;
+		vector<KVData<string>> smput_res;
+		vector<KVData<string>> smget_res;
 
 		// cout<<"DP1 : "<< put_key.size()<<endl;
 		// cout<<"DP2 : "<< get_key.size()<<endl;
@@ -62,12 +64,15 @@ namespace kvstore {
 		int mp = kh.mput(put_key, put_value, put_tablename, mput_res);
 		int mg = kh.mget(get_key, get_tablename, mget_res);
 		int md = kh.mdel(del_key, del_tablename, mdel_res);
-
+		if(sget_key.size() > 0)
+		int smg = kh.smget(sget_key, sget_tablename, smget_res);
+		if(sput_key.size() > 0)
+		int smp = kh.smput(sput_key, sput_value, sput_tablename, smput_res);
 		// cout<<"DP4"<<endl;
 		/* Combine the results in given order. */
 		vector<KVData<string>> combined_res;
 		int sz=operation_type.size();
-		int pi=0,gi=0,di=0;
+		int pi=0,gi=0,di=0,spi=0,sgi=0;
 		for(int i=0;i<sz;i++){
 			// cout<<"DP5"<<endl;
 			if(operation_type[i] == OPR_TYPE_PUT){
@@ -79,6 +84,12 @@ namespace kvstore {
 			} else if(operation_type[i] == OPR_TYPE_DEL){
 				combined_res.push_back(mdel_res[di]);
 				di++;
+			} else if(operation_type[i] == OPR_TYPE_SPUT){
+				combined_res.push_back(smput_res[spi]);
+				spi++;
+			} else if(operation_type[i] == OPR_TYPE_SGET){
+				combined_res.push_back(smget_res[sgi]);
+				sgi++;
 			} else {
 				cerr<<"Invalid operation type in "<<__FILE__<<", "<<__FUNCTION__<<endl;
 			}
@@ -117,5 +128,11 @@ namespace kvstore {
 		get_key.clear();
 		del_tablename.clear();
 		del_key.clear();
+
+		sput_tablename.clear();
+		sput_key.clear();
+		sput_value.clear();
+		sget_tablename.clear();
+		sget_key.clear();
 	}
 }

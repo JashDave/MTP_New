@@ -50,6 +50,7 @@ void callback_handler(void *data, KVData<string> kd){
 
 
 int main(){
+  RandomNumberGenerator rng(0,DATA_SET_SIZE-1);
   cout<<"DATA_SET_SIZE:"<<DATA_SET_SIZE<<endl;
   KVData<string> kd;
   vector<string> keys = DataSetGenerator::getRandomStrings(DATA_SET_SIZE,KEY_SIZE);
@@ -98,8 +99,8 @@ int main(){
     double read_prob = READ_PROBABILITY * RAND_MAX;
     long long start_time = currentMicros();
     while(opr_count){
-      r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
-      r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
+      r1 = rand();
+      r2 = rng.zipf();
       if(r1<read_prob){
         kd = ks.get(keys[r2]);
       } else {
@@ -132,8 +133,8 @@ int main(){
     double read_prob = READ_PROBABILITY * RAND_MAX;
     long long start_time = currentMicros();
     while(opr_count){
-      r1 = RandomNumberGenerator::uniform(0,RAND_MAX-1);
-      r2 = RandomNumberGenerator::zipf(0,DATA_SET_SIZE-1);
+      r1 = rand();
+      r2 = rng.zipf();
       if(r1<read_prob){
         ks.async_get(keys[r2],callback_handler,&dh);
       } else {

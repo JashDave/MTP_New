@@ -33,6 +33,7 @@ all:	test
 test:
 	$(G++) TestKVStoreImpl_Basic.cpp $(LIBS) $(DEFINES) -o Basic_KVStore.out 
 	$(G++) TestKVRequestImpl_Basic.cpp $(LIBS) $(DEFINES) -o Basic_KVRequest.out
+	$(G++) TestKVRequestImpl_SgetSput.cpp $(LIBS) $(DEFINES) -o Basic_KVRequestSgetSput.out
 	$(G++) TestKVStoreImpl_Async_Basic.cpp $(LIBS) $(DEFINES) -o Async_KVStore.out
 	$(G++) TestKVStore_AsyncVsBlocking_SingleUserThread.cpp $(LIBS) $(DEFINES) -o AsyncVsBlocking_KVStore.out
 	$(G++) TestKVRequestImpl_Async_Basic.cpp $(LIBS) $(DEFINES) -o Async_KVRequest.out
@@ -41,6 +42,7 @@ test:
 run:
 	./Basic_KVStore.out
 	./Basic_KVRequest.out
+	./Basic_KVRequestSgetSput.out
 	./Async_KVStore.out
 	./Async_KVRequest.out
 	./AsyncVsBlocking_KVStore.out
