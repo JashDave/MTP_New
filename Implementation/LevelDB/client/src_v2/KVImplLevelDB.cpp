@@ -334,4 +334,25 @@ namespace kvstore {
       c_kvsclient->mtx.unlock();
     }
 
+    int KVImplHelper::smget(vector<string>& key, vector<string>& tablename, vector<KVData<string>>& ret){
+      int sz = key.size();
+      KVData<string> kd;
+      kd.ierr = -1;
+      kd.serr = "SGET not yet implemeted for LevelDB.";
+      for(int i=0;i<sz;i++){
+        ret.push_back(kd);
+      }
+      return -1;
+    }
+
+    int KVImplHelper::smput(vector<string>& key, vector<string>& val, vector<string>& tablename, vector<KVData<string>>& ret){
+      int sz = key.size();
+      KVData<string> kd;
+      kd.ierr = -1;
+      kd.serr = "SPUT not yet implemeted for LevelDB.";
+      for(int i=0;i<sz;i++){
+        ret.push_back(kd);
+      }
+      return -1;
+    }
 }

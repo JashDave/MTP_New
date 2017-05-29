@@ -15,7 +15,8 @@ endif
 ifeq ($(kvs),memcached)
 	KVSTORE = -lmemcached -lkvs_memcached_v2 -lmemcached 
 	#DEFINES = -DCONF=string\(\"--SERVER=10.129.26.154:11211\"\)
-	DEFINES = -DCONF=string\(\"--SERVER=10.129.28.207:12000\"\)
+	#DEFINES = -DCONF=string\(\"--SERVER=10.129.28.207:12000\"\)
+	DEFINES = -DCONF=string\(\"--SERVER=10.129.28.207:12000\ --SERVER=10.129.28.207:12000\"\)
 endif
 
 
