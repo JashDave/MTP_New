@@ -5,7 +5,13 @@ import (
   "fmt"
   "net"
   "strconv"
+  "syscall"
+  "runtime"
+  "os/signal"
   "time"
+  _ "net/http/pprof"
+  "runtime/pprof"
+  "net/http"
   // "io"
   // "strings"
   kvstore "levelmemdb/lmemdb_kvstore"
@@ -198,6 +204,58 @@ func handleClient(conn net.Conn) {
 }
 
 func main() {
+
+  go func() {
+  signal_chan := make(chan os.Signal, 1)
+          signal.Notify(signal_chan,
+                  syscall.SIGHUP,
+                  syscall.SIGINT,
+                  syscall.SIGTERM,
+                  syscall.SIGQUIT)
+
+          exit_chan := make(chan int)
+          go func() {
+                  for {
+                          s := <-signal_chan
+                          switch s {
+                          // kill -SIGHUP XXXX
+                          case syscall.SIGHUP:
+                                  fmt.Println("hungup")
+
+                          // kill -SIGINT XXXX or Ctrl+c
+                          case syscall.SIGINT:
+                                  pprof.StopCPUProfile()
+                                  fmt.Println("Warikomi")
+                                  exit_chan<-0
+
+                          // kill -SIGTERM XXXX
+                          case syscall.SIGTERM:
+                                  fmt.Println("force stop")
+                                  exit_chan <- 0
+
+                          // kill -SIGQUIT XXXX
+                          case syscall.SIGQUIT:
+                                  fmt.Println("stop and core dump")
+                                  exit_chan <- 0
+
+                          default:
+                                  fmt.Println("Unknown signal.")
+                                  exit_chan <- 1
+                          }
+                  }
+          }()
+
+          code := <-exit_chan
+  pprof.StopCPUProfile()
+  os.Exit(code)
+  }()
+
+    //go sigHandler()
+    runtime.SetBlockProfileRate(1)
+    go http.ListenAndServe("10.129.26.154:8080", http.DefaultServeMux)
+    // go http.ListenAndServe("10.129.28.141:8080", http.DefaultServeMux)
+
+
   socket := os.Args[1] //Read form command line arugment
   ln, err := net.Listen("tcp",socket)
   if err != nil {
