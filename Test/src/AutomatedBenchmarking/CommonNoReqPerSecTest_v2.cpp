@@ -7,7 +7,7 @@
 #define RUN_TIME 60
 #define THREAD_COUNT 80
 #define THINKTIME 0
-
+#define READPROB 0.5
 #define KEY_SIZE 30
 #define VALUE_SIZE 2000
 #define DATASET_SIZE 10000
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
   // e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
 
   sm.startMonitoring();
-  e.setReadProb(0.95);
+  e.setReadProb(READPROB);
   e.runExperiment(folder + "RP_"+to_string(e.getReadProb()));
   sm.stopMonitoring();
 

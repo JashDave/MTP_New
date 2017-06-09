@@ -101,8 +101,10 @@ public:
         default:
           std::cerr << "Invalid value for distribution" << std::endl;
       }
+      #ifdef THINKTIME
       usleep(THINKTIME);
-
+      #endif
+      
       if(r1<rp){
         //Do read
         m[id].start();
