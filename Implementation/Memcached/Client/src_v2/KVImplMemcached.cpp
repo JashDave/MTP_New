@@ -68,7 +68,7 @@ namespace kvstore {
       // redisClusterFree(rc);
     }
     void eventLoop(){
-      std::chrono::milliseconds waittime(500);
+      std::chrono::milliseconds waittime(5);
       struct async_data ad;
       while(keeprunning){
         while(true){mtx.lock();if(!q.empty()){ad=q.front(); q.pop(); mtx.unlock(); break;}; mtx.unlock();std::this_thread::sleep_for(waittime);if(!keeprunning)return;}

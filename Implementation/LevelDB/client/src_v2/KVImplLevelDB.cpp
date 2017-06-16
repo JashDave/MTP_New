@@ -42,7 +42,7 @@ namespace kvstore {
     }
 
     void eventLoop(){
-      std::chrono::milliseconds waittime(500);
+      std::chrono::milliseconds waittime(5);
       struct async_data ad;
       std::vector<string> v;
       while(keeprunning){

@@ -16,6 +16,7 @@ private:
   vector<string> conn;
   int connsz;
   string tablename = "TestTable123_977";
+  string apnd[] = {"1","2","3","4","5","6"};
   string dsname = "See folder name";
   int distribution;
   RandomNumberGenerator *rng;
@@ -58,13 +59,15 @@ public:
   }
 
   void loadData(){
-    KVStore<string,string> k;
-    KVData<string> kd;
-    k.bind(conn[0],tablename);
-    for(int i=0;i<dataSz;i++){
-      kd = k.put(key[i],value[i]);
-      if(kd.ierr != 0){
-        cerr << "Failure in loading data at index " << i << " Error:" << kd.serr << endl;
+    for(int ii=0;ii<6;ii++){
+      KVStore<string,string> k;
+      KVData<string> kd;
+      k.bind(conn[0],tablename+apnd[ii]);
+      for(int i=0;i<dataSz;i++){
+        kd = k.put(key[i],value[i]);
+        if(kd.ierr != 0){
+          cerr << "Failure in loading data at index " << i << " Error:" << kd.serr << endl;
+        }
       }
     }
   }
@@ -79,7 +82,7 @@ public:
 
   void worker(int id){
     KVStore<string,string> k;
-    k.bind(conn[id%connsz],tablename);
+    k.bind(conn[id%connsz],tablename+apnd[id%6]);
 
     double rp = readp * RAND_MAX;
     int r1,r2;
@@ -104,7 +107,7 @@ public:
       #ifdef THINKTIME
       usleep(THINKTIME);
       #endif
-      
+
       if(r1<rp){
         //Do read
         m[id].start();
