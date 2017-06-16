@@ -575,7 +575,7 @@ namespace kvstore {
         } else {
           version = 0;
           ret.ierr = -1;
-          ret.serr = "Version error: version not acquired yet (please alwasy do SGET for the given key before doing SPUT OR use PUT operation)";
+          ret.serr = "Version error: version not acquired yet (please always do SGET for the given key before doing SPUT OR use PUT operation)";
           vret.push_back(ret);
           continue;
         }

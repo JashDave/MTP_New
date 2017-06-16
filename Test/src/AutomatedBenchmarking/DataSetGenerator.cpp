@@ -3,9 +3,14 @@ class DataSetGenerator{
 public:
   //Generate a random string of length len
   static string getRandomString(int len){
+    // string ret(len,'0');
+    // for(int i=0;i<len;i++){
+    //   ret[i] = '0'+rand()%75;
+    // }
+    //
     string ret(len,'0');
     for(int i=0;i<len;i++){
-      ret[i] = '0'+rand()%75;
+      ret[i] = 'a'+rand()%26;
     }
     return ret;
   }

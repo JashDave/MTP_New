@@ -69,12 +69,12 @@ int main(){
       }
     }
   } else {
-    KVStore<string,string> kss;
-    succ = kss.bind(CONF,TABLE);
-    jAssert(!succ,cout<<"Connection error"<<endl;);
-    for(long long i = 0; i<DATA_SET_SIZE; i++){
-      for(int ii=0; ii<THREAD_COUNT; ii++){
-        kd = kss.put(keys[i]+to_string(ii),vals[i]);
+    for(int ii=0; ii<THREAD_COUNT; ii++){
+      KVStore<string,string> kss;
+      succ = kss.bind(CONF,TABLE+to_string(ii));
+      jAssert(!succ,cout<<"Connection error"<<endl;);
+      for(long long i = 0; i<DATA_SET_SIZE; i++){
+        kd = kss.put(keys[i],vals[i]);
         if(kd.ierr != 0){
           cerr<<"Error loading data"<<endl;
         }
@@ -107,11 +107,11 @@ int main(){
     run = false;
     for(int i=0; i<THREAD_COUNT; i++){
       td[i] = thread([&,i]{
-        string append;
+        string tablename;
         if(CONTENTION){
-          append = "";
+          tablename = TABLE;
         } else {
-          append = to_string(i);
+          tablename = TABLE + to_string(i);
         }
         int id = i;
         KVData<string> kd;
@@ -120,14 +120,14 @@ int main(){
           // r1 = rand();
           r2 = rng.zipf();
           // r2 = rng.uniform();
-          ks[id].get<string,string>(keys[r2]+append,TABLE);
+          ks[id].get<string,string>(keys[r2],tablename);
           KVResultSet kr = ks[id].execute();
           ks[id].reset();
           kd = kr.get<string>(0);
           if(kd.ierr != 0){
             failure_count[id]++;
           }
-          ks[id].put<string,string>(keys[r2]+append,vals[r2],TABLE);
+          ks[id].put<string,string>(keys[r2],vals[r2],tablename);
           kr = ks[id].execute();
           ks[id].reset();
           kd = kr.get<string>(0);
@@ -169,13 +169,12 @@ int main(){
       run = false;
       for(int i=0; i<THREAD_COUNT; i++){
         td[i] = thread([&,i]{
-          string append;
+          string tablename;
           if(CONTENTION){
-            append = "";
+            tablename = TABLE;
           } else {
-            append = to_string(i);
+            tablename = TABLE + to_string(i);
           }
-          cout<<"ID:"<<i<<endl;
           int id = i;
           KVData<string> kd;
           // KVResultSet kr;
@@ -183,22 +182,19 @@ int main(){
           while(run){
             r2 = rng.zipf();
             // r2 = rng.uniform();
-            ks[id].sget<string,string>(keys[r2]+append,TABLE);
+            ks[id].sget<string,string>(keys[r2],tablename);
             KVResultSet kr = ks[id].execute();
             ks[id].reset();
             kd = kr.get<string>(0);
             if(kd.ierr != 0){
               failure_count[id]++;
-              cout<<"Err:"<<kd.serr<<endl;
             }
-            ks[id].sput<string,string>(keys[r2]+append,vals[r2],TABLE);
+            ks[id].sput<string,string>(keys[r2],vals[r2],tablename);
             kr = ks[id].execute();
             ks[id].reset();
             kd = kr.get<string>(0);
             if(kd.ierr != 0){
               failure_count[id]++;
-              cout<<"Key:"<<keys[r2]+append<<endl;
-              // cout<<"Err:"<<kd.serr<<endl;
             }
             opr_count[id]++;
             TRACE(if(opr_count[id]%1000 == 0){
