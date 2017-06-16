@@ -13,7 +13,7 @@
 
 #define TABLE string("TestTable123")
 #define RUN_TIME 120
-#define THREAD_COUNT 50
+//#define THREAD_COUNT 50
 //#define OPERATION_COUNT 1e4
 #define READ_PROBABILITY 0.5
 #define DATA_SET_SIZE 10000

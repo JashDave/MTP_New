@@ -32,9 +32,11 @@ LIBS = -lkvstore_v2 -lboost_serialization -pthread $(KVSTORE)
 all:	test
 
 test:
-	$(G++) TestKVStore_AsyncVsBlocking_SingleUserThread.cpp $(LIBS) $(DEFINES) -o AsyncVsBlocking_KVStore.out
+	$(G++) TestKVRequest_SGet_SPut.cpp $(LIBS) $(DEFINES) -o SGetSPut_overhead.out -DTHREAD_COUNT=$(TC)
+	#$(G++) TestKVStore_AsyncVsBlocking_SingleUserThread.cpp $(LIBS) $(DEFINES) -o AsyncVsBlocking_KVStore.out -DTHREAD_COUNT=$(TC)
 	#$(G++) TestKVRequest_AsyncVsBlocking_SingleUserThread.cpp $(LIBS) $(DEFINES) -o AsyncVsBlocking_KVRequest.out
 
 run:
-	./AsyncVsBlocking_KVStore.out
+	./SGetSPut_overhead.out
+	#./AsyncVsBlocking_KVStore.out
 	#./AsyncVsBlocking_KVRequest.out
