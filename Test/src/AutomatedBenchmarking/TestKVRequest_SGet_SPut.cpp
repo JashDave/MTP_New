@@ -100,13 +100,13 @@ int main(){
   /* Test Normal Get Set */
   // if(1==0) //------------------------------
   {
-    int r1;
-    int r2;
     vector<long long> opr_count(THREAD_COUNT,0);
     vector<long long> failure_count(THREAD_COUNT,0);
     run = false;
     for(int i=0; i<THREAD_COUNT; i++){
       td[i] = thread([&,i]{
+        int r1;
+        int r2;
         string append;
         if(CONTENTION){
           append = "";
@@ -162,20 +162,21 @@ int main(){
     /* Test Safe call */
     // if(1==0) //------------------------------
     {
-      int r1;
-      int r2;
       vector<long long> opr_count(THREAD_COUNT,0);
       vector<long long> failure_count(THREAD_COUNT,0);
       run = false;
       for(int i=0; i<THREAD_COUNT; i++){
         td[i] = thread([&,i]{
+          int r1;
+          int r2;
+          // cout<<"Tid:"<<this_thread::get_id()<<" i:"<<i<<endl;
           string append;
           if(CONTENTION){
             append = "";
           } else {
             append = to_string(i);
           }
-          cout<<"ID:"<<i<<endl;
+          // cout<<"ID:"<<i<<endl;
           int id = i;
           KVData<string> kd;
           // KVResultSet kr;
@@ -198,7 +199,7 @@ int main(){
             if(kd.ierr != 0){
               failure_count[id]++;
               cout<<"Key:"<<keys[r2]+append<<endl;
-              // cout<<"Err:"<<kd.serr<<endl;
+              cout<<"Err:"<<kd.serr<<endl;
             }
             opr_count[id]++;
             TRACE(if(opr_count[id]%1000 == 0){

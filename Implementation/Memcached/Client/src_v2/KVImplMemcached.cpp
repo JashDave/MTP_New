@@ -522,6 +522,13 @@ namespace kvstore {
           retval = string(resval,reslen);
           // cout<<"key:"<<retkey<<endl;
           // cout<<"val:"<<retval<<endl;
+          // bool doinsert = true;
+          // int retires = 0;
+
+          // if(c_kvsclient->version_store.find(retkey) != c_kvsclient->version_store.end()){
+          //   cout<<"Tid:"<<this_thread::get_id()<<" MapError overwriting key:"<<retkey<<endl;
+          // }
+          // cout<<"Putting:"<<retkey<<endl;
           c_kvsclient->version_store[retkey] = version;
           // free((void*)keyval);
           // free((void*)resval);
@@ -569,6 +576,8 @@ namespace kvstore {
         replaceStrChar(key, '\t', '_');
         replaceStrChar(key, '\n', '_');
         replaceStrChar(key, '\r', '_');
+
+        // cout<<"Fetching:"<<key<<endl;
         if(c_kvsclient->version_store.find(key) != c_kvsclient->version_store.end()){
           version = c_kvsclient->version_store[key];
           c_kvsclient->version_store.erase(key);
